@@ -1,13 +1,12 @@
-/* Groq AI integration — fast, free-tier friendly LLM calls for ATHENA */
+/* Groq AI integration — for art hints, task suggestions, and other non-chat features */
+/* The main chat uses /api/chat proxy with Gemini; Groq is used for auxiliary AI calls */
 
 const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
-/* Simple in-memory cache keyed by system+user+model */
 const cache = new Map<string, { result: string; ts: number }>();
-const CACHE_TTL = 5 * 60 * 1000; /* 5 minutes */
+const CACHE_TTL = 5 * 60 * 1000;
 
-/* Rate limiter: max 25 req/min (leaving margin below 30) */
 let requestTimestamps: number[] = [];
 
 function checkRateLimit(): boolean {
@@ -18,22 +17,16 @@ function checkRateLimit(): boolean {
   return true;
 }
 
-function cacheKey(system: string, user: string, model: string): string {
-  return `${model}|${system}|${user}`;
-}
-
 export async function askGroq(
   systemPrompt: string,
   userMessage: string,
   model: string = 'llama-3.1-8b-instant',
 ): Promise<string> {
-  const key = cacheKey(systemPrompt, userMessage, model);
+  const key = `${model}|${systemPrompt}|${userMessage}`;
   const cached = cache.get(key);
   if (cached && Date.now() - cached.ts < CACHE_TTL) return cached.result;
 
-  if (!checkRateLimit()) {
-    throw new Error('Rate limit approached. Wait a moment before asking again.');
-  }
+  if (!checkRateLimit()) throw new Error('Rate limit approached.');
 
   const res = await fetch(GROQ_URL, {
     method: 'POST',
@@ -75,8 +68,4 @@ export async function safeGroq(
     console.error('Groq call failed:', err);
     return fallback;
   }
-}
-
-export function clearGroqCache() {
-  cache.clear();
 }
