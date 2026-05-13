@@ -421,7 +421,7 @@ const SudokuGame: React.FC = () => {
     const allFilled = board.every(row => row.every(v => v !== 0));
     if (allFilled && conflicts.size === 0 && board.some(row => row.some(v => v !== 0))) {
       setCompleted(true);
-      addUserXp(75);
+      addUserXp(80);
       updateAppData(prev => ({ ...prev, gameScores: { ...prev.gameScores, sudoku: prev.gameScores.sudoku + 1 } }));
     }
   }, [board, findConflicts, addUserXp, updateAppData]);
@@ -541,7 +541,7 @@ const MemoryMatch: React.FC = () => {
     if (completed || matched === 0 || matched !== cards.length / 2) return;
     if (matched === cards.length / 2 && cards.length > 0 && !completed) {
       setCompleted(true);
-      addUserXp(50);
+      addUserXp(75);
       updateAppData(prev => ({ ...prev, gameScores: { ...prev.gameScores, memory: prev.gameScores.memory + 1 } }));
     }
   }, [matched, cards.length, completed, addUserXp, updateAppData]);
@@ -686,7 +686,7 @@ const AIArtGuesser: React.FC = () => {
     if (correct) {
       setScore(s => s + 100 + streak * 10);
       setStreak(s => s + 1);
-      addUserXp(50);
+      addUserXp(60);
     } else {
       setStreak(0);
     }
