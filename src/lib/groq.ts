@@ -1,21 +1,7 @@
-/* Groq AI integration — for art hints, task suggestions, and other non-chat features */
-/* The main chat uses /api/chat proxy with Gemini; Groq is used for auxiliary AI calls */
-
-const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
-const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
+/* Groq AI integration — all calls go through /api/groq proxy (key is server-side) */
 
 const cache = new Map<string, { result: string; ts: number }>();
 const CACHE_TTL = 5 * 60 * 1000;
-
-let requestTimestamps: number[] = [];
-
-function checkRateLimit(): boolean {
-  const now = Date.now();
-  requestTimestamps = requestTimestamps.filter(t => now - t < 60000);
-  if (requestTimestamps.length >= 25) return false;
-  requestTimestamps.push(now);
-  return true;
-}
 
 export async function askGroq(
   systemPrompt: string,
@@ -26,32 +12,23 @@ export async function askGroq(
   const cached = cache.get(key);
   if (cached && Date.now() - cached.ts < CACHE_TTL) return cached.result;
 
-  if (!checkRateLimit()) throw new Error('Rate limit approached.');
-
-  const res = await fetch(GROQ_URL, {
+  const res = await fetch('/api/groq', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${GROQ_API_KEY}`,
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
+      system: systemPrompt,
+      message: userMessage,
       model,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userMessage },
-      ],
-      temperature: 0.7,
-      max_tokens: 1024,
     }),
   });
 
   if (!res.ok) {
-    const text = await res.text().catch(() => '');
-    throw new Error(`Groq error ${res.status}: ${text}`);
+    const err = await res.json().catch(() => ({}));
+    throw new Error((err as any).error || `Groq proxy error ${res.status}`);
   }
 
   const data = await res.json();
-  const result = data.choices?.[0]?.message?.content || '';
+  const result = data.result || '';
   cache.set(key, { result, ts: Date.now() });
   return result;
 }

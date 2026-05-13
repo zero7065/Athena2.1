@@ -3,6 +3,7 @@ import { Send, Bot, User, Sparkles, Trash2, Loader2, Copy, Check, Download, Thum
 import { useAuth } from '../context/AuthContext';
 import { cn } from '../lib/utils';
 import Markdown from 'react-markdown';
+import AuthGate from './AuthGate';
 
 interface ChatMsg {
   id: string;
@@ -190,6 +191,7 @@ const AIChatbot: React.FC = () => {
   };
 
   return (
+    <AuthGate>
     <div className="p-3 sm:p-5 md:p-8 space-y-4 h-full flex flex-col max-w-5xl mx-auto">
       {/* Phase 3.9: PLASU Branding Header */}
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -332,6 +334,7 @@ const AIChatbot: React.FC = () => {
         </div>
       </div>
     </div>
+    </AuthGate>
   );
 };
 

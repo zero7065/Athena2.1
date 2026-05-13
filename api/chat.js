@@ -3,31 +3,39 @@
  *
  * Security features:
  * - Gemini API key is server-side only (never exposed to client)
- * - Rate limiting: 20 req/min per IP
+ * - Rate limiting: 20 req/min per IP (using Vercel KV)
  * - Input sanitization: strips dangerous characters
  * - Prompt injection guard via system instruction
  * - Security headers on all responses
  * - Gemini safety settings at BLOCK_MEDIUM_AND_ABOVE
  */
 
+import { kv } from '@vercel/kv';
+
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent';
 
-/* In-memory rate limit store (per IP) */
-const rateLimitStore = new Map();
 const RATE_LIMIT = 20;
-const RATE_WINDOW = 60_000;
+const RATE_WINDOW = 60; // in seconds
 
-function getRateLimitInfo(ip) {
-  const now = Date.now();
-  const entry = rateLimitStore.get(ip) || { count: 0, windowStart: now };
-  if (now - entry.windowStart > RATE_WINDOW) {
-    entry.count = 0;
-    entry.windowStart = now;
+async function getRateLimitInfo(ip) {
+  const key = `ratelimit:${ip}`;
+  const now = Math.floor(Date.now() / 1000); // current timestamp in seconds
+  
+  // Get current count and reset time from KV
+  const [count, resetTime] = await kv.get(key) ?? [0, now + RATE_WINDOW];
+  
+  // If window has passed, reset
+  if (now > resetTime) {
+    await kv.set(key, [1, now + RATE_WINDOW], { ex: RATE_WINDOW });
+    return { remaining: RATE_LIMIT - 1, limit: RATE_LIMIT };
   }
-  entry.count++;
-  rateLimitStore.set(ip, entry);
-  return { remaining: Math.max(0, RATE_LIMIT - entry.count), limit: RATE_LIMIT };
+  
+  // Increment and store
+  const newCount = count + 1;
+  await kv.set(key, [newCount, resetTime], { ex: Math.max(0, resetTime - now) });
+  
+  return { remaining: Math.max(0, RATE_LIMIT - newCount), limit: RATE_LIMIT };
 }
 
 /* Sanitize user input — strip control chars and script injection patterns */
@@ -74,16 +82,16 @@ export default async function handler(req, res) {
     return;
   }
 
-  /* --- Rate Limiting — Phase 1.2 --- */
-  const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket.remoteAddress || 'unknown';
-  const rateInfo = getRateLimitInfo(ip);
-  res.setHeader('X-RateLimit-Limit', rateInfo.limit);
-  res.setHeader('X-RateLimit-Remaining', rateInfo.remaining);
+   /* --- Rate Limiting — Phase 1.2 --- */
+   const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket.remoteAddress || 'unknown';
+   const rateInfo = await getRateLimitInfo(ip);
+   res.setHeader('X-RateLimit-Limit', rateInfo.limit);
+   res.setHeader('X-RateLimit-Remaining', rateInfo.remaining);
 
-  if (rateInfo.remaining === 0) {
-    res.status(429).json({ error: 'Too many requests. Please wait a moment.' });
-    return;
-  }
+   if (rateInfo.remaining === 0) {
+     res.status(429).json({ error: 'Too many requests. Please wait a moment.' });
+     return;
+   }
 
   /* --- Validate input --- */
   const { message, history } = req.body || {};
