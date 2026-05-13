@@ -30,6 +30,7 @@ const AdminPanel: React.FC = () => {
   }), [filteredTasks]);
 
   const totalXp = user.xp;
+  const userLevel = Math.floor(totalXp / 500) + 1;
   const avgStudyHours = sessions.length > 0
     ? (sessions.reduce((sum, s) => sum + s.duration, 0) / 60 / sessions.length)
     : 0;
@@ -45,7 +46,7 @@ const AdminPanel: React.FC = () => {
       ['In Progress', tasksByStatus['In Progress'].toString()],
       ['Done', tasksByStatus['Done'].toString()],
       ['Total XP', totalXp.toString()],
-      ['User Level', calcLevel(totalXp).toString()],
+      ['User Level', userLevel.toString()],
       ['Study Sessions', sessions.length.toString()],
       ['Avg Study Hours', avgStudyHours.toFixed(1)],
       ['Friends', friends.length.toString()],
@@ -77,10 +78,17 @@ const AdminPanel: React.FC = () => {
     { department: 'Chemistry', count: Math.max(1, Math.floor(tasks.length * 0.3)) },
   ];
 
-  const topAchievements = achievements.filter(a => a.unlockedAt !== null).map(a => ({
-    title: a.title,
-    count: 1,
-  }));
+  const gamesBreakdown = [
+    { name: 'Chess', value: gameScores.chess || 0, color: COLORS[0] },
+    { name: 'Memory', value: gameScores.memory || 0, color: COLORS[2] },
+    { name: 'Sudoku', value: gameScores.sudoku || 0, color: COLORS[3] },
+    { name: 'Art', value: gameScores.artGuesser || 0, color: COLORS[4] },
+  ];
+
+  // Simple leaderboard based on available metrics
+  const leaderboardData = [
+    { rank: 1, name: user.name || 'You', xp: totalXp, tasks: tasks.filter(t => t.status === 'done').length, sessions: sessions.length },
+  ];
 
   const chartData = [
     { name: 'To Do', value: tasksByStatus['To Do'] || 1 },
@@ -214,6 +222,52 @@ const AdminPanel: React.FC = () => {
         </div>
       )}
 
+      {/* XP Leaderboard */}
+      <div className="glass p-4 sm:p-6 md:p-8 rounded-[24px] sm:rounded-[40px]">
+        <div className="flex items-center gap-3 mb-4">
+          <Trophy size={20} className="text-amber-500" />
+          <h3 className="font-bold text-sm sm:text-base">XP Leaderboard</h3>
+        </div>
+        <div className="overflow-x-auto -mx-4 sm:mx-0">
+          <div className="min-w-[300px] px-4 sm:px-0">
+            <div className="flex items-center justify-between p-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+              <div className="flex items-center gap-3">
+                <span className="w-7 h-7 rounded-full bg-amber-500 text-white flex items-center justify-center text-xs font-bold">1</span>
+                <div>
+                  <p className="text-xs font-bold text-slate-800 dark:text-white">{user.name} <span className="text-primary text-[10px]">(you)</span></p>
+                  <p className="text-[10px] text-slate-400">{user.role}</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-sm font-bold text-amber-600">{totalXp} XP</p>
+                <p className="text-[10px] text-slate-400">Level {userLevel}</p>
+              </div>
+            </div>
+            <p className="text-[10px] text-slate-400 mt-3 text-center italic">
+              Full leaderboard requires server-side sync — invite classmates to compete!
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Games Breakdown */}
+      <div className="glass p-4 sm:p-6 md:p-8 rounded-[24px] sm:rounded-[40px]">
+        <div className="flex items-center gap-3 mb-4">
+          <BarChart3 size={20} className="text-slate-500" />
+          <h3 className="font-bold text-sm sm:text-base">Game Play Counts</h3>
+        </div>
+        <div className="overflow-x-auto -mx-4 sm:mx-0">
+          <div className="min-w-[400px] px-4 sm:px-0 grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {gamesBreakdown.map((g, i) => (
+              <div key={i} className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 text-center">
+                <p className="text-lg sm:text-xl font-bold" style={{ color: g.color }}>{g.value}</p>
+                <p className="text-[10px] font-medium text-slate-400">{g.name}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
       <div className="glass p-4 sm:p-6 md:p-8 rounded-[24px] sm:rounded-[40px]">
         <div className="flex items-center gap-3 mb-4">
           <Building2 size={20} className="text-slate-500" />
@@ -238,9 +292,5 @@ const AdminPanel: React.FC = () => {
     </div>
   );
 };
-
-function calcLevel(xp: number): number {
-  return Math.floor(Math.sqrt(xp / 50)) + 1;
-}
 
 export default AdminPanel;

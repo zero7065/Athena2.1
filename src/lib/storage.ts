@@ -69,6 +69,7 @@ export interface LocalAchievement {
 export interface LocalFriend {
   id: string;
   name: string;
+  studentId?: string;
   department: string;
   level: number;
   online: boolean;

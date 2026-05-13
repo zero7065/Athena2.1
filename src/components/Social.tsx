@@ -1,5 +1,17 @@
+/*
+ * ATHENA - Student Success Platform
+ * Section: FRIENDS & STUDY ROOM
+ *
+ * Changes made:
+ * - Add friend by Student ID — checks against registered users in localStorage
+ * - Friends list persists under "athena_friends"
+ * - Remove friend requires confirmation dialog
+ * - Study room shows friends list with simulated online/offline status
+ * - Empty friends list shows: "No study buddies yet — share your Student ID to connect"
+ */
+
 import React, { useState, useMemo } from 'react';
-import { Users, UserPlus, MessageSquare, Search, Zap, Globe, Clock, Check, X, UserMinus, DoorOpen } from 'lucide-react';
+import { Users, UserPlus, MessageSquare, Search, Zap, Globe, Clock, Check, X, UserMinus, DoorOpen, Copy } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAuth } from '../context/AuthContext';
 import { LocalFriend } from '../lib/storage';
@@ -17,19 +29,20 @@ const Social: React.FC = () => {
 
   const handleAddFriend = () => {
     if (!searchQuery.trim()) return;
-    const name = searchQuery.trim();
-    if (friends.some(f => f.name.toLowerCase() === name.toLowerCase())) {
+    const studentId = searchQuery.trim();
+    if (friends.some(f => f.studentId?.toLowerCase() === studentId.toLowerCase())) {
       setAddError('Already in your friends list');
       return;
     }
-    const matchedUser = allUsers.find((u: any) => u.name.toLowerCase() === name.toLowerCase());
+    const matchedUser = allUsers.find((u: any) => u.studentId?.toLowerCase() === studentId.toLowerCase());
     if (!matchedUser) {
-      setAddError('No user found with that name. They must register first.');
+      setAddError('No user found with that Student ID. They must register first.');
       return;
     }
     const newFriend: LocalFriend = {
       id: Date.now().toString(),
       name: matchedUser.name,
+      studentId: matchedUser.studentId,
       department: matchedUser.department || 'Unknown',
       level: 1,
       online: true,
@@ -46,6 +59,16 @@ const Social: React.FC = () => {
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') handleAddFriend();
+  };
+
+  const [copied, setCopied] = useState(false);
+
+  const copyStudentId = () => {
+    if (user?.studentId) {
+      navigator.clipboard.writeText(user.studentId);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   return (
@@ -71,7 +94,7 @@ const Social: React.FC = () => {
         <div className="glass p-4 sm:p-6 rounded-3xl space-y-4">
           <h3 className="font-bold text-sm sm:text-base text-slate-700">Add a Study Buddy</h3>
           <div className="flex gap-3">
-            <input type="text" placeholder="Enter friend's name..."
+            <input type="text" placeholder="Enter Student ID..."
               className="flex-1 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary outline-none text-sm text-base"
               value={searchQuery} onChange={e => setSearchQuery(e.target.value)} onKeyDown={handleKeyDown} />
             <button onClick={handleAddFriend}
@@ -80,19 +103,16 @@ const Social: React.FC = () => {
             </button>
           </div>
           {addError && <p className="text-xs text-red-500 font-bold">{addError}</p>}
-          {allUsers.length > 0 && (
-            <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
-              <p className="text-[10px] font-bold text-slate-400 uppercase mb-2">Registered Users</p>
-              <div className="flex flex-wrap gap-2">
-                {allUsers.map((u: any, i: number) => (
-                  <button key={i} onClick={() => { setSearchQuery(u.name); setAddError(''); }}
-                    className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-[10px] font-medium text-slate-600 dark:text-slate-300 hover:border-primary hover:text-primary transition-all">
-                    {u.name} <span className="text-slate-400">({u.role})</span>
-                  </button>
-                ))}
-              </div>
+          <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+            <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Your Student ID</p>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-mono font-bold text-primary">{user?.studentId || 'N/A'}</span>
+              <button onClick={copyStudentId} className="p-1.5 hover:bg-slate-100 rounded-lg transition-colors" title="Copy Student ID">
+                {copied ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} className="text-slate-400" />}
+              </button>
             </div>
-          )}
+            <p className="text-[10px] text-slate-400 mt-1">Share this ID with classmates so they can add you!</p>
+          </div>
         </div>
       )}
 
@@ -101,9 +121,9 @@ const Social: React.FC = () => {
           {friends.length === 0 ? (
             <div className="glass p-8 sm:p-12 rounded-[32px] text-center">
               <Users size={48} className="mx-auto mb-4 text-slate-300" />
-              <h3 className="text-lg font-bold text-slate-600 dark:text-slate-400 mb-2">No Friends Yet</h3>
+              <h3 className="text-lg font-bold text-slate-600 dark:text-slate-400 mb-2">No study buddies yet</h3>
               <p className="text-sm text-slate-400 max-w-sm mx-auto leading-relaxed">
-                Switch to "Add Friend" and search for registered users to start collaborating!
+                Share your Student ID to connect. Add friends by their Student ID to start collaborating!
               </p>
               <button onClick={() => setActiveTab('add')}
                 className="mt-4 btn-primary inline-flex items-center gap-2 text-sm">
