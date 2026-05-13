@@ -65,7 +65,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('athena_token');
     setIsLoading(false);
   }
-}
     } else {
       setIsLoading(false);
     }
