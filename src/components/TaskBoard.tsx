@@ -14,16 +14,16 @@
  * - All task state persists in localStorage under "athena_tasks"
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
-import { Plus, Search, Trash2, AlertCircle, Moon, Sun, ChevronDown, Loader2, Brain, User } from 'lucide-react';
+import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { Plus, Search, Trash2, AlertCircle, Moon, Sun, ChevronDown, Loader2, Brain, User, Send, Clock, XCircle } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { useAuth } from '../context/AuthContext';
-import { LocalTask } from '../lib/storage';
+import { LocalTask, getSubmissions, saveSubmission, getStudentSubmissions } from '../lib/storage';
 import { cn } from '../lib/utils';
 import { safeGroq } from '../lib/groq';
 
 const TaskBoard: React.FC = () => {
-  const { appData, updateAppData, addUserXp } = useAuth();
+  const { user, appData, updateAppData, addUserXp } = useAuth();
   const [isAdding, setIsAdding] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileMoveTask, setMobileMoveTask] = useState<string | null>(null);
@@ -39,6 +39,154 @@ const TaskBoard: React.FC = () => {
     status: 'todo' as LocalTask['status'],
     assignedTo: '',
   });
+  const [pendingAutoSubmit, setPendingAutoSubmit] = useState<Record<string, number>>({});
+  const [submittingTask, setSubmittingTask] = useState<string | null>(null);
+  const autoTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Load pending auto-submit timers from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem('athena_autosubmit');
+    if (stored) {
+      try {
+        setPendingAutoSubmit(JSON.parse(stored));
+      } catch { /* ignore */ }
+    }
+    return () => { if (autoTimerRef.current) clearInterval(autoTimerRef.current); };
+  }, []);
+
+  // Auto-submit timer — check every 10 seconds
+  useEffect(() => {
+    autoTimerRef.current = setInterval(() => {
+      const now = Date.now();
+      let changed = false;
+      setPendingAutoSubmit(prev => {
+        const updated = { ...prev };
+        for (const [taskId, autoTime] of Object.entries(updated)) {
+          if (now >= autoTime) {
+            // Auto-submit this task
+            const existingSubs = getStudentSubmissions(user?.email || '');
+            const alreadySubmitted = existingSubs.some(s => s.assignmentTitle === taskId && s.status !== 'draft');
+            if (!alreadySubmitted && user) {
+              const task = appData.tasks.find(t => t.id === taskId);
+              if (task) {
+                saveSubmission({
+                  id: `sub_${task.id}_${Date.now()}`,
+                  studentId: user.studentId,
+                  studentName: user.name,
+                  studentEmail: user.email,
+                  studentDepartment: user.department || '',
+                  assignmentId: task.id,
+                  assignmentTitle: task.title,
+                  description: task.description,
+                  status: 'submitted',
+                  score: 0,
+                  feedback: '',
+                  submittedAt: Date.now(),
+                  gradedAt: null,
+                });
+              }
+            }
+            delete updated[taskId];
+            changed = true;
+          }
+        }
+        if (changed) {
+          localStorage.setItem('athena_autosubmit', JSON.stringify(updated));
+        }
+        return updated;
+      });
+    }, 10000);
+    return () => { if (autoTimerRef.current) clearInterval(autoTimerRef.current); };
+  }, [user, appData.tasks]);
+
+  const tasks = appData.tasks;
+  const submissions = getStudentSubmissions(user?.email || '');
+  const submissionMap = useMemo(() => {
+    const map = new Map<string, string>();
+    submissions.forEach(s => map.set(s.assignmentId || '', s.status));
+    return map;
+  }, [submissions]);
+
+  const getSubmissionStatus = (taskId: string): { label: string; color: string } | null => {
+    if (pendingAutoSubmit[taskId]) {
+      const remaining = Math.max(0, Math.floor((pendingAutoSubmit[taskId] - Date.now()) / 1000));
+      return { label: `Auto-submit in ${Math.floor(remaining / 60)}m ${remaining % 60}s`, color: 'text-orange-500' };
+    }
+    const status = submissionMap.get(taskId);
+    if (status === 'submitted') return { label: 'Submitted', color: 'text-blue-500' };
+    if (status === 'graded') return { label: 'Graded', color: 'text-emerald-500' };
+    if (status === 'draft') return { label: 'Draft', color: 'text-slate-400' };
+    return null;
+  };
+
+  const handleSubmitTask = useCallback((taskId: string) => {
+    if (!user) return;
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
+    
+    // Cancel auto-submit if pending
+    if (pendingAutoSubmit[taskId]) {
+      const updated = { ...pendingAutoSubmit };
+      delete updated[taskId];
+      setPendingAutoSubmit(updated);
+      localStorage.setItem('athena_autosubmit', JSON.stringify(updated));
+    }
+
+    // Save submission
+    setSubmittingTask(taskId);
+    setTimeout(() => {
+      saveSubmission({
+        id: `sub_${taskId}_${Date.now()}`,
+        studentId: user.studentId,
+        studentName: user.name,
+        studentEmail: user.email,
+        studentDepartment: user.department || '',
+        assignmentId: taskId,
+        assignmentTitle: task.title,
+        description: task.description,
+        status: 'submitted',
+        score: 0,
+        feedback: '',
+        submittedAt: Date.now(),
+        gradedAt: null,
+      });
+      setSubmittingTask(null);
+    }, 500);
+  }, [user, tasks, pendingAutoSubmit]);
+
+  const handleCancelAutoSubmit = useCallback((taskId: string) => {
+    const updated = { ...pendingAutoSubmit };
+    delete updated[taskId];
+    setPendingAutoSubmit(updated);
+    localStorage.setItem('athena_autosubmit', JSON.stringify(updated));
+    
+    // Save as draft
+    const task = tasks.find(t => t.id === taskId);
+    if (task && user) {
+      const existingSubs = getStudentSubmissions(user.email);
+      const draft = existingSubs.find(s => s.assignmentId === taskId && s.status === 'draft');
+      if (!draft) {
+        saveSubmission({
+          id: `sub_${taskId}_${Date.now()}`,
+          studentId: user.studentId,
+          studentName: user.name,
+          studentEmail: user.email,
+          studentDepartment: user.department || '',
+          assignmentId: taskId,
+          assignmentTitle: task.title,
+          description: task.description,
+          status: 'draft',
+          score: 0,
+          feedback: '',
+          submittedAt: 0,
+          gradedAt: null,
+          draftSavedAt: Date.now(),
+        });
+      }
+    }
+  }, [pendingAutoSubmit, tasks, user]);
+
+  const isStudent = user?.role === 'student';
 
   const tasks = appData.tasks;
 
@@ -109,11 +257,24 @@ const TaskBoard: React.FC = () => {
       const task = prev.tasks.find(t => t.id === id);
       if (task && task.status !== 'done' && newStatus === 'done') {
         addUserXp(50);
+        // Student: start auto-submit timer (10 min)
+        if (isStudent && user) {
+          const existingSubs = getStudentSubmissions(user.email);
+          const alreadySubmitted = existingSubs.some(s => s.assignmentId === id && (s.status === 'submitted' || s.status === 'graded'));
+          if (!alreadySubmitted) {
+            const autoSubmitTime = Date.now() + 10 * 60 * 1000; // 10 minutes
+            setPendingAutoSubmit(prev => {
+              const updated = { ...prev, [id]: autoSubmitTime };
+              localStorage.setItem('athena_autosubmit', JSON.stringify(updated));
+              return updated;
+            });
+          }
+        }
       }
       return { ...prev, tasks: updated };
     });
     setMobileMoveTask(null);
-  }, [updateAppData, addUserXp]);
+  }, [updateAppData, addUserXp, isStudent, user]);
 
   // Update assigned to field
   const handleUpdateAssignedTo = useCallback((taskId: string, assignedTo: string) => {
@@ -250,6 +411,38 @@ const TaskBoard: React.FC = () => {
                                     {overdueTasks.includes(task.id) ? <AlertCircle size={12} className="text-red-500" /> : <Sun size={12} />}
                                     <span className={overdueTasks.includes(task.id) ? 'text-red-500 font-bold' : ''}>{task.dueDate}</span>
                                   </div>
+                                  {isStudent && task.status === 'done' && (
+                                    <div className="flex items-center gap-2">
+                                      {(() => {
+                                        const subInfo = getSubmissionStatus(task.id);
+                                        if (subInfo) {
+                                          return <span className={`text-[10px] font-bold ${subInfo.color}`}>{subInfo.label}</span>;
+                                        }
+                                        if (pendingAutoSubmit[task.id]) {
+                                          const remaining = Math.max(0, Math.floor((pendingAutoSubmit[task.id] - Date.now()) / 1000));
+                                          return (
+                                            <>
+                                              <span className="text-[10px] text-orange-500 font-bold flex items-center gap-1">
+                                                <Clock size={10} /> Auto {Math.floor(remaining / 60)}m
+                                              </span>
+                                              <button onClick={() => handleCancelAutoSubmit(task.id)}
+                                                className="p-0.5 hover:text-red-500 transition-colors" title="Cancel auto-submit">
+                                                <XCircle size={12} />
+                                              </button>
+                                            </>
+                                          );
+                                        }
+                                        return (
+                                          <button onClick={() => handleSubmitTask(task.id)}
+                                            disabled={submittingTask === task.id}
+                                            className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-primary/10 text-primary text-[10px] font-bold hover:bg-primary/20 transition-all min-h-[28px]">
+                                            {submittingTask === task.id ? <Loader2 size={10} className="animate-spin" /> : <Send size={10} />}
+                                            Submit
+                                          </button>
+                                        );
+                                      })()}
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                             )}

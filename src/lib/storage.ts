@@ -231,3 +231,89 @@ export function addXp(data: AppData, amount: number): AppData {
   updated.user.level = calcLevel(updated.user.xp);
   return updated;
 }
+
+/* ========================================
+ * Shared Submissions System (lecturer-student)
+ * ======================================== */
+
+export interface Submission {
+  id: string;
+  studentId: string;
+  studentName: string;
+  studentEmail: string;
+  studentDepartment: string;
+  assignmentId?: string;
+  assignmentTitle: string;
+  description: string;
+  status: 'draft' | 'submitted' | 'graded';
+  score: number;
+  feedback: string;
+  submittedAt: number;
+  gradedAt: number | null;
+  autoSubmitAt?: number; // timestamp when it auto-submits
+  draftSavedAt?: number; // timestamp when draft was last saved
+}
+
+export interface Assignment {
+  id: string;
+  title: string;
+  description: string;
+  dueDate: string;
+  points: number;
+  createdBy: string; // lecturer email
+  createdAt: number;
+}
+
+// Shared storage key (no PREFIX — always exact key)
+const SUBMISSIONS_KEY = 'athena_submissions';
+const ASSIGNMENTS_KEY = 'athena_assignments';
+
+export function getSubmissions(): Submission[] {
+  try {
+    const raw = localStorage.getItem(SUBMISSIONS_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+
+export function saveSubmission(submission: Submission) {
+  const all = getSubmissions();
+  const idx = all.findIndex(s => s.id === submission.id);
+  if (idx >= 0) {
+    all[idx] = submission;
+  } else {
+    all.push(submission);
+  }
+  localStorage.setItem(SUBMISSIONS_KEY, JSON.stringify(all));
+}
+
+export function deleteSubmission(id: string) {
+  const all = getSubmissions().filter(s => s.id !== id);
+  localStorage.setItem(SUBMISSIONS_KEY, JSON.stringify(all));
+}
+
+export function getStudentSubmissions(studentEmail: string): Submission[] {
+  return getSubmissions().filter(s => s.studentEmail === studentEmail);
+}
+
+export function getAssignments(): Assignment[] {
+  try {
+    const raw = localStorage.getItem(ASSIGNMENTS_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+
+export function saveAssignment(assignment: Assignment) {
+  const all = getAssignments();
+  const idx = all.findIndex(a => a.id === assignment.id);
+  if (idx >= 0) {
+    all[idx] = assignment;
+  } else {
+    all.push(assignment);
+  }
+  localStorage.setItem(ASSIGNMENTS_KEY, JSON.stringify(all));
+}
+
+export function deleteAssignment(id: string) {
+  const all = getAssignments().filter(a => a.id !== id);
+  localStorage.setItem(ASSIGNMENTS_KEY, JSON.stringify(all));
+}
