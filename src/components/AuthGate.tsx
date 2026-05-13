@@ -1,68 +1,67 @@
 import React, { useState, useEffect } from 'react';
 import { GraduationCap, AlertCircle, Loader2, LogOut } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
-/* Google OAuth via Identity Services — inline to avoid module resolution issues */
+/* Google OAuth via Identity Services — loaded from CDN */
 declare global {
   interface Window {
     google?: any;
-    plasuAuthCallback?: (user: { email: string; name: string; picture: string } | null) => void;
   }
 }
 
 const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
-function loadGIS(): Promise<void> {
-  return new Promise((resolve) => {
-    if (document.getElementById('gis-script')) { resolve(); return; }
-    const s = document.createElement('script');
-    s.id = 'gis-script';
-    s.src = 'https://accounts.google.com/gsi/client';
-    s.onload = () => resolve();
-    document.head.appendChild(s);
-  });
-}
-
 const AuthGate: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<{ email: string; name: string; picture: string } | null>(null);
+  const { user: localUser, logout: localLogout } = useAuth();
+  const [gaUser, setGaUser] = useState<{ email: string; name: string; picture: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
     if (!CLIENT_ID) {
-      setError('Google sign-in is not configured. Set VITE_GOOGLE_CLIENT_ID.');
+      setError('Google sign-in not configured. Contact your administrator.');
       setLoading(false);
       return;
     }
 
-    window.plasuAuthCallback = (u) => {
-      setUser(u);
+    if (document.getElementById('gis-script')) {
       setLoading(false);
-    };
+      return;
+    }
 
-    loadGIS().then(() => {
+    const s = document.createElement('script');
+    s.id = 'gis-script';
+    s.src = 'https://accounts.google.com/gsi/client';
+    s.onload = () => {
       window.google.accounts.id.initialize({
         client_id: CLIENT_ID,
         callback: (response: any) => {
           try {
             const payload = JSON.parse(atob(response.credential.split('.')[1]));
             const email: string = payload.email || '';
-            const domain = email.split('@')[1];
-            if (domain !== 'plasu.edu.ng') {
-              setError('Access is restricted to PLASU students and staff. Please use your @plasu.edu.ng email.');
+            if (!email.endsWith('@plasu.edu.ng')) {
+              setError('Access restricted to @plasu.edu.ng emails only.');
               setLoading(false);
               return;
             }
-            setUser({ email, name: payload.name || email.split('@')[0], picture: payload.picture || '' });
+            setGaUser({
+              email,
+              name: payload.name || email.split('@')[0],
+              picture: payload.picture || '',
+            });
           } catch {
-            setError('Sign-in failed. Please try again.');
+            setError('Authentication failed. Please try again.');
           }
           setLoading(false);
         },
       });
       setLoading(false);
-    });
-
-    return () => { window.plasuAuthCallback = undefined; };
+    };
+    s.onerror = () => {
+      setError('Failed to load Google sign-in.');
+      setLoading(false);
+    };
+    document.head.appendChild(s);
   }, []);
 
   const handleSignIn = () => {
@@ -70,14 +69,19 @@ const AuthGate: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     if (window.google?.accounts?.id) {
       window.google.accounts.id.prompt();
     } else {
-      setError('Google sign-in is loading. Please try again.');
+      setError('Google sign-in not loaded. Please refresh.');
     }
   };
 
   const handleSignOut = () => {
-    setUser(null);
-    setError('');
+    setGaUser(null);
+    if (localUser) localLogout();
   };
+
+  /* If local user exists (demo mode), skip Google auth */
+  if (localUser) {
+    return <>{children}</>;
+  }
 
   if (loading) {
     return (
@@ -88,11 +92,11 @@ const AuthGate: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     );
   }
 
-  if (user) {
+  if (gaUser) {
     return (
       <>
         <div className="absolute top-4 right-4 z-50 flex items-center gap-3">
-          <span className="text-xs text-slate-500 hidden sm:inline">{user.email}</span>
+          <span className="text-xs text-slate-500 hidden sm:inline">{gaUser.email}</span>
           <button onClick={handleSignOut}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-[10px] font-bold text-slate-500 hover:text-red-500 hover:border-red-200 transition-all min-h-[36px]">
             <LogOut size={12} /> Sign Out
