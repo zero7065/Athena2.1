@@ -28,13 +28,14 @@ interface SavedUser {
 }
 
 function getSavedUsers(): SavedUser[] {
+  // loadData already adds the 'athena_' prefix
   return loadData<SavedUser[]>('users', []);
 }
 
 function saveUser(u: SavedUser) {
   const users = getSavedUsers();
   users.push(u);
-  try { localStorage.setItem('athena_users', JSON.stringify(users)); } catch {}
+  saveData('users', users);
 }
 
 const Auth: React.FC<AuthProps> = ({ mode, setMode, onClose }) => {

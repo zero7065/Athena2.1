@@ -140,7 +140,7 @@ export function getDefaultAppData(): AppData {
     level: 1,
     streak: 0,
     lastLoginDate: new Date().toISOString().split('T')[0],
-    isAdmin: true,
+    isAdmin: false,
     role: 'student',
     themeColor: '#00843D',
     fontPreference: 'sans',

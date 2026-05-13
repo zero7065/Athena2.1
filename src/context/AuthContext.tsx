@@ -36,27 +36,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setAppDataState(stored);
       setUser(stored.user);
       setIsLoading(false);
-    } else if (token) {
-      try {
-        const parsed = JSON.parse(atob(token.split('.')[1]));
-        setUser({
-          name: parsed.name || 'Student',
-          email: parsed.email || '',
-          department: parsed.department || 'Computer Science',
-          yearOfStudy: parsed.year || 2,
-          xp: parsed.xp || 0,
-          level: parsed.level || 1,
-          streak: parsed.streak || 0,
-          lastLoginDate: '',
-          isAdmin: parsed.is_admin || false,
-          role: parsed.role || 'student',
-        });
-        setIsLoading(false);
-      } catch {
-        setToken(null);
-        localStorage.removeItem('athena_token');
-        setIsLoading(false);
-      }
+} else if (token) {
+  try {
+    let parsed;
+    // Check if it's our custom format (base64 encoded JSON) or standard JWT
+    if (token.includes('.')) {
+      // Standard JWT format: header.payload.signature
+      parsed = JSON.parse(atob(token.split('.')[1]));
+    } else {
+      // Our custom format: base64 encoded JSON
+      parsed = JSON.parse(atob(token));
+    }
+    setUser({
+      name: parsed.name || 'Student',
+      email: parsed.email || '',
+      department: parsed.department || 'Computer Science',
+      yearOfStudy: parsed.year || 2,
+      xp: parsed.xp || 0,
+      level: parsed.level || 1,
+      streak: parsed.streak || 0,
+      lastLoginDate: '',
+      isAdmin: parsed.is_admin || false,
+      role: parsed.role || 'student',
+    });
+    setIsLoading(false);
+  } catch {
+    setToken(null);
+    localStorage.removeItem('athena_token');
+    setIsLoading(false);
+  }
+}
     } else {
       setIsLoading(false);
     }
