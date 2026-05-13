@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
+import Auth from './components/Auth';
 import Landing from './components/Landing';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
@@ -85,8 +86,13 @@ const AppContent: React.FC = () => {
     );
   }
 
+  // AUTH GATE: Show auth form if not logged in (app not accessible without login)
   if (!user) {
-    return <Landing />;
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+        <Auth mode="login" setMode={() => {}} onClose={() => {}} />
+      </div>
+    );
   }
 
   const renderContent = () => {
@@ -100,7 +106,7 @@ const AppContent: React.FC = () => {
       case 'social': return <Social />;
       case 'profile': return <Profile />;
       case 'lecturer': return user.role === 'lecturer' ? <LecturerPortal /> : <Dashboard setActiveTab={handleTabChange} />;
-      case 'admin': return user.isAdmin ? <AdminPanel /> : <Dashboard setActiveTab={handleTabChange} />;
+      case 'admin': return user.role === 'admin' ? <AdminPanel /> : <Dashboard setActiveTab={handleTabChange} />;
       default: return <Dashboard setActiveTab={handleTabChange} />;
     }
   };

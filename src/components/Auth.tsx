@@ -1,7 +1,21 @@
+/*
+ * ATHENA - Student Success Platform
+ * Section: AUTH - LOGIN & SIGNUP
+ * - Complete auth system with localStorage persistence
+ * - Signup: Full Name, Student ID, Email, Password, Role (Student/Admin)
+ * - Password validation: min 8 chars, at least 1 number, 1 uppercase
+ * - Confirm password field with match validation
+ * - Inline error messages for each field
+ * - Loading state on submit
+ * - "Invalid credentials" error message
+ * - "Account already exists" error on signup
+ * - Auth state persists in localStorage under "athena_auth"
+ * - Users stored in localStorage under "athena_users"
+ */
+
 import React, { useState } from 'react';
-import { X, Mail, Lock, User, GraduationCap, Building2, Calendar, UserCheck, Eye, EyeOff } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
-import { loadData, getDefaultAppData } from '../lib/storage';
+import { X, Mail, Lock, User, GraduationCap, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
+import { useAuth, User as AuthUser } from '../context/AuthContext';
 
 interface AuthProps {
   mode: 'login' | 'register';
@@ -9,158 +23,211 @@ interface AuthProps {
   onClose: () => void;
 }
 
-const EXAMPLE_CREDENTIALS = [
-  { email: 'admin@plasu.edu.ng', password: 'admin123', role: 'Admin', label: 'Full access to everything' },
-  { email: 'lecturer@plasu.edu.ng', password: 'lecturer123', role: 'Lecturer', label: 'Manage courses & students' },
-  { email: 'student@plasu.edu.ng', password: 'student123', role: 'Student', label: 'Study & collaborate' },
-];
-
+// Storage keys
 const USERS_KEY = 'athena_users';
 
-interface SavedUser {
+// User type for stored users
+interface StoredUser {
   email: string;
   password: string;
   name: string;
-  department: string;
-  yearOfStudy: number;
-  role: 'student' | 'lecturer' | 'admin';
-  title?: string;
+  studentId: string;
+  role: 'student' | 'admin';
 }
 
-function getSavedUsers(): SavedUser[] {
-  // loadData already adds the 'athena_' prefix
-  return loadData<SavedUser[]>('users', []);
+// Get users from localStorage
+function getStoredUsers(): StoredUser[] {
+  try {
+    const stored = localStorage.getItem(USERS_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
 }
 
-function saveUser(u: SavedUser) {
-  const users = getSavedUsers();
-  users.push(u);
-  saveData('users', users);
+// Save users to localStorage
+function saveUsers(users: StoredUser[]): void {
+  localStorage.setItem(USERS_KEY, JSON.stringify(users));
+}
+
+// Password validation
+function validatePassword(password: string): { valid: boolean; errors: string[] } {
+  const errors: string[] = [];
+  if (password.length < 8) errors.push('Password must be at least 8 characters');
+  if (!/[0-9]/.test(password)) errors.push('Password must contain at least 1 number');
+  if (!/[A-Z]/.test(password)) errors.push('Password must contain at least 1 uppercase letter');
+  return { valid: errors.length === 0, errors };
 }
 
 const Auth: React.FC<AuthProps> = ({ mode, setMode, onClose }) => {
-  const { login } = useAuth();
+  const { login, isLoading: authLoading } = useAuth();
+  
   const [formData, setFormData] = useState({
+    name: '',
+    studentId: '',
     email: '',
     password: '',
-    name: '',
-    department: '',
-    year_of_study: 1,
-    role: 'student' as 'student' | 'lecturer' | 'admin',
-    title: ''
+    confirmPassword: '',
+    role: 'student' as 'student' | 'admin',
   });
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  
+  // Field-specific errors
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [generalError, setGeneralError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [showExamples, setShowExamples] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const fillExample = (ex: typeof EXAMPLE_CREDENTIALS[0]) => {
-    setFormData(prev => ({
-      ...prev,
-      email: ex.email,
-      password: ex.password,
-      role: ex.role.toLowerCase() as any,
-    }));
-    setError('');
-  };
-
-  const handleLocalLogin = (email: string, password: string): SavedUser | null => {
-    const users = getSavedUsers();
-    const user = users.find(u => u.email === email && u.password === password);
-    if (user) return user;
-
-    const ex = EXAMPLE_CREDENTIALS.find(e => e.email === email && e.password === password);
-    if (ex) {
-      return {
-        email: ex.email,
-        password: ex.password,
-        name: ex.role === 'Admin' ? 'Admin User' : ex.role === 'Lecturer' ? 'Dr. Lecturer' : 'Student User',
-        department: 'Computer Science',
-        yearOfStudy: 2,
-        role: ex.role.toLowerCase() as any,
-        title: ex.role === 'Lecturer' ? 'Dr.' : undefined,
-      };
+  // Clear field-specific error when user types
+  const handleChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    if (fieldErrors[field]) {
+      setFieldErrors(prev => ({ ...prev, [field]: '' }));
     }
-    return null;
+    if (generalError) setGeneralError('');
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Validate single field
+  const validateField = (field: string, value: string): string => {
+    switch (field) {
+      case 'name':
+        return value.trim() ? '' : 'Full Name is required';
+      case 'studentId':
+        return value.trim() ? '' : 'Student ID is required';
+      case 'email':
+        if (!value.trim()) return 'Email is required';
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? '' : 'Invalid email format';
+      case 'password':
+        if (!value) return 'Password is required';
+        const pwdValidation = validatePassword(value);
+        return pwdValidation.valid ? '' : pwdValidation.errors[0];
+      case 'confirmPassword':
+        return value === formData.password ? '' : 'Passwords do not match';
+      default:
+        return '';
+    }
+  };
+
+  // Handle login
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setError('');
+    setIsSubmitting(true);
+    setFieldErrors({});
+    setGeneralError('');
 
-    if (mode === 'login') {
-      const user = handleLocalLogin(formData.email, formData.password);
-      if (!user) {
-        setError('Invalid email or password. Try the example accounts below.');
-        setIsLoading(false);
-        return;
-      }
-      const stored = loadData('app_data', getDefaultAppData());
-      stored.user = {
-        ...stored.user,
-        name: user.name,
-        email: user.email,
-        department: user.department,
-        yearOfStudy: user.yearOfStudy,
-        isAdmin: user.role === 'admin',
-        role: user.role,
-        title: user.title || '',
-      };
-      login('local', stored.user);
-      onClose();
-    } else {
-      if (!formData.name || !formData.email || !formData.password) {
-        setError('All fields are required.');
-        setIsLoading(false);
-        return;
-      }
-      if (getSavedUsers().some(u => u.email === formData.email)) {
-        setError('An account with this email already exists.');
-        setIsLoading(false);
-        return;
-      }
-      saveUser({
-        email: formData.email,
-        password: formData.password,
-        name: formData.name,
-        department: formData.department,
-        yearOfStudy: formData.year_of_study,
-        role: formData.role,
-        title: formData.title,
-      });
-      const stored = loadData('app_data', getDefaultAppData());
-      stored.user = {
-        ...stored.user,
-        name: formData.name,
-        email: formData.email,
-        department: formData.department,
-        yearOfStudy: formData.year_of_study,
-        isAdmin: formData.role === 'admin',
-        role: formData.role,
-        title: formData.title,
-      };
-      login('local', stored.user);
-      onClose();
+    // Validate fields
+    const emailError = validateField('email', formData.email);
+    const passwordError = validateField('password', formData.password);
+
+    if (emailError || passwordError) {
+      setFieldErrors({ email: emailError, password: passwordError });
+      setIsSubmitting(false);
+      return;
     }
+
+    // Simulate async login
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Check against stored users
+    const users = getStoredUsers();
+    const user = users.find(u => u.email === formData.email && u.password === formData.password);
+
+    if (!user) {
+      setGeneralError('Invalid credentials');
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Login successful
+    const authUser: AuthUser = {
+      name: user.name,
+      studentId: user.studentId,
+      email: user.email,
+      role: user.role,
+    };
+    login(authUser);
+    setIsSubmitting(false);
+    onClose();
   };
+
+  // Handle registration
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setFieldErrors({});
+    setGeneralError('');
+
+    // Validate all fields
+    const errors: Record<string, string> = {};
+    ['name', 'studentId', 'email', 'password', 'confirmPassword'].forEach(field => {
+      const error = validateField(field, formData[field as keyof typeof formData]);
+      if (error) errors[field] = error;
+    });
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Simulate async registration
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Check if email already exists
+    const users = getStoredUsers();
+    if (users.some(u => u.email === formData.email)) {
+      setFieldErrors({ email: 'Account already exists' });
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Create new user
+    const newUser: StoredUser = {
+      name: formData.name,
+      studentId: formData.studentId,
+      email: formData.email,
+      password: formData.password,
+      role: formData.role,
+    };
+
+    // Save user
+    users.push(newUser);
+    saveUsers(users);
+
+    // Login the new user
+    const authUser: AuthUser = {
+      name: newUser.name,
+      studentId: newUser.studentId,
+      email: newUser.email,
+      role: newUser.role,
+    };
+    login(authUser);
+    setIsSubmitting(false);
+    onClose();
+  };
+
+  const handleSubmit = mode === 'login' ? handleLogin : handleRegister;
+
+  const isLoading = isSubmitting || authLoading;
 
   return (
-    <div className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-[32px] shadow-2xl relative border border-slate-200 dark:border-slate-800">
-      <button onClick={onClose}
+    <div className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-[32px] shadow-2xl relative border border-slate-200 dark:border-slate-800 max-w-md w-full">
+      <button 
+        onClick={onClose}
         className="absolute top-4 sm:top-6 right-4 sm:right-6 p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
-        aria-label="Close">
+        aria-label="Close"
+      >
         <X size={20} />
       </button>
 
       <div className="flex flex-col items-center mb-6 sm:mb-8">
         <div className="flex items-center gap-3 mb-4 sm:mb-6">
-          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary rounded-2xl flex items-center justify-center text-white shadow-lg">
+          <div className="w-12 h-12 bg-[#00843D] rounded-2xl flex items-center justify-center text-white shadow-lg">
             <GraduationCap size={24} />
           </div>
           <div className="flex flex-col items-start">
             <span className="text-xl sm:text-2xl font-black tracking-tighter text-slate-900 dark:text-white leading-none">ATHENA</span>
-            <span className="text-[10px] text-primary font-bold uppercase tracking-[0.2em] leading-none mt-1">PLASU Edition</span>
+            <span className="text-[10px] text-[#00843D] font-bold uppercase tracking-[0.2em] leading-none mt-1">PLASU Edition</span>
           </div>
         </div>
         <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight text-center">
@@ -171,118 +238,172 @@ const Auth: React.FC<AuthProps> = ({ mode, setMode, onClose }) => {
         </p>
       </div>
 
-      {mode === 'login' && !showExamples && (
-        <button onClick={() => setShowExamples(true)}
-          className="w-full mb-4 flex items-center justify-center gap-2 p-2.5 rounded-xl border border-dashed border-primary/30 text-primary text-xs font-bold hover:bg-primary/5 transition-all">
-          Need test credentials? Click here
-        </button>
-      )}
-
-      {showExamples && (
-        <div className="mb-4 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 space-y-2">
-          <div className="flex items-center justify-between">
-            <p className="text-[10px] font-bold text-slate-400 uppercase">Test Accounts</p>
-            <button onClick={() => setShowExamples(false)} className="text-[10px] text-slate-400 hover:text-primary">Hide</button>
-          </div>
-          {EXAMPLE_CREDENTIALS.map(ex => (
-            <button key={ex.email} onClick={() => fillExample(ex)}
-              className="w-full flex items-center justify-between p-2 rounded-xl hover:bg-white dark:hover:bg-slate-800 transition-all text-left border border-transparent hover:border-primary/20">
-              <div>
-                <p className="text-xs font-bold text-slate-700 dark:text-slate-200">{ex.role}</p>
-                <p className="text-[10px] text-slate-400">{ex.label}</p>
-              </div>
-              <div className="text-right">
-                <p className="text-[10px] font-mono text-primary">{ex.email}</p>
-                <p className="text-[10px] font-mono text-slate-400">{ex.password}</p>
-              </div>
-            </button>
-          ))}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Registration Fields */}
         {mode === 'register' && (
           <>
-            <div className="flex p-1 bg-slate-100 dark:bg-slate-800 rounded-xl mb-3 sm:mb-4">
-              <button type="button" onClick={() => setFormData({ ...formData, role: 'student' })}
-                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${formData.role === 'student' ? 'bg-white dark:bg-slate-700 text-primary shadow-sm' : 'text-slate-500'}`}>
+            {/* Role Selection */}
+            <div className="flex p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+              <button 
+                type="button" 
+                onClick={() => handleChange('role', 'student')}
+                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${formData.role === 'student' ? 'bg-white dark:bg-slate-700 text-[#00843D] shadow-sm' : 'text-slate-500'}`}
+              >
                 Student
               </button>
-              <button type="button" onClick={() => setFormData({ ...formData, role: 'lecturer' })}
-                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${formData.role === 'lecturer' ? 'bg-white dark:bg-slate-700 text-primary shadow-sm' : 'text-slate-500'}`}>
-                Lecturer
-              </button>
-              <button type="button" onClick={() => setFormData({ ...formData, role: 'admin' })}
-                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${formData.role === 'admin' ? 'bg-white dark:bg-slate-700 text-primary shadow-sm' : 'text-slate-500'}`}>
+              <button 
+                type="button" 
+                onClick={() => handleChange('role', 'admin')}
+                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${formData.role === 'admin' ? 'bg-white dark:bg-slate-700 text-[#00843D] shadow-sm' : 'text-slate-500'}`}
+              >
                 Admin
               </button>
             </div>
 
+            {/* Full Name */}
             <div className="relative">
               <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-              <input type="text" placeholder="Full Name" required
-                className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary outline-none transition-all text-base"
-                value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
+              <input 
+                type="text" 
+                placeholder="Full Name" 
+                value={formData.name}
+                onChange={(e) => handleChange('name', e.target.value)}
+                className={`w-full pl-12 pr-4 py-3 rounded-xl border ${fieldErrors.name ? 'border-red-500' : 'border-slate-200 dark:border-slate-700'} bg-white dark:bg-slate-800 focus:ring-2 focus:ring-[#00843D] outline-none transition-all text-base font-size: 16px`}
+                style={{ fontSize: '16px' }}
+              />
+              {fieldErrors.name && (
+                <p className="text-xs text-red-500 mt-1 ml-1">{fieldErrors.name}</p>
+              )}
             </div>
-            <div className="grid grid-cols-2 gap-3 sm:gap-4">
-              <div className="relative">
-                <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                <input type="text" placeholder={formData.role === 'student' ? 'Dept' : 'Faculty'} required
-                  className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary outline-none transition-all text-base"
-                  value={formData.department} onChange={e => setFormData({ ...formData, department: e.target.value })} />
-              </div>
-              <div className="relative">
-                {formData.role === 'student' ? (
-                  <>
-                    <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={18} />
-                    <select className="w-full pl-12 pr-8 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary outline-none transition-all appearance-none cursor-pointer text-base"
-                      value={formData.year_of_study} onChange={e => setFormData({ ...formData, year_of_study: parseInt(e.target.value) })}>
-                      {[1, 2, 3, 4, 5, 6].map(y => <option key={y} value={y}>Year {y}</option>)}
-                    </select>
-                  </>
-                ) : (
-                  <>
-                    <UserCheck className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                    <input type="text" placeholder="Title (e.g. Dr.)"
-                      className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary outline-none transition-all text-base"
-                      value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} />
-                  </>
-                )}
-              </div>
+
+            {/* Student ID */}
+            <div className="relative">
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+              <input 
+                type="text" 
+                placeholder="Student ID" 
+                value={formData.studentId}
+                onChange={(e) => handleChange('studentId', e.target.value)}
+                className={`w-full pl-12 pr-4 py-3 rounded-xl border ${fieldErrors.studentId ? 'border-red-500' : 'border-slate-200 dark:border-slate-700'} bg-white dark:bg-slate-800 focus:ring-2 focus:ring-[#00843D] outline-none transition-all text-base font-size: 16px`}
+                style={{ fontSize: '16px' }}
+              />
+              {fieldErrors.studentId && (
+                <p className="text-xs text-red-500 mt-1 ml-1">{fieldErrors.studentId}</p>
+              )}
             </div>
           </>
         )}
 
+        {/* Email */}
         <div className="relative">
           <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-          <input type="email" placeholder="Email Address" required
-            className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary outline-none transition-all text-base"
-            value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} />
+          <input 
+            type="email" 
+            placeholder="Email Address" 
+            value={formData.email}
+            onChange={(e) => handleChange('email', e.target.value)}
+            className={`w-full pl-12 pr-4 py-3 rounded-xl border ${fieldErrors.email ? 'border-red-500' : 'border-slate-200 dark:border-slate-700'} bg-white dark:bg-slate-800 focus:ring-2 focus:ring-[#00843D] outline-none transition-all text-base font-size: 16px`}
+            style={{ fontSize: '16px' }}
+          />
+          {fieldErrors.email && (
+            <p className="text-xs text-red-500 mt-1 ml-1">{fieldErrors.email}</p>
+          )}
         </div>
+
+        {/* Password */}
         <div className="relative">
           <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-          <input type={showPassword ? 'text' : 'password'} placeholder="Password" required
-            className="w-full pl-12 pr-12 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary outline-none transition-all text-base"
-            value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} />
-          <button type="button" onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center">
+          <input 
+            type={showPassword ? 'text' : 'password'} 
+            placeholder="Password" 
+            value={formData.password}
+            onChange={(e) => handleChange('password', e.target.value)}
+            className={`w-full pl-12 pr-12 py-3 rounded-xl border ${fieldErrors.password ? 'border-red-500' : 'border-slate-200 dark:border-slate-700'} bg-white dark:bg-slate-800 focus:ring-2 focus:ring-[#00843D] outline-none transition-all text-base font-size: 16px`}
+            style={{ fontSize: '16px' }}
+          />
+          <button 
+            type="button" 
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#00843D] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+          >
             {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
+          {fieldErrors.password && (
+            <p className="text-xs text-red-500 mt-1 ml-1">{fieldErrors.password}</p>
+          )}
         </div>
 
-        {error && <p className="text-xs text-red-500 font-bold text-center bg-red-50 dark:bg-red-900/20 py-2 rounded-lg">{error}</p>}
+        {/* Confirm Password (Registration only) */}
+        {mode === 'register' && (
+          <div className="relative">
+            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <input 
+              type={showConfirmPassword ? 'text' : 'password'} 
+              placeholder="Confirm Password" 
+              value={formData.confirmPassword}
+              onChange={(e) => handleChange('confirmPassword', e.target.value)}
+              className={`w-full pl-12 pr-12 py-3 rounded-xl border ${fieldErrors.confirmPassword ? 'border-red-500' : 'border-slate-200 dark:border-slate-700'} bg-white dark:bg-slate-800 focus:ring-2 focus:ring-[#00843D] outline-none transition-all text-base font-size: 16px`}
+              style={{ fontSize: '16px' }}
+            />
+            <button 
+              type="button" 
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#00843D] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+            >
+              {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+            {fieldErrors.confirmPassword && (
+              <p className="text-xs text-red-500 mt-1 ml-1">{fieldErrors.confirmPassword}</p>
+            )}
+          </div>
+        )}
 
-        <button type="submit" disabled={isLoading}
-          className="w-full bg-primary text-white font-bold rounded-xl py-3 sm:py-4 text-base sm:text-lg shadow-xl shadow-primary/20 hover:bg-emerald-700 transition-all active:scale-95 disabled:opacity-50 min-h-[48px]">
-          {isLoading ? 'Processing...' : mode === 'login' ? 'Sign In' : 'Create Account'}
+        {/* General Error */}
+        {generalError && (
+          <div className="flex items-center gap-2 p-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+            <AlertCircle size={16} className="text-red-500 shrink-0" />
+            <p className="text-xs text-red-600 dark:text-red-400">{generalError}</p>
+          </div>
+        )}
+
+        {/* Submit Button */}
+        <button 
+          type="submit" 
+          disabled={isLoading}
+          className="w-full bg-[#00843D] text-white font-bold rounded-xl py-3 sm:py-4 text-base sm:text-lg shadow-xl shadow-[#00843D]/20 hover:bg-[#006a2f] transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px]"
+        >
+          {isLoading ? (
+            <span className="flex items-center justify-center gap-2">
+              <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              </svg>
+              Processing...
+            </span>
+          ) : mode === 'login' ? 'Sign In' : 'Create Account'}
         </button>
       </form>
 
-      <div className="mt-4 sm:mt-6 text-center text-xs sm:text-sm text-slate-500 font-medium">
+      {/* Toggle Mode */}
+      <div className="mt-6 text-center text-xs sm:text-sm text-slate-500 font-medium">
         {mode === 'login' ? (
-          <>Don't have an account?{' '}<button onClick={() => setMode('register')} className="text-primary font-extrabold hover:underline">Sign Up</button></>
+          <>Don't have an account?{' '}
+            <button 
+              onClick={() => { setMode('register'); setFieldErrors({}); setGeneralError(''); }} 
+              className="text-[#00843D] font-extrabold hover:underline"
+            >
+              Sign Up
+            </button>
+          </>
         ) : (
-          <>Already have an account?{' '}<button onClick={() => setMode('login')} className="text-primary font-extrabold hover:underline">Sign In</button></>
+          <>Already have an account?{' '}
+            <button 
+              onClick={() => { setMode('login'); setFieldErrors({}); setGeneralError(''); }} 
+              className="text-[#00843D] font-extrabold hover:underline"
+            >
+              Sign In
+            </button>
+          </>
         )}
       </div>
     </div>

@@ -41,6 +41,7 @@ export interface LocalTask {
   priority: 'low' | 'medium' | 'high';
   status: 'todo' | 'in-progress' | 'done';
   createdAt: number;
+  assignedTo?: string;
 }
 
 export interface LocalSession {
