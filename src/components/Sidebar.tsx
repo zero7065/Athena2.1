@@ -46,7 +46,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isCollapsed,
   if (user?.role === 'lecturer') {
     menuItems.splice(4, 0, { id: 'lecturer', label: 'Lecturer Portal', icon: BookOpen });
   }
-  if (user?.isAdmin) {
+  if (user?.role === 'admin') {
     menuItems.push({ id: 'admin', label: 'Admin Panel', icon: ShieldCheck });
   }
 
@@ -151,8 +151,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isCollapsed,
             <div className="text-left overflow-hidden">
               <p className="text-sm font-bold text-slate-800 dark:text-white truncate">{user?.name}</p>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold text-[#00843D] uppercase">Lv. {user?.level || 1}</span>
-                <span className="text-[10px] font-bold text-orange-500 uppercase">{user?.streak || 0} &bull;</span>
+                <span className="text-[10px] font-bold text-[#00843D] uppercase">{user?.name?.[0] || 'S'}</span>
               </div>
             </div>
           )}

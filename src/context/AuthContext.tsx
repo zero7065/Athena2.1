@@ -1,30 +1,23 @@
 /*
  * ATHENA - Student Success Platform
- * Section: AUTH - LOGIN & SIGNUP (localStorage-based)
+ * Section: AUTH - LOGIN & SIGNUP
  *
- * Changes made:
- * - Auth state persists in localStorage under key "athena_auth"
- * - Signup collects: Full Name, Student ID, Email, Password, Role (Student / Admin)
- * - Login validates against stored users in localStorage
- * - After login, user object (name, studentId, email, role) available app-wide
- * - Logout clears auth state and redirects to login screen
- * - Admin role unlocks Admin Analytics panel
- * - Preserved appData, updateAppData, addUserXp for backward compatibility
- * - XP & Achievements persist in localStorage under "athena_xp" and "athena_achievements"
+ * - 3 roles: student, lecturer, admin
+ * - Per-user appData isolation (key = athena_app_data_{email})
+ * - Submissions system shared via sharedStorage helpers
+ * - Auth state persists in localStorage under "athena_auth"
  */
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { loadData, saveData, AppData as StorageAppData, UserProfile, addXp, checkAndUnlockAchievements, getDefaultAppData } from '../lib/storage';
+import { loadData, saveData, AppData as StorageAppData, addXp, checkAndUnlockAchievements, getDefaultAppData } from '../lib/storage';
 
-// User type for the app
 export interface User {
   name: string;
   studentId: string;
   email: string;
-  role: 'student' | 'admin';
+  role: 'student' | 'lecturer' | 'admin';
 }
 
-// Auth context type
 interface AuthContextType {
   user: User | null;
   token: string | null;
@@ -38,10 +31,12 @@ interface AuthContextType {
   setShowAchievement: (a: any) => void;
 }
 
-// Create the context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Auth provider component
+function getAppDataKey(email: string): string {
+  return `app_data_${email.replace(/[@.]/g, '_')}`;
+}
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
@@ -49,7 +44,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [appData, setAppDataState] = useState<StorageAppData>(getDefaultAppData());
   const [showAchievement, setShowAchievement] = useState<any>(null);
 
-  // Load user from localStorage on startup
   useEffect(() => {
     const stored = localStorage.getItem('athena_auth');
     if (stored) {
@@ -57,40 +51,62 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const parsed = JSON.parse(stored);
         setUser(parsed);
         setToken('logged-in');
+        // Load per-user app data
+        const dataKey = getAppDataKey(parsed.email);
+        const raw = localStorage.getItem(dataKey);
+        if (raw) {
+          setAppDataState(JSON.parse(raw));
+        } else {
+          // Migrate old shared key if first login
+          const oldData = loadData('app_data', getDefaultAppData());
+          localStorage.setItem(dataKey, JSON.stringify(oldData));
+          setAppDataState(oldData);
+        }
       } catch {
         localStorage.removeItem('athena_auth');
       }
     }
-    // Load app data
-    const data = loadData('app_data', getDefaultAppData());
-    setAppDataState(data);
     setIsLoading(false);
   }, []);
 
-  // Login function
   const login = (userData: User) => {
     localStorage.setItem('athena_auth', JSON.stringify(userData));
     setUser(userData);
     setToken('logged-in');
+    // Load per-user app data
+    const dataKey = getAppDataKey(userData.email);
+    const raw = localStorage.getItem(dataKey);
+    if (raw) {
+      setAppDataState(JSON.parse(raw));
+    } else {
+      const fresh = getDefaultAppData();
+      localStorage.setItem(dataKey, JSON.stringify(fresh));
+      setAppDataState(fresh);
+    }
   };
 
-  // Logout function
   const logout = () => {
+    // Save current user's data before logout
+    if (user) {
+      const dataKey = getAppDataKey(user.email);
+      localStorage.setItem(dataKey, JSON.stringify(appData));
+    }
     localStorage.removeItem('athena_auth');
     setUser(null);
     setToken(null);
   };
 
-  // Update app data
   const updateAppData = useCallback((updater: (prev: StorageAppData) => StorageAppData) => {
     setAppDataState(prev => {
       const next = updater(prev);
-      saveData('app_data', next);
+      if (user) {
+        const dataKey = getAppDataKey(user.email);
+        localStorage.setItem(dataKey, JSON.stringify(next));
+      }
       return next;
     });
-  }, []);
+  }, [user]);
 
-  // Add XP and check achievements
   const addUserXp = useCallback((amount: number) => {
     let result: any[] = [];
     updateAppData(prev => {
@@ -117,7 +133,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 };
 
-// Custom hook to use auth
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {

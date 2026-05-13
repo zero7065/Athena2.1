@@ -32,7 +32,8 @@ interface StoredUser {
   password: string;
   name: string;
   studentId: string;
-  role: 'student' | 'admin';
+  department: string;
+  role: 'student' | 'lecturer' | 'admin';
 }
 
 // Get users from localStorage
@@ -68,7 +69,8 @@ const Auth: React.FC<AuthProps> = ({ mode, setMode, onClose }) => {
     email: '',
     password: '',
     confirmPassword: '',
-    role: 'student' as 'student' | 'admin',
+    role: 'student' as 'student' | 'lecturer' | 'admin',
+    department: '',
   });
   
   // Field-specific errors
@@ -159,7 +161,7 @@ const Auth: React.FC<AuthProps> = ({ mode, setMode, onClose }) => {
 
     // Validate all fields
     const errors: Record<string, string> = {};
-    ['name', 'studentId', 'email', 'password', 'confirmPassword'].forEach(field => {
+    ['name', 'studentId', 'email', 'password', 'confirmPassword', 'department'].forEach(field => {
       const error = validateField(field, formData[field as keyof typeof formData]);
       if (error) errors[field] = error;
     });
@@ -187,6 +189,7 @@ const Auth: React.FC<AuthProps> = ({ mode, setMode, onClose }) => {
       studentId: formData.studentId,
       email: formData.email,
       password: formData.password,
+      department: formData.department,
       role: formData.role,
     };
 
@@ -253,6 +256,13 @@ const Auth: React.FC<AuthProps> = ({ mode, setMode, onClose }) => {
               </button>
               <button 
                 type="button" 
+                onClick={() => handleChange('role', 'lecturer')}
+                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${formData.role === 'lecturer' ? 'bg-white dark:bg-slate-700 text-[#00843D] shadow-sm' : 'text-slate-500'}`}
+              >
+                Lecturer
+              </button>
+              <button 
+                type="button" 
                 onClick={() => handleChange('role', 'admin')}
                 className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${formData.role === 'admin' ? 'bg-white dark:bg-slate-700 text-[#00843D] shadow-sm' : 'text-slate-500'}`}
               >
@@ -276,12 +286,12 @@ const Auth: React.FC<AuthProps> = ({ mode, setMode, onClose }) => {
               )}
             </div>
 
-            {/* Student ID */}
+            {/* Student ID (or Staff ID for lecturers) */}
             <div className="relative">
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
               <input 
                 type="text" 
-                placeholder="Student ID" 
+                placeholder={formData.role === 'lecturer' ? 'Staff ID' : 'Student ID'} 
                 value={formData.studentId}
                 onChange={(e) => handleChange('studentId', e.target.value)}
                 className={`w-full pl-12 pr-4 py-3 rounded-xl border ${fieldErrors.studentId ? 'border-red-500' : 'border-slate-200 dark:border-slate-700'} bg-white dark:bg-slate-800 focus:ring-2 focus:ring-[#00843D] outline-none transition-all text-base font-size: 16px`}
@@ -289,6 +299,22 @@ const Auth: React.FC<AuthProps> = ({ mode, setMode, onClose }) => {
               />
               {fieldErrors.studentId && (
                 <p className="text-xs text-red-500 mt-1 ml-1">{fieldErrors.studentId}</p>
+              )}
+            </div>
+
+            {/* Department / Faculty */}
+            <div className="relative">
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+              <input 
+                type="text" 
+                placeholder={formData.role === 'lecturer' ? 'Faculty / Department' : 'Department'} 
+                value={formData.department}
+                onChange={(e) => handleChange('department', e.target.value)}
+                className={`w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-[#00843D] outline-none transition-all text-base font-size: 16px`}
+                style={{ fontSize: '16px' }}
+              />
+              {fieldErrors.department && (
+                <p className="text-xs text-red-500 mt-1 ml-1">{fieldErrors.department}</p>
               )}
             </div>
           </>
