@@ -175,15 +175,13 @@ const AppContent: React.FC = () => {
   );
 };
 
-import { FirebaseAuthProvider } from './context/FirebaseAuthContext';
+
 
 export default function App() {
   return (
     <AuthProvider>
       <ThemeProvider>
-        <FirebaseAuthProvider>
-          <AppContent />
-        </FirebaseAuthProvider>
+        <AppContent />
       </ThemeProvider>
     </AuthProvider>
   );
