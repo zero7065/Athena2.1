@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import Auth from './components/Auth';
@@ -16,7 +16,7 @@ import LecturerPortal from './components/LecturerPortal';
 import AIChatbot from './components/AIChatbot';
 import { cn } from './lib/utils';
 import { useKeyboardShortcuts } from './lib/useKeyboard';
-import { LayoutDashboard, CheckSquare, Timer, Gamepad2, Trophy, Users, UserCircle, Sparkles, Menu, X } from 'lucide-react';
+import { LayoutDashboard, CheckSquare, Timer, Gamepad2, Trophy, Users, UserCircle, Sparkles, Menu, X, BookOpen, ShieldCheck } from 'lucide-react';
 
 const AchievementToast: React.FC = () => {
   const { showAchievement, setShowAchievement } = useAuth();
@@ -111,15 +111,24 @@ const AppContent: React.FC = () => {
     }
   };
 
-  const mobileTabs = [
-    { id: 'dashboard', icon: LayoutDashboard, label: 'Home' },
-    { id: 'tasks', icon: CheckSquare, label: 'Tasks' },
-    { id: 'study', icon: Timer, label: 'Focus' },
-    { id: 'games', icon: Gamepad2, label: 'Games' },
-    { id: 'social', icon: Users, label: 'Social' },
-    { id: 'achievements', icon: Trophy, label: 'Awards' },
-    { id: 'profile', icon: UserCircle, label: 'Profile' },
-  ];
+  const mobileTabs = useMemo(() => {
+    const tabs: Array<{ id: string; icon: any; label: string }> = [
+      { id: 'dashboard', icon: LayoutDashboard, label: 'Home' },
+      { id: 'tasks', icon: CheckSquare, label: 'Tasks' },
+      { id: 'study', icon: Timer, label: 'Focus' },
+      { id: 'games', icon: Gamepad2, label: 'Games' },
+      { id: 'social', icon: Users, label: 'Social' },
+      { id: 'achievements', icon: Trophy, label: 'Awards' },
+      { id: 'profile', icon: UserCircle, label: 'Profile' },
+    ];
+    if (user?.role === 'lecturer') {
+      tabs.splice(4, 0, { id: 'lecturer', icon: BookOpen, label: 'Lecturer' });
+    }
+    if (user?.role === 'admin') {
+      tabs.push({ id: 'admin', icon: ShieldCheck, label: 'Admin' });
+    }
+    return tabs;
+  }, [user?.role]);
 
   return (
     <>
