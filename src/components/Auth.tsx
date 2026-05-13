@@ -146,6 +146,7 @@ const Auth: React.FC<AuthProps> = ({ mode, setMode, onClose }) => {
       studentId: user.studentId,
       email: user.email,
       role: user.role,
+      department: user.department,
     };
     login(authUser);
     setIsSubmitting(false);
@@ -203,6 +204,7 @@ const Auth: React.FC<AuthProps> = ({ mode, setMode, onClose }) => {
       studentId: newUser.studentId,
       email: newUser.email,
       role: newUser.role,
+      department: newUser.department,
     };
     login(authUser);
     setIsSubmitting(false);

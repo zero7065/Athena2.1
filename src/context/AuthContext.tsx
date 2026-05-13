@@ -16,6 +16,7 @@ export interface User {
   studentId: string;
   email: string;
   role: 'student' | 'lecturer' | 'admin';
+  department?: string;
 }
 
 interface AuthContextType {

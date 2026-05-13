@@ -1,8 +1,21 @@
+/*
+ * ATHENA - Student Success Platform
+ * Section: AI CHAT — Gemini → Groq Fallback
+ *
+ * Changes:
+ * - Primary: Gemini via /api/chat proxy (streaming SSE)
+ * - Fallback: If Gemini fails (429, 502, 500, or any error), auto-retry with Groq
+ * - Model indicator shows which AI is responding
+ * - "Falling back to Groq..." message appears during failover
+ * - Rate limit / API errors show human-readable messages
+ */
+
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Send, Bot, User, Sparkles, Trash2, Loader2, Copy, Check, Download, ThumbsUp, ThumbsDown, RotateCcw } from 'lucide-react';
+import { Send, Bot, User, Sparkles, Trash2, Loader2, Copy, Check, Download, ThumbsUp, ThumbsDown, RotateCcw, Zap } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { cn } from '../lib/utils';
 import Markdown from 'react-markdown';
+import { safeGroq } from '../lib/groq';
 import AuthGate from './AuthGate';
 
 interface ChatMsg {
@@ -12,6 +25,7 @@ interface ChatMsg {
   timestamp: string;
   failed?: boolean;
   feedback?: 'up' | 'down' | null;
+  model?: 'gemini' | 'groq';
 }
 
 const STORAGE_KEY = 'athena_chat_history';
@@ -54,6 +68,7 @@ const AIChatbot: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [streamingId, setStreamingId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [fallbackMessage, setFallbackMessage] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -74,6 +89,78 @@ const AIChatbot: React.FC = () => {
     localStorage.removeItem(STORAGE_KEY);
   };
 
+  // Try Gemini first, fall back to Groq
+  const tryGeminiThenGroq = useCallback(async (userText: string, history: any[], aiId: string) => {
+    // Step 1: Try Gemini via /api/chat
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: userText, history }),
+        signal: abortRef.current?.signal,
+      });
+
+      // If Gemini succeeds (streaming SSE)
+      if (res.ok && res.body) {
+        setMessages(prev => prev.map(m => m.id === aiId ? { ...m, model: 'gemini' } : m));
+
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              try {
+                const json = JSON.parse(line.slice(6));
+                if (json.text) {
+                  setMessages(prev => prev.map(m => m.id === aiId ? { ...m, text: m.text + json.text } : m));
+                }
+              } catch { /* skip */ }
+            }
+          }
+        }
+        return; // Gemini succeeded
+      }
+
+      // Gemini failed — try Groq fallback
+      if (res.status === 429) {
+        setFallbackMessage('Gemini is busy — falling back to Groq...');
+      } else if (res.status === 502 || res.status === 500) {
+        setFallbackMessage('Gemini is unavailable — falling back to Groq...');
+      } else {
+        setFallbackMessage('Trying alternative AI...');
+      }
+
+      throw new Error('gemini_failed');
+    } catch (err: any) {
+      if (err.name === 'AbortError') throw err;
+
+      // Step 2: Fall back to Groq
+      setMessages(prev => prev.map(m => m.id === aiId ? { ...m, model: 'groq' } : m));
+
+      const systemPrompt = `You are PLASU Athena, an academic assistant for Plateau State University students and staff. Answer academic questions helpfully and concisely. You stay on academic topics.`;
+
+      const response = await safeGroq(
+        systemPrompt,
+        userText,
+        'llama-3.1-8b-instant',
+        'AI is currently unavailable. Please check your Groq API key configuration.'
+      );
+
+      setMessages(prev => prev.map(m => m.id === aiId ? { ...m, text: response, failed: response.includes('unavailable') } : m));
+    } finally {
+      setFallbackMessage(null);
+    }
+  }, []);
+
   const handleSend = useCallback(async () => {
     if (!input.trim() || isLoading) return;
 
@@ -87,6 +174,7 @@ const AIChatbot: React.FC = () => {
     const aiId = (Date.now() + 1).toString();
 
     setMessages(prev => [...prev, userMsg]);
+    const userText = input.trim();
     setInput('');
     setIsLoading(true);
     setStreamingId(aiId);
@@ -104,56 +192,7 @@ const AIChatbot: React.FC = () => {
     abortRef.current = new AbortController();
 
     try {
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMsg.text, history }),
-        signal: abortRef.current.signal,
-      });
-
-      if (res.status === 429) {
-        const err = await res.json().catch(() => ({ error: 'Too many requests.' }));
-        setMessages(prev => prev.map(m => m.id === aiId ? { ...m, text: `**${err.error}**`, failed: true } : m));
-        setIsLoading(false);
-        setStreamingId(null);
-        return;
-      }
-
-      if (!res.ok) {
-        setMessages(prev => prev.map(m => m.id === aiId ? { ...m, text: 'Something went wrong. Please try again.', failed: true } : m));
-        setIsLoading(false);
-        setStreamingId(null);
-        return;
-      }
-
-      const reader = res.body?.getReader();
-      if (!reader) throw new Error('No reader');
-
-      const decoder = new TextDecoder();
-      let buffer = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || '';
-
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            try {
-              const json = JSON.parse(line.slice(6));
-              if (json.text) {
-                setMessages(prev => prev.map(m => m.id === aiId ? { ...m, text: m.text + json.text } : m));
-              }
-              if (json.done || json.finishReason) {
-                // streaming complete
-              }
-            } catch { /* skip */ }
-          }
-        }
-      }
+      await tryGeminiThenGroq(userText, history, aiId);
     } catch (err: any) {
       if (err.name === 'AbortError') return;
       setMessages(prev => prev.map(m => m.id === aiId ? { ...m, text: 'Something went wrong. Please try again.', failed: true } : m));
@@ -162,7 +201,7 @@ const AIChatbot: React.FC = () => {
       setStreamingId(null);
       abortRef.current = null;
     }
-  }, [input, isLoading, messages]);
+  }, [input, isLoading, messages, tryGeminiThenGroq]);
 
   const retryMessage = useCallback(async (failedMsgId: string) => {
     const idx = messages.findIndex(m => m.id === failedMsgId);
@@ -193,7 +232,6 @@ const AIChatbot: React.FC = () => {
   return (
     <AuthGate>
     <div className="p-3 sm:p-5 md:p-8 space-y-4 h-full flex flex-col max-w-5xl mx-auto">
-      {/* Phase 3.9: PLASU Branding Header */}
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="p-2.5 rounded-2xl bg-[#00843D] text-white shadow-lg">
@@ -219,6 +257,14 @@ const AIChatbot: React.FC = () => {
           </button>
         </div>
       </header>
+
+      {/* Fallback notification banner */}
+      {fallbackMessage && (
+        <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-xs text-amber-700 dark:text-amber-300 font-medium">
+          <Loader2 size={14} className="animate-spin" />
+          {fallbackMessage}
+        </div>
+      )}
 
       <div className="flex-1 glass rounded-[24px] sm:rounded-[40px] flex flex-col overflow-hidden border border-slate-200/50 dark:border-slate-700/50 shadow-2xl" style={{ maxHeight: 'calc(100vh - 220px)' }}>
         <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-4 no-scrollbar">
@@ -256,6 +302,18 @@ const AIChatbot: React.FC = () => {
                   <div className={cn('p-3 sm:p-4 rounded-2xl sm:rounded-3xl text-sm leading-relaxed shadow-sm',
                     m.role === 'user' ? 'bg-[#00843D] text-white rounded-tr-none' : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-100 dark:border-slate-700 rounded-tl-none',
                     m.failed && 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800')}>
+                    {/* Model indicator tag */}
+                    {m.role === 'model' && m.model && !m.failed && (
+                      <div className="flex items-center gap-1 mb-1">
+                        <span className={cn(
+                          'inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold',
+                          m.model === 'gemini' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
+                        )}>
+                          {m.model === 'gemini' ? <Zap size={10} /> : <Sparkles size={10} />}
+                          {m.model === 'gemini' ? 'Gemini' : 'Groq'}
+                        </span>
+                      </div>
+                    )}
                     {m.role === 'model' && streamingId === m.id && !m.failed ? (
                       <span>{m.text}<span className="inline-block w-2 h-4 bg-[#00843D] dark:bg-[#00843D] ml-0.5 animate-pulse" /></span>
                     ) : (
@@ -265,14 +323,12 @@ const AIChatbot: React.FC = () => {
                       <span className={cn('text-[10px] font-bold uppercase tracking-widest', m.role === 'user' ? 'text-white/60' : 'text-slate-400')}>
                         {formatTime(m.timestamp)}
                       </span>
-                      {/* Phase 3.10: Copy button on AI messages */}
                       {m.role === 'model' && !m.failed && m.text && streamingId !== m.id && (
                         <div className="flex items-center gap-1">
                           <button onClick={() => copyText(m.text, m.id)}
                             className="p-1 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors" title="Copy response">
                             {copiedId === m.id ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} className="text-slate-400" />}
                           </button>
-                          {/* Phase 3.11: Feedback buttons */}
                           <button onClick={() => giveFeedback(m.id, 'up')}
                             className={cn('p-1 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors', m.feedback === 'up' ? 'text-emerald-500' : 'text-slate-400')} title="Helpful">
                             <ThumbsUp size={12} />
@@ -283,7 +339,6 @@ const AIChatbot: React.FC = () => {
                           </button>
                         </div>
                       )}
-                      {/* Phase 2.6: Retry button on failed messages */}
                       {m.failed && (
                         <button onClick={() => retryMessage(m.id)}
                           className="flex items-center gap-1 text-[10px] font-bold text-red-500 hover:text-red-700 transition-colors">
@@ -296,7 +351,6 @@ const AIChatbot: React.FC = () => {
               </div>
             ))
           )}
-          {/* Phase 2.6: Typing indicator */}
           {isLoading && streamingId === null && (
             <div className="flex gap-3 mr-auto">
               <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-xl bg-white dark:bg-slate-800 text-[#00843D] border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0 shadow-sm">
@@ -314,7 +368,6 @@ const AIChatbot: React.FC = () => {
           )}
         </div>
 
-        {/* Phase 2.8: Mobile-safe input area */}
         <div className="p-3 sm:p-5 bg-white/50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-800 safe-area-bottom">
           <div className="relative flex items-center gap-2">
             <input type="text" value={input} onChange={e => setInput(e.target.value)}
@@ -327,7 +380,6 @@ const AIChatbot: React.FC = () => {
               <Send size={18} />
             </button>
           </div>
-          {/* Phase 3.9: Footer */}
           <p className="text-[10px] text-center text-slate-400 mt-2 font-medium leading-relaxed px-2">
             PLASU Athena is an AI tool &mdash; always verify important information with your lecturer.
           </p>
