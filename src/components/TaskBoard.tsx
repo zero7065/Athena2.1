@@ -188,8 +188,6 @@ const TaskBoard: React.FC = () => {
 
   const isStudent = user?.role === 'student';
 
-  const tasks = appData.tasks;
-
   const overdueTasks = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);

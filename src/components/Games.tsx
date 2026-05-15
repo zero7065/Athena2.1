@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { Chess } from 'chess.js';
+import { Chess, type Square } from 'chess.js';
 import { Trophy, RotateCcw, CheckCircle2, AlertCircle, ChevronLeft, Brain, Grid3X3, Image as ImageIcon, Gamepad2, Star, Clock, Zap, Share2, Palette, Copy, BookOpen, Loader2 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAuth } from '../context/AuthContext';
@@ -20,8 +20,8 @@ const PIECE_SET: Record<string, Record<string, { char: string; label: string }>>
 
 const ChessGame: React.FC = () => {
   const [game, setGame] = useState(new Chess());
-  const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
-  const [legalMoves, setLegalMoves] = useState<string[]>([]);
+  const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
+  const [legalMoves, setLegalMoves] = useState<Square[]>([]);
   const [playMode, setPlayMode] = useState<'ai' | 'friend'>('ai');
   const [gameOver, setGameOver] = useState<string | null>(null);
   const [showShare, setShowShare] = useState(false);
@@ -36,7 +36,7 @@ const ChessGame: React.FC = () => {
     brown: { dark: 'bg-amber-800', light: 'bg-amber-50' },
   };
 
-  const getPiece = (square: string): { char: string; label: string; color: 'w' | 'b' } | null => {
+  const getPiece = (square: Square): { char: string; label: string; color: 'w' | 'b' } | null => {
     const piece = game.get(square);
     if (!piece) return null;
     const key = piece.color + piece.type;
@@ -49,7 +49,7 @@ const ChessGame: React.FC = () => {
     const cols = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
     return rows.map(r => cols.map(c => {
       const sq = c + r;
-      return { square: sq, piece: getPiece(sq), isDark: (rows.indexOf(r) + cols.indexOf(c)) % 2 === 1 };
+      return { square: sq, piece: getPiece(sq as Square), isDark: (rows.indexOf(r) + cols.indexOf(c)) % 2 === 1 };
     }));
   }, [game, pieceStyle]);
 
@@ -139,7 +139,7 @@ const ChessGame: React.FC = () => {
     }
   }, [game, playMode, makeAMove]);
 
-  const handleSquareClick = useCallback((square: string) => {
+  const handleSquareClick = useCallback((square: Square) => {
     if (game.isGameOver()) return;
     if (playMode === 'ai' && game.turn() === 'b') return;
     const piece = game.get(square);
@@ -195,10 +195,11 @@ const ChessGame: React.FC = () => {
         <div className="glass-strong p-2 sm:p-3 rounded-2xl sm:rounded-3xl w-full max-w-[420px] mx-auto">
           <div className="grid grid-cols-8 border-2 border-slate-400/50 dark:border-slate-600/50 rounded-lg overflow-hidden shadow-inner">
             {board.flat().map(sq => {
-              const isSelected = selectedSquare === sq.square;
-              const isLegal = legalMoves.includes(sq.square);
+              const sqKey = sq.square as Square;
+              const isSelected = selectedSquare === sqKey;
+              const isLegal = legalMoves.includes(sqKey);
               return (
-                <button key={sq.square} onClick={() => handleSquareClick(sq.square)}
+                <button key={sq.square} onClick={() => handleSquareClick(sq.square as Square)}
                   className={cn(
                     "aspect-square flex items-center justify-center transition-colors relative select-none",
                     sq.isDark ? colors.dark : colors.light,

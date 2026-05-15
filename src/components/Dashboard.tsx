@@ -2,6 +2,7 @@ import React from 'react';
 import { Calendar, CheckSquare, Zap, Users, TrendingUp, Flame, Star, School, MessageSquare, Sparkles, Brain, Trophy, BookOpen } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAuth } from '../context/AuthContext';
+import { useCurrentUser } from '../hooks/useCurrentUser';
 import { calcLevel, xpForNextLevel } from '../lib/storage';
 
 interface DashboardProps {
@@ -10,6 +11,7 @@ interface DashboardProps {
 
 const Dashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
   const { appData, user } = useAuth();
+  const profile = useCurrentUser();
   const tasks = appData.tasks;
   const sessions = appData.sessions;
   const achievements = appData.achievements;
@@ -18,10 +20,11 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
     ? Math.round(sessions.reduce((acc, s) => acc + 7, 0) / sessions.length * 10) / 10
     : 0;
 
-  const level = calcLevel(user.xp);
+  const xp = profile?.xp ?? 0;
+  const level = calcLevel(xp);
   const currentLevelXp = xpForNextLevel(level - 1);
   const nextLevelXp = xpForNextLevel(level);
-  const progressInLevel = user.xp - currentLevelXp;
+  const progressInLevel = xp - currentLevelXp;
   const xpNeeded = nextLevelXp - currentLevelXp;
   const progressPct = Math.min(100, Math.round((progressInLevel / (xpNeeded || 1)) * 100));
 
@@ -72,7 +75,7 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-500">Level {level}</span>
-            <span className="text-xs font-bold text-primary">{user.xp} XP</span>
+            <span className="text-xs font-bold text-primary">{xp} XP</span>
           </div>
           <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2.5 overflow-hidden">
             <div className="h-full bg-gradient-to-r from-primary to-emerald-400 rounded-full transition-all" style={{ width: `${progressPct}%` }} />
@@ -169,14 +172,14 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
             <Flame className="text-orange-500 shrink-0" size={22} />
             <div>
               <p className="text-[10px] font-bold text-slate-400 uppercase">Streak</p>
-              <p className="text-sm sm:text-base font-bold text-slate-800 dark:text-white">{user?.streak || 0} Days</p>
+              <p className="text-sm sm:text-base font-bold text-slate-800 dark:text-white">{profile?.streak || 0} Days</p>
             </div>
           </div>
           <div className="glass px-3 sm:px-5 py-2 rounded-2xl flex items-center gap-2 sm:gap-3 border-primary/20">
             <Star className="text-primary shrink-0" size={22} />
             <div>
               <p className="text-[10px] font-bold text-slate-400 uppercase">Level {level}</p>
-              <p className="text-sm sm:text-base font-bold text-slate-800 dark:text-white">{user?.xp || 0} XP</p>
+              <p className="text-sm sm:text-base font-bold text-slate-800 dark:text-white">{xp} XP</p>
             </div>
           </div>
         </div>

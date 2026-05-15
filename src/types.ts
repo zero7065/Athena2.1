@@ -1,59 +1,61 @@
-export interface User {
-  id: number;
-  email: string;
+export type UserRole = 'student' | 'lecturer' | 'admin';
+export type AIPersonality = 'charming' | 'strict' | 'sarcastic' | 'zen';
+export type FontPreference = 'sans' | 'mono' | 'serif';
+
+/** Minimal identity from login / signup */
+export interface AuthUser {
   name: string;
-  department: string;
-  year_of_study: number;
-  bio?: string;
-  avatar_url?: string;
-  theme_color: string;
-  ai_personality: 'strict' | 'charming' | 'sarcastic' | 'zen';
-  font_preference: 'sans' | 'mono' | 'serif';
-  is_admin: boolean;
-  role: 'student' | 'lecturer' | 'admin';
-  title?: string;
-  subscription_tier: 'basic' | 'pro' | 'enterprise';
-  is_anonymous: boolean;
-  streak: number;
+  email: string;
+  studentId: string;
+  role: UserRole;
+  department?: string;
+}
+
+/** Full profile stored in appData.user (auth + gamification + preferences) */
+export interface UserProfile extends AuthUser {
+  yearOfStudy: number;
   xp: number;
   level: number;
-  created_at: string;
+  streak: number;
+  themeColor: string;
+  fontPreference: FontPreference;
+  aiPersonality: AIPersonality;
+  isAnonymous: boolean;
+  isAdmin: boolean;
+  lastLoginDate: string;
+  bio?: string;
+  avatar_url?: string;
 }
 
-export interface Task {
-  id: number;
-  user_id: number;
+export interface StoredUser extends AuthUser {
+  password: string;
+}
+
+export interface LocalTask {
+  id: string;
   title: string;
   description: string;
-  due_date: string;
-  priority: 'low' | 'medium' | 'high' | 'critical';
-  subject: string;
+  dueDate: string;
+  priority: 'low' | 'medium' | 'high';
   status: 'todo' | 'in-progress' | 'done';
+  createdAt: number;
+  assignedTo?: string;
 }
 
-export interface Session {
-  id: number;
-  user_id: number;
-  subject: string;
+export interface LocalSession {
+  id: string;
+  date: number;
   duration: number;
-  focus_score: number;
-  created_at: string;
+  subject: string;
 }
 
-export interface Achievement {
-  id: number;
-  user_id: number;
+export interface LocalAchievement {
+  id: string;
   title: string;
   description: string;
-  unlocked_at: string;
-}
-
-export interface Insight {
-  id: number;
-  user_id: number;
-  content: string;
-  type: 'strength' | 'weakness' | 'prediction' | 'nag';
-  created_at: string;
+  icon: string;
+  unlockedAt: number | null;
+  requirement: string;
 }
 
 export interface ChatMessage {
@@ -61,16 +63,4 @@ export interface ChatMessage {
   role: 'user' | 'model';
   text: string;
   timestamp: string;
-}
-
-export interface Friend {
-  id: number;
-  user_id: number;
-  friend_id: number;
-  status: 'pending' | 'accepted';
-  name?: string;
-  avatar_url?: string;
-  is_anonymous?: boolean;
-  level?: number;
-  department?: string;
 }

@@ -1,23 +1,25 @@
 import React, { useState } from 'react';
 import { UserCircle, Mail, Building2, Edit3, Palette, Save, Camera, ShieldCheck, Brain, Star, Sparkles, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useCurrentUser } from '../hooks/useCurrentUser';
 import { cn } from '../lib/utils';
 import { calcLevel } from '../lib/storage';
 
 const Profile: React.FC = () => {
-  const { user, updateAppData, appData } = useAuth();
+  const { user, updateAppData } = useAuth();
+  const profile = useCurrentUser();
   const [isEditing, setIsEditing] = useState(false);
 
   const [formData, setFormData] = useState({
-    name: user?.name || '',
-    department: user?.department || '',
-    yearOfStudy: user?.yearOfStudy || 1,
-    bio: '',
-    themeColor: user?.themeColor || '#00843D',
-    aiPersonality: (user?.aiPersonality || 'charming') as 'charming' | 'strict' | 'sarcastic' | 'zen',
-    fontPreference: (user?.fontPreference || 'sans') as 'sans' | 'mono' | 'serif',
-    isAnonymous: user?.isAnonymous || false,
-    avatar_url: ''
+    name: profile?.name || user?.name || '',
+    department: profile?.department || user?.department || '',
+    yearOfStudy: profile?.yearOfStudy || 1,
+    bio: profile?.bio || '',
+    themeColor: profile?.themeColor || '#00843D',
+    aiPersonality: (profile?.aiPersonality || 'charming') as 'charming' | 'strict' | 'sarcastic' | 'zen',
+    fontPreference: (profile?.fontPreference || 'sans') as 'sans' | 'mono' | 'serif',
+    isAnonymous: profile?.isAnonymous || false,
+    avatar_url: profile?.avatar_url || '',
   });
 
   const personalities = [
@@ -77,9 +79,9 @@ const Profile: React.FC = () => {
             <div className="w-full h-px bg-slate-100 dark:bg-slate-800" />
             <div className="grid grid-cols-3 gap-2 w-full">
               {[
-                { label: 'Level', value: calcLevel(user?.xp || 0), color: 'text-primary' },
-                { label: 'Streak', value: `${user?.streak || 0}`, color: 'text-orange-500' },
-                { label: 'XP', value: user?.xp || 0, color: 'text-primary' },
+                { label: 'Level', value: calcLevel(profile?.xp || 0), color: 'text-primary' },
+                { label: 'Streak', value: `${profile?.streak || 0}`, color: 'text-orange-500' },
+                { label: 'XP', value: profile?.xp || 0, color: 'text-primary' },
               ].map(s => (
                 <div key={s.label} className="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/50">
                   <p className="text-[10px] font-bold text-slate-400 uppercase">{s.label}</p>

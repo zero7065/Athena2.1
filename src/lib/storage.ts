@@ -1,6 +1,22 @@
 /* localStorage persistence layer with namespace prefix, corruption handling, and defaults */
 
+import type { AuthUser, UserProfile } from '../types';
+
 const PREFIX = 'athena_';
+
+export type { UserProfile };
+
+export function mergeAppDataUser(auth: AuthUser, existing: UserProfile): UserProfile {
+  return {
+    ...existing,
+    name: auth.name,
+    email: auth.email,
+    studentId: auth.studentId,
+    role: auth.role,
+    department: auth.department ?? existing.department,
+    isAdmin: auth.role === 'admin',
+  };
+}
 
 export function loadData<T>(key: string, fallback: T): T {
   try {
@@ -82,23 +98,6 @@ export interface LocalGameScore {
   artGuesser: number;
 }
 
-export interface UserProfile {
-  name: string;
-  email: string;
-  department: string;
-  yearOfStudy: number;
-  xp: number;
-  level: number;
-  streak: number;
-  lastLoginDate: string;
-  isAdmin: boolean;
-  role: 'student' | 'lecturer' | 'admin';
-  themeColor: string;
-  fontPreference: 'sans' | 'mono' | 'serif';
-  aiPersonality: 'charming' | 'strict' | 'sarcastic' | 'zen';
-  isAnonymous: boolean;
-}
-
 export interface AppData {
   user: UserProfile;
   tasks: LocalTask[];
@@ -136,6 +135,7 @@ export function getDefaultAppData(): AppData {
   user: {
     name: 'Demo Student',
     email: 'demo@plasu.edu.ng',
+    studentId: 'STU000',
     department: 'Computer Science',
     yearOfStudy: 2,
     xp: 0,

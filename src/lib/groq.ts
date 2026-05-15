@@ -24,17 +24,6 @@ export const useGroqKey = () => {
   return isConfigured;
 };
 
-// Banner component for missing API key
-export const GroqUnavailableBanner = () => {
-  const isConfigured = useGroqKey();
-  if (isConfigured) return null;
-  return (
-    <div className="bg-red-500 text-white px-4 py-2 text-center text-sm font-medium">
-      AI features unavailable — API key not configured
-    </div>
-  );
-};
-
 // Debounce hook for user input
 export const useDebounce = <T>(value: T, delay: number): T => {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
@@ -149,7 +138,7 @@ export const useGroq = () => {
 export const useDebouncedGroq = (delay: number = 500) => {
   const { callGroq, loading, error, isConfigured } = useGroq();
   const [debouncedResult, setDebouncedResult] = useState<string | null>(null);
-  const debounceRef = useRef<NodeJS.Timeout>();
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const debouncedCall = useCallback((systemPrompt: string, userMessage: string, model?: string) => {
     if (debounceRef.current) clearTimeout(debounceRef.current);

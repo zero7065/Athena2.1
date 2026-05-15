@@ -15,7 +15,8 @@
 
 import React, { useState } from 'react';
 import { X, Mail, Lock, User, GraduationCap, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
-import { useAuth, User as AuthUser } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
+import type { AuthUser } from '../types';
 
 interface AuthProps {
   mode: 'login' | 'register';

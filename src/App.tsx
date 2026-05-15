@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import Auth from './components/Auth';
-import Landing from './components/Landing';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import TaskBoard from './components/TaskBoard';
@@ -16,6 +15,7 @@ import LecturerPortal from './components/LecturerPortal';
 import AIChatbot from './components/AIChatbot';
 import { cn } from './lib/utils';
 import { useKeyboardShortcuts } from './lib/useKeyboard';
+import { useCurrentUser } from './hooks/useCurrentUser';
 import { LayoutDashboard, CheckSquare, Timer, Gamepad2, Trophy, Users, UserCircle, Sparkles, Menu, X, BookOpen, ShieldCheck } from 'lucide-react';
 
 const AchievementToast: React.FC = () => {
@@ -27,13 +27,14 @@ const AchievementToast: React.FC = () => {
     }
   }, [showAchievement, setShowAchievement]);
   if (!showAchievement) return null;
+  const achievement = showAchievement as { title: string; description: string };
   return (
     <div className="fixed bottom-4 sm:bottom-6 right-4 sm:right-6 z-[200] animate-bounce">
       <div className="bg-gradient-to-r from-amber-500 to-yellow-500 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-2xl shadow-2xl flex items-center gap-3 sm:gap-4">
         <div className="text-2xl sm:text-3xl">&#127942;</div>
         <div>
           <p className="font-bold text-sm sm:text-base">Achievement Unlocked!</p>
-          <p className="text-xs sm:text-sm opacity-90">{showAchievement.title} &mdash; {showAchievement.description}</p>
+          <p className="text-xs sm:text-sm opacity-90">{achievement.title} &mdash; {achievement.description}</p>
         </div>
       </div>
     </div>
@@ -42,10 +43,12 @@ const AchievementToast: React.FC = () => {
 
 const AppContent: React.FC = () => {
   const { user, isLoading } = useAuth();
+  const profile = useCurrentUser();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
 
   useEffect(() => {
     const handleResize = () => {
@@ -65,33 +68,45 @@ const AppContent: React.FC = () => {
 
   useKeyboardShortcuts(handleTabChange);
 
+  const mobileTabs = useMemo(() => {
+    const tabs: Array<{ id: string; icon: typeof LayoutDashboard; label: string }> = [
+      { id: 'dashboard', icon: LayoutDashboard, label: 'Home' },
+      { id: 'ai', icon: Sparkles, label: 'AI' },
+      { id: 'tasks', icon: CheckSquare, label: 'Tasks' },
+      { id: 'study', icon: Timer, label: 'Focus' },
+      { id: 'games', icon: Gamepad2, label: 'Games' },
+      { id: 'social', icon: Users, label: 'Social' },
+      { id: 'achievements', icon: Trophy, label: 'Awards' },
+      { id: 'profile', icon: UserCircle, label: 'Profile' },
+    ];
+    if (user?.role === 'lecturer') {
+      tabs.splice(5, 0, { id: 'lecturer', icon: BookOpen, label: 'Lecturer' });
+    }
+    if (user?.role === 'admin') {
+      tabs.push({ id: 'admin', icon: ShieldCheck, label: 'Admin' });
+    }
+    return tabs;
+  }, [user?.role]);
+
   useEffect(() => {
-    if (user) {
-      document.documentElement.style.setProperty('--primary', user.themeColor || '#00843D');
+    if (profile) {
+      document.documentElement.style.setProperty('--primary', profile.themeColor || '#00843D');
       const fonts: Record<string, string> = { sans: 'font-sans', mono: 'font-mono', serif: 'font-serif' };
       document.documentElement.className = document.documentElement.className
         .replace(/font-(sans|mono|serif)/g, '')
-        .trim() + ' ' + (fonts[user.fontPreference] || 'font-sans');
+        .trim() + ' ' + (fonts[profile.fontPreference] || 'font-sans');
     }
-  }, [user]);
+  }, [profile]);
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-16 h-16 border-4 border-[#00843D] border-t-transparent rounded-full animate-spin" />
-          <p className="text-[#00843D] font-bold animate-pulse uppercase tracking-widest text-xs">Initializing ATHENA...</p>
-        </div>
-      </div>
+      <div className="min-h-screen flex items-center justify-center bg-slate-50"><div className="flex flex-col items-center gap-4"><div className="w-16 h-16 border-4 border-[#00843D] border-t-transparent rounded-full animate-spin" /><p className="text-[#00843D] font-bold animate-pulse uppercase tracking-widest text-xs">Initializing ATHENA...</p></div></div>
     );
   }
 
-  // AUTH GATE: Show auth form if not logged in (app not accessible without login)
   if (!user) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-        <Auth mode="login" setMode={() => {}} onClose={() => {}} />
-      </div>
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4"><Auth mode={authMode} setMode={setAuthMode} onClose={() => {}} /></div>
     );
   }
 
@@ -110,25 +125,6 @@ const AppContent: React.FC = () => {
       default: return <Dashboard setActiveTab={handleTabChange} />;
     }
   };
-
-  const mobileTabs = useMemo(() => {
-    const tabs: Array<{ id: string; icon: any; label: string }> = [
-      { id: 'dashboard', icon: LayoutDashboard, label: 'Home' },
-      { id: 'tasks', icon: CheckSquare, label: 'Tasks' },
-      { id: 'study', icon: Timer, label: 'Focus' },
-      { id: 'games', icon: Gamepad2, label: 'Games' },
-      { id: 'social', icon: Users, label: 'Social' },
-      { id: 'achievements', icon: Trophy, label: 'Awards' },
-      { id: 'profile', icon: UserCircle, label: 'Profile' },
-    ];
-    if (user?.role === 'lecturer') {
-      tabs.splice(4, 0, { id: 'lecturer', icon: BookOpen, label: 'Lecturer' });
-    }
-    if (user?.role === 'admin') {
-      tabs.push({ id: 'admin', icon: ShieldCheck, label: 'Admin' });
-    }
-    return tabs;
-  }, [user?.role]);
 
   return (
     <>
