@@ -1,144 +1,660 @@
-import React from 'react';
-import { ArrowRight, BookOpen, Clock, Users, BarChart3, Brain, GraduationCap, Star } from 'lucide-react';
+/*
+ * ATHENA - Student Success Platform
+ * Section: HOMEPAGE
+ *
+ * Plateau State University branded landing page.
+ * Features: university imagery, student interaction, events, dark/light toggle
+ */
 
-export default function Homepage({ onSignUp }: { onSignUp: () => void }) {
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  ArrowRight, BookOpen, Clock, Users, BarChart3, Brain, GraduationCap,
+  Star, MapPin, Quote, Award, ChevronRight, Play, Sun, Moon,
+  Calendar, ChevronLeft, Sparkles, Zap, Trophy, ExternalLink
+} from 'lucide-react';
+
+// Animated counter hook
+function useCountUp(end: number, duration: number = 2000, startOnView: boolean = true) {
+  const [count, setCount] = useState(0);
+  const ref = useRef<HTMLDivElement>(null);
+  const started = useRef(false);
+
+  useEffect(() => {
+    if (!startOnView) {
+      animate();
+      return;
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !started.current) {
+          started.current = true;
+          animate();
+        }
+      },
+      { threshold: 0.3 }
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+
+  function animate() {
+    const startTime = Date.now();
+    const tick = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setCount(Math.floor(eased * end));
+      if (progress < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+
+  return { count, ref };
+}
+
+// Typewriter text effect
+function useTypewriter(texts: string[], speed: number = 60, deleteSpeed: number = 30, pauseTime: number = 2000) {
+  const [displayText, setDisplayText] = useState('');
+  const [textIndex, setTextIndex] = useState(0);
+  const [charIndex, setCharIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (!isDeleting) {
+        if (charIndex < texts[textIndex].length) {
+          setDisplayText(prev => prev + texts[textIndex][charIndex]);
+          setCharIndex(prev => prev + 1);
+        } else {
+          setTimeout(() => setIsDeleting(true), pauseTime);
+        }
+      } else {
+        if (charIndex > 0) {
+          setDisplayText(prev => prev.slice(0, -1));
+          setCharIndex(prev => prev - 1);
+        } else {
+          setIsDeleting(false);
+          setTextIndex((prev) => (prev + 1) % texts.length);
+        }
+      }
+    }, isDeleting ? deleteSpeed : speed);
+
+    return () => clearTimeout(timeout);
+  }, [charIndex, isDeleting, textIndex, texts, speed, deleteSpeed, pauseTime]);
+
+  return displayText;
+}
+
+// Testimonial carousel
+const testimonials = [
+  {
+    quote: "ATHENA's gamified approach kept me consistent. I went from struggling to stay organized to having a perfect study routine.",
+    name: "Amina Okafor",
+    role: "Computer Science, Year 3",
+    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=face",
+  },
+  {
+    quote: "The AI tutor is a game-changer. I can ask questions anytime and get instant explanations. My GPA improved significantly.",
+    name: "David Adewale",
+    role: "Mathematics, Year 2",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
+  },
+  {
+    quote: "Study rooms with friends kept me accountable. We compete on leaderboards and share materials. Best study tool I've ever used.",
+    name: "Grace Nnamdi",
+    role: "Biology, Year 4",
+    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
+  },
+];
+
+// Events data
+const events = [
+  { title: "Semester Exams Start", date: "June 15, 2025", type: "academic", color: "from-red-500 to-orange-500" },
+  { title: "AI Study Workshop", date: "May 28, 2025", type: "workshop", color: "from-blue-500 to-cyan-500" },
+  { title: "Project Submission Deadline", date: "July 1, 2025", type: "deadline", color: "from-purple-500 to-pink-500" },
+  { title: "Matriculation Ceremony", date: "August 10, 2025", type: "event", color: "from-emerald-500 to-green-500" },
+];
+
+interface HomepageProps {
+  onSignUp: () => void;
+  theme?: 'light' | 'dark';
+  onToggleTheme?: () => void;
+}
+
+export default function Homepage({ onSignUp, theme = 'dark', onToggleTheme }: HomepageProps) {
+  const [activeTestimonial, setActiveTestimonial] = useState(0);
+  const [showVideo, setShowVideo] = useState(false);
+  const autoPlayRef = useRef<ReturnType<typeof setInterval>>();
+
+  useEffect(() => {
+    autoPlayRef.current = setInterval(() => {
+      setActiveTestimonial((prev) => (prev + 1) % testimonials.length);
+    }, 5000);
+    return () => clearInterval(autoPlayRef.current);
+  }, []);
+
+  const typedText = useTypewriter(
+    ['organize your coursework', 'track your progress', 'ace your exams', 'collaborate with peers'],
+    70, 35, 1800
+  );
+
+  const students = useCountUp(8000, 2500);
+  const features = useCountUp(50, 2000);
+  const studyHours = useCountUp(15000, 3000);
+  const xpEarned = useCountUp(500000, 3000);
+
+  const isLight = theme === 'light';
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950 text-white overflow-hidden">
-      <div className="absolute top-0 right-0 w-96 h-96 bg-amber-400/10 rounded-full blur-3xl pointer-events-none" />
+    <div className={`min-h-screen ${isLight ? 'bg-white text-slate-900' : 'bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950 text-white'} overflow-x-hidden`}>
 
-      {/* Nav */}
-      <header className="relative border-b border-slate-800/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
-          <div className="text-2xl font-black tracking-tighter flex items-center gap-2">
-            <GraduationCap size={24} className="text-amber-400" />
-            <span className="text-amber-400">ATHENA</span>
-          </div>
-          <button onClick={onSignUp} className="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-lg transition-all hover:shadow-lg hover:shadow-amber-500/20">
-            Join Now
-          </button>
-        </div>
-      </header>
+      {/* Animated background particles */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        {[...Array(20)].map((_, i) => (
+          <div
+            key={i}
+            className={`absolute rounded-full ${isLight ? 'bg-emerald-200/30' : 'bg-emerald-500/10'}`}
+            style={{
+              width: `${4 + Math.random() * 8}px`,
+              height: `${4 + Math.random() * 8}px`,
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animation: `float ${15 + Math.random() * 25}s ease-in-out infinite`,
+              animationDelay: `${Math.random() * 10}s`,
+            }}
+          />
+        ))}
+        <style>{`
+          @keyframes float {
+            0%, 100% { transform: translateY(0) scale(1); opacity: 0.3; }
+            50% { transform: translateY(-100px) scale(1.5); opacity: 0.8; }
+          }
+          @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(0, 132, 61, 0.2); }
+            50% { box-shadow: 0 0 40px rgba(0, 132, 61, 0.4); }
+          }
+          @keyframes slide-up {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          @keyframes fade-in {
+            from { opacity: 0; }
+            to { opacity: 1; }
+          }
+          .animate-slide-up { animation: slide-up 0.6s ease-out; }
+          .animate-fade-in { animation: fade-in 0.8s ease-out; }
+          .animate-pulse-glow { animation: pulse-glow 3s ease-in-out infinite; }
+        `}</style>
+      </div>
 
-      {/* Hero */}
-      <section className="relative pt-24 pb-32 px-6 md:px-12">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div className="space-y-8">
-              <div className="inline-block px-4 py-1 bg-amber-500/10 border border-amber-500/30 rounded-full text-sm font-bold text-amber-300">
-                🎓 PLASU Student Platform
+      {/* Navbar */}
+      <header className={`relative z-50 ${isLight ? 'bg-white/80 border-b border-emerald-100' : 'bg-slate-950/80 border-b border-slate-800/50'} backdrop-blur-xl sticky top-0`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16 sm:h-20">
+            {/* Logo */}
+            <div className="flex items-center gap-3 group">
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all group-hover:scale-110 ${isLight ? 'bg-emerald-600' : 'bg-[#00843D]'}`}>
+                <GraduationCap size={22} className="text-white" />
               </div>
-
-              <h1 className="text-6xl md:text-7xl font-black leading-tight tracking-tight">
-                Manage your{' '}
-                <span className="bg-gradient-to-r from-amber-400 to-amber-300 bg-clip-text text-transparent">
-                  academic life
-                </span>
-              </h1>
-
-              <p className="text-xl text-slate-300 leading-relaxed max-w-xl">
-                Tasks, study schedules, progress tracking, and AI tutoring — all in one place. Stay organized. Stay focused. Excel in your courses.
-              </p>
-
-              <div className="flex gap-4 flex-wrap">
-                <button onClick={onSignUp} className="px-8 py-4 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-lg rounded-lg flex items-center gap-3 transition-all hover:translate-x-1 shadow-xl shadow-amber-500/20">
-                  Start Free <ArrowRight size={20} />
-                </button>
-                <button onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} className="px-8 py-4 border-2 border-slate-600 hover:border-amber-400 text-white font-bold text-lg rounded-lg transition-colors">
-                  Learn More
-                </button>
-              </div>
-
-              <div className="text-sm text-slate-400">
-                ✓ For PLASU students | ✓ Free to use | ✓ Offline-first
+              <div className="flex flex-col">
+                <span className={`text-lg sm:text-xl font-black tracking-tight leading-none ${isLight ? 'text-emerald-800' : 'text-white'}`}>ATHENA</span>
+                <span className={`text-[8px] font-bold uppercase tracking-[0.2em] leading-none mt-0.5 ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`}>PLASU Edition</span>
               </div>
             </div>
 
-            <div className="relative aspect-video bg-slate-900/50 border border-slate-700 rounded-2xl overflow-hidden shadow-2xl">
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-slate-900 to-slate-950 p-6">
-                <Brain size={56} className="text-amber-400 mb-4" />
-                <p className="text-slate-300 font-semibold text-center">Platform Dashboard</p>
-                <p className="text-xs text-slate-500 mt-2 text-center">Sign up to access your academic tools</p>
+            {/* Right side */}
+            <div className="flex items-center gap-2 sm:gap-4">
+              {/* Theme toggle */}
+              {onToggleTheme && (
+                <button
+                  onClick={onToggleTheme}
+                  className={`p-2.5 rounded-xl transition-all min-h-[44px] min-w-[44px] flex items-center justify-center ${
+                    isLight
+                      ? 'hover:bg-emerald-100 text-emerald-600'
+                      : 'hover:bg-slate-800 text-amber-400'
+                  }`}
+                  aria-label={isLight ? 'Switch to dark mode' : 'Switch to light mode'}
+                >
+                  {isLight ? <Moon size={20} /> : <Sun size={20} />}
+                </button>
+              )}
+
+              {/* CTA buttons */}
+              <button
+                onClick={onSignUp}
+                className={`px-4 sm:px-6 py-2.5 font-bold rounded-xl transition-all text-sm whitespace-nowrap min-h-[44px] ${
+                  isLight
+                    ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/20'
+                    : 'bg-amber-500 hover:bg-amber-600 text-slate-950 shadow-lg shadow-amber-500/20'
+                }`}
+              >
+                Sign In
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* ===== HERO SECTION ===== */}
+      <section className="relative z-10 pt-12 sm:pt-20 pb-16 sm:pb-24 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+            {/* Left content */}
+            <div className="space-y-6 sm:space-y-8 animate-slide-up">
+              <div className={`inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider ${
+                isLight ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/30'
+              }`}>
+                <Zap size={14} /> Powered by AI for PLASU Students
+              </div>
+
+              <h1 className={`text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black leading-[1.1] tracking-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                Your Intelligent{' '}
+                <br />
+                <span className={isLight ? 'text-emerald-600' : 'text-emerald-400'}>Companion</span> at{' '}
+                <br />
+                Plateau State University
+              </h1>
+
+              <div className={`text-lg sm:text-xl lg:text-2xl ${isLight ? 'text-slate-500' : 'text-slate-300'} font-medium`}>
+                AI-powered tools to{' '}
+                <span className={`font-bold ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`}>
+                  {typedText}
+                </span>
+                <span className="animate-pulse">|</span>
+              </div>
+
+              <p className={`text-base sm:text-lg leading-relaxed max-w-lg ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
+                ATHENA helps you master your studies, track your progress, and collaborate with peers using advanced AI-driven insights — built specifically for PLASU.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2">
+                <button
+                  onClick={onSignUp}
+                  className={`flex items-center justify-center gap-2 px-6 sm:px-8 py-3 sm:py-4 font-bold text-sm sm:text-base rounded-xl transition-all min-h-[48px] shadow-xl ${
+                    isLight
+                      ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/30 hover:translate-y-[-2px]'
+                      : 'bg-amber-500 hover:bg-amber-600 text-slate-950 shadow-amber-500/30 hover:translate-y-[-2px]'
+                  }`}
+                >
+                  Create Free Account <ArrowRight size={20} />
+                </button>
+                <button
+                  onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+                  className={`flex items-center justify-center gap-2 px-6 sm:px-8 py-3 sm:py-4 font-bold text-sm sm:text-base rounded-xl transition-all min-h-[48px] ${
+                    isLight
+                      ? 'border-2 border-emerald-300 text-emerald-700 hover:bg-emerald-50'
+                      : 'border-2 border-slate-600 text-slate-300 hover:border-emerald-500 hover:text-emerald-400'
+                  }`}
+                >
+                  Explore Features <ChevronRight size={20} />
+                </button>
+              </div>
+
+              <div className={`flex flex-wrap gap-4 sm:gap-6 text-xs sm:text-sm ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                <span className="flex items-center gap-1.5">✓ 8,000+ PLASU Students</span>
+                <span className="flex items-center gap-1.5">✓ Free & Offline-First</span>
+                <span className="flex items-center gap-1.5">✓ No Credit Card</span>
+              </div>
+            </div>
+
+            {/* Right - Hero image / showcase */}
+            <div className="relative animate-fade-in">
+              {/* Main showcase card */}
+              <div className={`relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl animate-pulse-glow ${
+                isLight ? 'bg-emerald-50 border border-emerald-200' : 'bg-slate-900/50 border border-slate-700'
+              }`}>
+                <div className="aspect-[4/3] relative overflow-hidden">
+                  <img
+                    src="https://images.unsplash.com/photo-1523050854058-8df90110c7f1?w=800&h=600&fit=crop"
+                    alt="PLASU Campus"
+                    className="w-full h-full object-cover opacity-80"
+                    loading="lazy"
+                  />
+                  <div className={`absolute inset-0 bg-gradient-to-tr ${
+                    isLight ? 'from-emerald-900/70 via-emerald-800/30 to-transparent' : 'from-slate-950/80 via-blue-950/40 to-transparent'
+                  }`} />
+
+                  {/* Overlay content */}
+                  <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6">
+                    <div className="flex items-center gap-2 mb-2">
+                      <MapPin size={14} className="text-emerald-400" />
+                      <span className="text-xs font-bold text-emerald-300 uppercase tracking-wider">Plateau State University, Bokkos</span>
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-bold text-white">Where Knowledge Meets Innovation</h3>
+                    <p className="text-xs sm:text-sm text-slate-300 mt-1">Est. 2005 — 66th University in Nigeria</p>
+                  </div>
+
+                  {/* Floating stat badges */}
+                  <div className={`absolute top-4 right-4 px-3 py-2 rounded-xl backdrop-blur-md ${
+                    isLight ? 'bg-white/80' : 'bg-slate-900/80'
+                  } shadow-lg border ${isLight ? 'border-emerald-200' : 'border-slate-700'}`}>
+                    <div className="flex items-center gap-2">
+                      <Trophy size={16} className="text-emerald-500" />
+                      <span className={`text-xs font-bold ${isLight ? 'text-slate-700' : 'text-slate-200'}`}>Top 5% National</span>
+                    </div>
+                  </div>
+
+                  {/* Play button */}
+                  <button
+                    onClick={() => setShowVideo(true)}
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-white/30 transition-all group"
+                  >
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                      isLight ? 'bg-emerald-600' : 'bg-amber-500'
+                    } group-hover:scale-110 transition-transform`}>
+                      <Play size={24} className="text-white ml-1" />
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              {/* Floating card - student count */}
+              <div className={`absolute -bottom-4 -left-4 px-4 py-3 rounded-2xl shadow-xl backdrop-blur-md border ${
+                isLight ? 'bg-white/90 border-emerald-200' : 'bg-slate-900/90 border-slate-700'
+              }`}>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center">
+                    <Users size={20} className="text-white" />
+                  </div>
+                  <div>
+                    <p className={`text-lg font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>{students.count.toLocaleString()}+</p>
+                    <p className={`text-[10px] font-bold uppercase tracking-wider ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>{students.ref ? '' : ''}Students Strong</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Floating card - AI */}
+              <div className={`absolute -top-4 -right-4 px-4 py-3 rounded-2xl shadow-xl backdrop-blur-md border ${
+                isLight ? 'bg-white/90 border-emerald-200' : 'bg-slate-900/90 border-slate-700'
+              }`}>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center">
+                    <Brain size={20} className="text-slate-950" />
+                  </div>
+                  <div>
+                    <p className={`text-lg font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>AI-Powered</p>
+                    <p className={`text-[10px] font-bold uppercase tracking-wider ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>24/7 Tutoring</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Features */}
-      <section id="features" className="relative py-24 px-6 md:px-12 bg-slate-900/30 border-y border-slate-800">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-5xl font-black text-center mb-4 text-white">
-            Tools to <span className="text-amber-400">manage your studies</span>
-          </h2>
-          <p className="text-center text-slate-400 mb-16 max-w-2xl mx-auto text-lg">
-            Everything you need to stay organized and excel academically.
-          </p>
-
-          <div className="grid md:grid-cols-2 gap-8">
+      {/* ===== STATS SECTION ===== */}
+      <section ref={students.ref} className={`relative z-10 py-16 sm:py-20 ${isLight ? 'bg-emerald-50/50' : 'bg-slate-900/30'}`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8">
             {[
-              {
-                icon: <BookOpen size={32} className="text-amber-400" />,
-                title: 'Course Tasks & Assignments',
-                desc: 'Organize coursework by subject. Track deadlines. Never miss submissions.',
-              },
-              {
-                icon: <Clock size={32} className="text-amber-400" />,
-                title: 'Study Schedule',
-                desc: 'Pomodoro timer. Study sessions. Build consistency with streak tracking.',
-              },
-              {
-                icon: <BarChart3 size={32} className="text-amber-400" />,
-                title: 'Progress Dashboard',
-                desc: 'Track completed tasks. Monitor grades. See your academic growth.',
-              },
-              {
-                icon: <Brain size={32} className="text-amber-400" />,
-                title: 'AI Study Assistant',
-                desc: 'Ask questions. Get explanations. Instant tutoring for difficult concepts.',
-              },
-              {
-                icon: <Users size={32} className="text-amber-400" />,
-                title: 'Study Groups',
-                desc: 'Connect with classmates. Share notes. Collaborate on projects.',
-              },
-              {
-                icon: <Star size={32} className="text-amber-400" />,
-                title: 'Achievements & Rewards',
-                desc: 'Earn XP. Unlock badges. Compete on the leaderboard. Stay motivated.',
-              },
-            ].map((f, i) => (
-              <div key={i} className="bg-slate-900/40 border border-slate-700 rounded-2xl p-8 hover:border-amber-400/50 hover:bg-slate-900/60 transition-all group">
-                <div className="mb-4 group-hover:scale-110 transition-transform">{f.icon}</div>
-                <h3 className="text-2xl font-bold mb-3 text-white">{f.title}</h3>
-                <p className="text-slate-400 leading-relaxed">{f.desc}</p>
+              { icon: Users, value: `${students.count.toLocaleString()}+`, label: 'PLASU Students', color: 'text-emerald-500' },
+              { icon: BookOpen, value: `${features.count}+`, label: 'Academic Programs', color: 'text-blue-500' },
+              { icon: Clock, value: `${studyHours.count.toLocaleString()}+`, label: 'Study Hours Tracked', color: 'text-amber-500' },
+              { icon: Star, value: `${(xpEarned.count / 1000).toFixed(0)}K+`, label: 'XP Earned', color: 'text-purple-500' },
+            ].map((s, i) => (
+              <div key={i} className={`text-center p-4 sm:p-6 rounded-2xl ${isLight ? 'bg-white border border-emerald-100' : 'bg-slate-900/50 border border-slate-800'} hover:scale-105 transition-transform`}>
+                <s.icon size={28} className={`${s.color} mx-auto mb-3`} />
+                <p className={`text-2xl sm:text-3xl font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>{s.value}</p>
+                <p className={`text-xs sm:text-sm font-bold ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>{s.label}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Testimonial */}
-      <section className="py-16 px-6 md:px-12 max-w-4xl mx-auto text-center">
-        <p className="text-2xl text-slate-300 italic font-light mb-6 leading-relaxed">
-          "ATHENA helped me stay on top of my coursework. My GPA improved because I finally had everything organized in one place."
-        </p>
-        <p className="font-bold text-amber-400 text-lg">— Chisom E., PLASU Year 3</p>
-      </section>
-
-      {/* Footer CTA */}
-      <footer className="relative border-t border-slate-800 bg-slate-950/80 backdrop-blur-sm">
-        <div className="max-w-6xl mx-auto px-6 py-16 flex flex-col md:flex-row justify-between items-center gap-8">
-          <div>
-            <h3 className="text-2xl font-black mb-2 text-white">
-              Ready to excel <span className="text-amber-400">academically</span>?
-            </h3>
-            <p className="text-slate-400 text-lg">
-              Join hundreds of PLASU students. Free to use. No credit card.
+      {/* ===== FEATURES SECTION ===== */}
+      <section id="features" className={`relative z-10 py-16 sm:py-24 ${isLight ? 'bg-white' : 'bg-slate-950'}`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12 sm:mb-16">
+            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-4 ${
+              isLight ? 'bg-emerald-100 text-emerald-700' : 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/30'
+            }`}>
+              <Sparkles size={14} /> Everything You Need
+            </div>
+            <h2 className={`text-3xl sm:text-4xl lg:text-5xl font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>
+              Built for <span className={isLight ? 'text-emerald-600' : 'text-emerald-400'}>PLASU Students</span>
+            </h2>
+            <p className={`text-base sm:text-lg mt-3 max-w-2xl mx-auto ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
+              Real tools that fit your study rhythm. Track tasks, stay focused, compete with friends, and get AI-powered tutoring.
             </p>
           </div>
-          <button onClick={onSignUp} className="px-10 py-4 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-lg rounded-lg transition-all hover:scale-105 whitespace-nowrap shadow-xl shadow-amber-500/20">
-            Get Started →
-          </button>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            {[
+              { icon: BookOpen, title: 'Smart Task Board', desc: 'Drag-and-drop kanban. Organize by subject. Never miss a deadline.', color: 'from-emerald-500 to-green-500' },
+              { icon: Clock, title: 'Focus Timer', desc: 'Pomodoro technique optimized for academic sessions. 25 min work, 5 min break.', color: 'from-blue-500 to-cyan-500' },
+              { icon: Brain, title: 'AI Study Assistant', desc: 'Ask anything. Get instant answers powered by Groq AI. Available 24/7.', color: 'from-purple-500 to-pink-500' },
+              { icon: Trophy, title: 'Gamified Learning', desc: 'Earn XP. Unlock achievements. Compete on leaderboards. Stay motivated.', color: 'from-amber-500 to-orange-500' },
+              { icon: Users, title: 'Study Together', desc: 'Connect with classmates. Create study rooms. Share materials in real-time.', color: 'from-rose-500 to-red-500' },
+              { icon: BarChart3, title: 'Progress Analytics', desc: 'Track your growth. View study streaks. Monitor your academic performance.', color: 'from-indigo-500 to-violet-500' },
+            ].map((f, i) => (
+              <div
+                key={i}
+                className={`group relative overflow-hidden rounded-2xl sm:rounded-3xl p-6 sm:p-8 transition-all hover:translate-y-[-4px] cursor-default ${
+                  isLight
+                    ? 'bg-emerald-50 border border-emerald-100 hover:shadow-xl hover:shadow-emerald-500/10'
+                    : 'bg-slate-900/50 border border-slate-800 hover:shadow-xl hover:shadow-emerald-500/5'
+                }`}
+              >
+                <div className={`absolute top-0 right-0 w-32 h-32 rounded-full bg-gradient-to-br ${f.color} opacity-5 group-hover:opacity-10 transition-opacity`} />
+                <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${f.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+                  <f.icon size={24} className="text-white" />
+                </div>
+                <h3 className={`text-lg sm:text-xl font-bold mb-2 ${isLight ? 'text-slate-900' : 'text-white'}`}>{f.title}</h3>
+                <p className={`text-sm leading-relaxed ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>{f.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ===== UNIVERSITY INFO + EVENTS ===== */}
+      <section className={`relative z-10 py-16 sm:py-24 ${isLight ? 'bg-emerald-50/50' : 'bg-slate-900/30'}`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-3 gap-6 sm:gap-8">
+            {/* University info */}
+            <div className={`lg:col-span-2 rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10 relative overflow-hidden ${
+              isLight ? 'bg-white border border-emerald-100' : 'bg-slate-900/50 border border-slate-800'
+            }`}>
+              <div className={`absolute top-0 right-0 p-6 sm:p-8 opacity-5`}>
+                <GraduationCap size={120} className={isLight ? 'text-emerald-600' : 'text-emerald-400'} />
+              </div>
+              <div className="relative z-10 space-y-4 sm:space-y-5">
+                <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider ${
+                  isLight ? 'bg-emerald-100 text-emerald-700' : 'bg-emerald-500/10 text-emerald-300'
+                }`}>
+                  <BookOpen size={14} /> About PLASU
+                </div>
+                <h2 className={`text-xl sm:text-2xl md:text-3xl font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                  Plateau State University, Bokkos
+                </h2>
+                <p className={`text-sm sm:text-base leading-relaxed ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
+                  Established in March 2005 and granted recognition by the National Universities Commission (NUC) on April 29, 2005,
+                  as the 66th University in Nigeria and the 24th state-owned university. Located in Diram Village along the Butura-Tarangol
+                  axis in Bokkos LGA, about 70 km from Jos, the state capital.
+                </p>
+                <div className="flex flex-wrap gap-4 sm:gap-6 pt-2">
+                  <div className={`flex items-center gap-2 text-xs sm:text-sm ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                    <MapPin size={16} className="text-emerald-500 shrink-0" /> Bokkos, Plateau State
+                  </div>
+                  <div className={`flex items-center gap-2 text-xs sm:text-sm ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                    <Quote size={16} className="text-emerald-500 shrink-0" /> Knowledge, Diligence & Integrity
+                  </div>
+                  <div className={`flex items-center gap-2 text-xs sm:text-sm ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                    <Award size={16} className="text-emerald-500 shrink-0" /> 66th University in Nigeria
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Events sidebar */}
+            <div className={`rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10 border-l-4 ${
+              isLight ? 'bg-white border-emerald-500' : 'bg-slate-900/50 border-emerald-500'
+            }`}>
+              <div className="flex items-center gap-3 mb-6">
+                <Calendar size={20} className="text-emerald-500" />
+                <h3 className={`text-base sm:text-lg font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>Upcoming Events</h3>
+              </div>
+              <div className="space-y-4">
+                {events.map((event, i) => (
+                  <div key={i} className="flex gap-3 group cursor-pointer">
+                    <div className={`w-1.5 rounded-full bg-gradient-to-b ${event.color} shrink-0`} />
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-sm font-bold group-hover:${isLight ? 'text-emerald-600' : 'text-emerald-400'} transition-colors ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
+                        {event.title}
+                      </p>
+                      <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>{event.date}</p>
+                    </div>
+                    <ChevronRight size={16} className={`${isLight ? 'text-slate-400' : 'text-slate-600'} group-hover:translate-x-1 transition-transform`} />
+                  </div>
+                ))}
+              </div>
+              <button className={`mt-6 text-xs font-bold flex items-center gap-1 transition-colors ${
+                isLight ? 'text-emerald-600 hover:text-emerald-700' : 'text-emerald-400 hover:text-emerald-300'
+              }`}>
+                View Full Calendar <ExternalLink size={12} />
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ===== TESTIMONIALS ===== */}
+      <section className={`relative z-10 py-16 sm:py-24 ${isLight ? 'bg-white' : 'bg-slate-950'}`}>
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-4 ${
+            isLight ? 'bg-emerald-100 text-emerald-700' : 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/30'
+          }`}>
+            <Quote size={14} /> Student Voices
+          </div>
+          <h2 className={`text-3xl sm:text-4xl font-black mb-8 sm:mb-12 ${isLight ? 'text-slate-900' : 'text-white'}`}>
+            Trusted by <span className={isLight ? 'text-emerald-600' : 'text-emerald-400'}>PLASU Students</span>
+          </h2>
+
+          <div className="relative">
+            <div className={`rounded-2xl sm:rounded-3xl p-6 sm:p-10 md:p-12 ${isLight ? 'bg-emerald-50 border border-emerald-100' : 'bg-slate-900/50 border border-slate-800'}`}>
+              <div className="flex items-center justify-center gap-1 mb-6">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} size={18} className="text-amber-400 fill-amber-400" />
+                ))}
+              </div>
+              <p className={`text-lg sm:text-xl md:text-2xl italic leading-relaxed mb-8 transition-opacity ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>
+                "{testimonials[activeTestimonial].quote}"
+              </p>
+              <div className="flex items-center justify-center gap-4">
+                <img
+                  src={testimonials[activeTestimonial].avatar}
+                  alt={testimonials[activeTestimonial].name}
+                  className="w-12 h-12 rounded-full object-cover border-2 border-emerald-500"
+                />
+                <div className="text-left">
+                  <p className={`font-bold text-sm ${isLight ? 'text-slate-900' : 'text-white'}`}>{testimonials[activeTestimonial].name}</p>
+                  <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>{testimonials[activeTestimonial].role}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Dots */}
+            <div className="flex justify-center gap-2 mt-6">
+              {testimonials.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setActiveTestimonial(i)}
+                  className={`w-2.5 h-2.5 rounded-full transition-all ${
+                    i === activeTestimonial
+                      ? (isLight ? 'bg-emerald-600 w-8' : 'bg-emerald-400 w-8')
+                      : (isLight ? 'bg-emerald-200' : 'bg-slate-700')
+                  }`}
+                />
+              ))}
+            </div>
+
+            {/* Nav buttons */}
+            <div className="flex justify-center gap-3 mt-4">
+              <button
+                onClick={() => setActiveTestimonial((prev) => (prev - 1 + testimonials.length) % testimonials.length)}
+                className={`p-2 rounded-xl transition-all ${
+                  isLight ? 'hover:bg-emerald-100 text-slate-500' : 'hover:bg-slate-800 text-slate-400'
+                }`}
+              >
+                <ChevronLeft size={20} />
+              </button>
+              <button
+                onClick={() => setActiveTestimonial((prev) => (prev + 1) % testimonials.length)}
+                className={`p-2 rounded-xl transition-all ${
+                  isLight ? 'hover:bg-emerald-100 text-slate-500' : 'hover:bg-slate-800 text-slate-400'
+                }`}
+              >
+                <ChevronRight size={20} />
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ===== CTA FOOTER ===== */}
+      <footer className={`relative z-10 ${isLight ? 'bg-emerald-900 text-white' : 'bg-slate-950 border-t border-slate-800'}`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Main CTA */}
+          <div className={`py-16 sm:py-20 text-center border-b ${isLight ? 'border-emerald-800' : 'border-slate-800'}`}>
+            <div className="max-w-2xl mx-auto space-y-6">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold uppercase tracking-wider">
+                <Sparkles size={14} /> Start Your Journey
+              </div>
+              <h2 className={`text-3xl sm:text-4xl lg:text-5xl font-black ${isLight ? 'text-white' : 'text-white'}`}>
+                Ready to Transform Your <span className="text-emerald-400">Academic Life</span>?
+              </h2>
+              <p className={`text-base sm:text-lg ${isLight ? 'text-emerald-200' : 'text-slate-400'} max-w-xl mx-auto`}>
+                Join thousands of PLASU students already using ATHENA to organize, focus, and excel. Free to start.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+                <button
+                  onClick={onSignUp}
+                  className={`px-8 py-4 font-bold text-lg rounded-xl transition-all min-h-[48px] ${
+                    isLight
+                      ? 'bg-white text-emerald-900 hover:bg-emerald-50 shadow-xl hover:scale-105'
+                      : 'bg-amber-500 hover:bg-amber-600 text-slate-950 shadow-xl shadow-amber-500/20 hover:scale-105'
+                  }`}
+                >
+                  Create Free Account →
+                </button>
+                <button
+                  onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+                  className={`px-8 py-4 font-bold text-lg rounded-xl transition-all min-h-[48px] border-2 ${
+                    isLight
+                      ? 'border-emerald-400 text-emerald-200 hover:bg-emerald-800'
+                      : 'border-slate-600 text-slate-300 hover:border-emerald-500'
+                  }`}
+                >
+                  Learn More
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom footer */}
+          <div className="py-8 sm:py-10 flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center">
+                <GraduationCap size={18} className="text-white" />
+              </div>
+              <span className={`font-bold text-sm ${isLight ? 'text-emerald-200' : 'text-white'}`}>ATHENA — PLASU Edition</span>
+            </div>
+            <p className={`text-xs sm:text-sm text-center ${isLight ? 'text-emerald-300' : 'text-slate-500'}`}>
+              &copy; 2025 ATHENA — Designed to empower every student at Plateau State University, Bokkos.
+            </p>
+            <div className="flex gap-4 sm:gap-6 text-xs sm:text-sm font-medium">
+              <a href="https://plasu.edu.ng" target="_blank" rel="noopener noreferrer" className={`transition-colors ${isLight ? 'text-emerald-300 hover:text-white' : 'text-slate-400 hover:text-emerald-400'}`}>
+                PLASU Website
+              </a>
+              <a href="#" className={`transition-colors ${isLight ? 'text-emerald-300 hover:text-white' : 'text-slate-400 hover:text-emerald-400'}`}>
+                Privacy
+              </a>
+              <a href="#" className={`transition-colors ${isLight ? 'text-emerald-300 hover:text-white' : 'text-slate-400 hover:text-emerald-400'}`}>
+                Support
+              </a>
+            </div>
+          </div>
         </div>
       </footer>
     </div>

@@ -18,6 +18,7 @@ import SecretAdmin from './components/SecretAdmin';
 import { cn } from './lib/utils';
 import { useKeyboardShortcuts } from './lib/useKeyboard';
 import { useCurrentUser } from './hooks/useCurrentUser';
+import { useTheme } from './context/ThemeContext';
 import { LayoutDashboard, CheckSquare, Timer, Gamepad2, Trophy, Users, UserCircle, Sparkles, Menu, X, BookOpen, ShieldCheck } from 'lucide-react';
 
 const AchievementToast: React.FC = () => {
@@ -45,6 +46,7 @@ const AchievementToast: React.FC = () => {
 
 const AppContent: React.FC = () => {
   const { user, isLoading } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const profile = useCurrentUser();
 
   // Secret admin route — hidden access via /admin-secret
@@ -114,7 +116,7 @@ const AppContent: React.FC = () => {
 
   if (!user) {
     if (!showAuth) {
-      return <Homepage onSignUp={() => setShowAuth(true)} />;
+      return <Homepage onSignUp={() => setShowAuth(true)} theme={theme} onToggleTheme={toggleTheme} />;
     }
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
