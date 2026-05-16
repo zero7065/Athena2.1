@@ -100,7 +100,7 @@ const Auth: React.FC<AuthProps> = ({ mode, setMode, onClose }) => {
       case 'email':
         if (!value.trim()) return 'Email is required';
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Invalid email format';
-        return value.toLowerCase().endsWith('@plasu.edu.ng') ? '' : 'Please use your official @plasu.edu.ng email';
+        return '';
       case 'password':
         if (!value) return 'Password is required';
         const pwdValidation = validatePassword(value);
@@ -249,7 +249,7 @@ const Auth: React.FC<AuthProps> = ({ mode, setMode, onClose }) => {
         {/* Registration Fields */}
         {mode === 'register' && (
           <>
-            {/* Role Selection */}
+            {/* Role Selection — Student & Lecturer only (Admin is hidden) */}
             <div className="flex p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
               <button 
                 type="button" 
@@ -264,13 +264,6 @@ const Auth: React.FC<AuthProps> = ({ mode, setMode, onClose }) => {
                 className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${formData.role === 'lecturer' ? 'bg-white dark:bg-slate-700 text-[#00843D] shadow-sm' : 'text-slate-500'}`}
               >
                 Lecturer
-              </button>
-              <button 
-                type="button" 
-                onClick={() => handleChange('role', 'admin')}
-                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${formData.role === 'admin' ? 'bg-white dark:bg-slate-700 text-[#00843D] shadow-sm' : 'text-slate-500'}`}
-              >
-                Admin
               </button>
             </div>
 

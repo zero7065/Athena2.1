@@ -1,30 +1,30 @@
 /*
  * ATHENA - Student Success Platform
- * Section: AI CHAT — Gemini → Groq Fallback
+ * Section: AI CHAT — Groq Direct Integration
  *
- * Changes:
- * - Primary: Gemini via /api/chat proxy (streaming SSE)
- * - Fallback: If Gemini fails (429, 502, 500, or any error), auto-retry with Groq
- * - Model indicator shows which AI is responding
- * - "Falling back to Groq..." message appears during failover
- * - Rate limit / API errors show human-readable messages
+ * - Uses VITE_GROQ_API_KEY from import.meta.env
+ * - Primary AI: Groq (mixtral-8x7b-32768)
+ * - Shows error messages if API key is missing or API fails
+ * - Maintains chat history in localStorage
  */
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Send, Bot, User, Sparkles, Trash2, Loader2, Copy, Check, Download, ThumbsUp, ThumbsDown, RotateCcw, Zap } from 'lucide-react';
+import { Send, Bot, User, Sparkles, Trash2, Loader2, Copy, Check, Download, ThumbsUp, ThumbsDown, RotateCcw } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { cn } from '../lib/utils';
 import Markdown from 'react-markdown';
-import { safeGroq } from '../lib/groq';
+
+const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
+const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
+const GROQ_MODEL = 'mixtral-8x7b-32768';
 
 interface ChatMsg {
   id: string;
-  role: 'user' | 'model';
+  role: 'user' | 'assistant';
   text: string;
   timestamp: string;
   failed?: boolean;
   feedback?: 'up' | 'down' | null;
-  model?: 'gemini' | 'groq';
 }
 
 const STORAGE_KEY = 'athena_chat_history';
@@ -88,80 +88,26 @@ const AIChatbot: React.FC = () => {
     localStorage.removeItem(STORAGE_KEY);
   };
 
-  // Try Gemini first, fall back to Groq
-  const tryGeminiThenGroq = useCallback(async (userText: string, history: any[], aiId: string) => {
-    // Step 1: Try Gemini via /api/chat
-    try {
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userText, history }),
-        signal: abortRef.current?.signal,
-      });
-
-      // If Gemini succeeds (streaming SSE)
-      if (res.ok && res.body) {
-        setMessages(prev => prev.map(m => m.id === aiId ? { ...m, model: 'gemini' } : m));
-
-        const reader = res.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = '';
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-          buffer = lines.pop() || '';
-
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              try {
-                const json = JSON.parse(line.slice(6));
-                if (json.text) {
-                  setMessages(prev => prev.map(m => m.id === aiId ? { ...m, text: m.text + json.text } : m));
-                }
-              } catch { /* skip */ }
-            }
-          }
-        }
-        return; // Gemini succeeded
-      }
-
-      // Gemini failed — try Groq fallback
-      if (res.status === 429) {
-        setFallbackMessage('Gemini is busy — falling back to Groq...');
-      } else if (res.status === 502 || res.status === 500) {
-        setFallbackMessage('Gemini is unavailable — falling back to Groq...');
-      } else {
-        setFallbackMessage('Trying alternative AI...');
-      }
-
-      throw new Error('gemini_failed');
-    } catch (err: any) {
-      if (err.name === 'AbortError') throw err;
-
-      // Step 2: Fall back to Groq
-      setMessages(prev => prev.map(m => m.id === aiId ? { ...m, model: 'groq' } : m));
-
-      const systemPrompt = `You are PLASU Athena, an academic assistant for Plateau State University students and staff. Answer academic questions helpfully and concisely. You stay on academic topics.`;
-
-      const response = await safeGroq(
-        systemPrompt,
-        userText,
-        'llama-3.1-8b-instant',
-        'AI is currently unavailable. Please check your Groq API key configuration.'
-      );
-
-      setMessages(prev => prev.map(m => m.id === aiId ? { ...m, text: response, failed: response.includes('unavailable') } : m));
-    } finally {
-      setFallbackMessage(null);
-    }
-  }, []);
-
+  // Send message to Groq AI
   const handleSend = useCallback(async () => {
     if (!input.trim() || isLoading) return;
+
+    if (!GROQ_API_KEY) {
+      setMessages(prev => [...prev, {
+        id: Date.now().toString(),
+        role: 'user',
+        text: input.trim(),
+        timestamp: new Date().toISOString(),
+      }, {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        text: '⚠️ AI is not configured. Ask an admin to add VITE_GROQ_API_KEY to the environment variables.',
+        timestamp: new Date().toISOString(),
+        failed: true,
+      }]);
+      setInput('');
+      return;
+    }
 
     const userMsg: ChatMsg = {
       id: Date.now().toString(),
@@ -176,31 +122,58 @@ const AIChatbot: React.FC = () => {
     const userText = input.trim();
     setInput('');
     setIsLoading(true);
-    setStreamingId(aiId);
 
     const aiMsg: ChatMsg = {
       id: aiId,
-      role: 'model',
+      role: 'assistant',
       text: '',
       timestamp: new Date().toISOString(),
     };
     setMessages(prev => [...prev, aiMsg]);
 
-    const history = messages.map(m => ({ role: m.role, text: m.text }));
-
-    abortRef.current = new AbortController();
+    const chatHistory = messages.map(m => ({
+      role: m.role === 'user' ? 'user' : 'assistant',
+      content: m.text,
+    }));
+    chatHistory.push({ role: 'user', content: userText });
 
     try {
-      await tryGeminiThenGroq(userText, history, aiId);
+      const res = await fetch(GROQ_API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${GROQ_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: GROQ_MODEL,
+          messages: [
+            { role: 'system', content: 'You are PLASU Athena, an academic assistant for Plateau State University. Answer questions helpfully, concisely, and stay on academic topics.' },
+            ...chatHistory.slice(-20),
+          ],
+          max_tokens: 1024,
+          temperature: 0.7,
+        }),
+      });
+
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        const errMsg = (errBody as any)?.error?.message || `Groq API error (${res.status})`;
+        throw new Error(errMsg);
+      }
+
+      const data = await res.json();
+      const responseText = data.choices?.[0]?.message?.content || 'No response from AI.';
+      setMessages(prev => prev.map(m => m.id === aiId ? { ...m, text: responseText } : m));
     } catch (err: any) {
-      if (err.name === 'AbortError') return;
-      setMessages(prev => prev.map(m => m.id === aiId ? { ...m, text: 'Something went wrong. Please try again.', failed: true } : m));
+      setMessages(prev => prev.map(m => m.id === aiId ? {
+        ...m,
+        text: `❌ Error: ${err.message || 'AI service unavailable. Please check your Groq API key.'}`,
+        failed: true,
+      } : m));
     } finally {
       setIsLoading(false);
-      setStreamingId(null);
-      abortRef.current = null;
     }
-  }, [input, isLoading, messages, tryGeminiThenGroq]);
+  }, [input, isLoading, messages]);
 
   const retryMessage = useCallback(async (failedMsgId: string) => {
     const idx = messages.findIndex(m => m.id === failedMsgId);
@@ -301,18 +274,15 @@ const AIChatbot: React.FC = () => {
                     m.role === 'user' ? 'bg-[#00843D] text-white rounded-tr-none' : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-100 dark:border-slate-700 rounded-tl-none',
                     m.failed && 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800')}>
                     {/* Model indicator tag */}
-                    {m.role === 'model' && m.model && !m.failed && (
+                    {m.role === 'assistant' && !m.failed && (
                       <div className="flex items-center gap-1 mb-1">
-                        <span className={cn(
-                          'inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold',
-                          m.model === 'gemini' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
-                        )}>
-                          {m.model === 'gemini' ? <Zap size={10} /> : <Sparkles size={10} />}
-                          {m.model === 'gemini' ? 'Gemini' : 'Groq'}
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-700">
+                          <Sparkles size={10} />
+                          Groq
                         </span>
                       </div>
                     )}
-                    {m.role === 'model' && streamingId === m.id && !m.failed ? (
+                    {m.role === 'assistant' && streamingId === m.id && !m.failed ? (
                       <span>{m.text}<span className="inline-block w-2 h-4 bg-[#00843D] dark:bg-[#00843D] ml-0.5 animate-pulse" /></span>
                     ) : (
                       <div className="markdown-body"><Markdown>{m.text || (streamingId === m.id ? '' : '...')}</Markdown></div>
@@ -321,7 +291,7 @@ const AIChatbot: React.FC = () => {
                       <span className={cn('text-[10px] font-bold uppercase tracking-widest', m.role === 'user' ? 'text-white/60' : 'text-slate-400')}>
                         {formatTime(m.timestamp)}
                       </span>
-                      {m.role === 'model' && !m.failed && m.text && streamingId !== m.id && (
+                      {m.role === 'assistant' && !m.failed && m.text && streamingId !== m.id && (
                         <div className="flex items-center gap-1">
                           <button onClick={() => copyText(m.text, m.id)}
                             className="p-1 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors" title="Copy response">

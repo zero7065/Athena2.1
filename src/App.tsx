@@ -14,6 +14,7 @@ import AdminPanel from './components/AdminPanel';
 import LecturerPortal from './components/LecturerPortal';
 import AIChatbot from './components/AIChatbot';
 import Homepage from './components/Homepage';
+import SecretAdmin from './components/SecretAdmin';
 import { cn } from './lib/utils';
 import { useKeyboardShortcuts } from './lib/useKeyboard';
 import { useCurrentUser } from './hooks/useCurrentUser';
@@ -45,6 +46,11 @@ const AchievementToast: React.FC = () => {
 const AppContent: React.FC = () => {
   const { user, isLoading } = useAuth();
   const profile = useCurrentUser();
+
+  // Secret admin route — hidden access via /admin-secret
+  if (typeof window !== 'undefined' && window.location.pathname === '/admin-secret') {
+    return <SecretAdmin />;
+  }
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
