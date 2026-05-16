@@ -19,6 +19,18 @@ export const SkeletonLine: React.FC<{ className?: string }> = ({ className }) =>
   <div className={cn("h-3 bg-slate-200 dark:bg-slate-700 rounded animate-pulse", className)} />
 );
 
+export const SkeletonAvatar: React.FC<{ className?: string }> = ({ className }) => (
+  <div className={cn("w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-700 animate-pulse shrink-0", className)} />
+);
+
+export const SkeletonText: React.FC<{ lines?: number; className?: string }> = ({ lines = 3, className }) => (
+  <div className={cn("space-y-2 animate-pulse", className)}>
+    {Array.from({ length: lines }).map((_, i) => (
+      <div key={i} className="h-3 bg-slate-200 dark:bg-slate-700 rounded" style={{ width: `${90 - i * 15}%` }} />
+    ))}
+  </div>
+);
+
 export const SkeletonTable: React.FC<{ rows?: number }> = ({ rows = 4 }) => (
   <div className="space-y-3 animate-pulse">
     {Array.from({ length: rows }).map((_, i) => (
