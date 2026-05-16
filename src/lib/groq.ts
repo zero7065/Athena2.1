@@ -1,27 +1,59 @@
 /*
  * ATHENA - Student Success Platform
  * Section: GROQ AI INTEGRATION
- * - Uses VITE_GROQ_API_KEY from import.meta.env
- * - Added error handling with user-facing messages
- * - Added loading state handling
- * - Added debounce support for user input
- * - Added rate limit error handling (429)
- * - Added banner when API key is missing
+ * - All calls go through /api/groq proxy (key is server-side)
+ * - Error handling with user-facing messages
+ * - Loading state handling
+ * - Debounce support for user input
+ * - Rate limit error handling (429)
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 
-const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
-const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
+const GROQ_PROXY_URL = '/api/groq';
 
 // Cache for Groq responses
 const cache = new Map<string, { result: string; ts: number }>();
 const CACHE_TTL = 5 * 60 * 1000;
 
-// Hook to check if API key is configured
-export const useGroqKey = () => {
-  const [isConfigured, setIsConfigured] = useState<boolean>(!!GROQ_API_KEY);
-  return isConfigured;
+// Custom hook for Groq calls with loading state
+export const useGroq = () => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const callGroq = useCallback(async (systemPrompt: string, userMessage: string, model?: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await askGroq(systemPrompt, userMessage, model);
+      return result;
+    } catch (err: any) {
+      setError(err.message);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  return { callGroq, loading, error };
+};
+
+// Debounced version for user input
+export const useDebouncedGroq = (delay: number = 500) => {
+  const { callGroq, loading, error } = useGroq();
+  const [debouncedResult, setDebouncedResult] = useState<string | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  const debouncedCall = useCallback((systemPrompt: string, userMessage: string, model?: string) => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    
+    debounceRef.current = setTimeout(async () => {
+      const result = await callGroq(systemPrompt, userMessage, model);
+      setDebouncedResult(result);
+    }, delay);
+  }, [callGroq, delay]);
+
+  return { debouncedCall, debouncedResult, loading, error };
 };
 
 // Debounce hook for user input
@@ -38,27 +70,20 @@ export const useDebounce = <T>(value: T, delay: number): T => {
   return debouncedValue;
 };
 
-// Main Groq ask function
+// Main Groq ask function (calls /api/groq proxy — key is server-side)
 export async function askGroq(
   systemPrompt: string,
   userMessage: string,
   model: string = 'llama-3.1-8b-instant',
 ): Promise<string> {
-  if (!GROQ_API_KEY) {
-    throw new Error('AI features unavailable — API key not configured');
-  }
-
   const key = `${model}|${systemPrompt}|${userMessage}`;
   const cached = cache.get(key);
   if (cached && Date.now() - cached.ts < CACHE_TTL) return cached.result;
 
   try {
-    const res = await fetch(GROQ_API_URL, {
+    const res = await fetch(GROQ_PROXY_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${GROQ_API_KEY}`,
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model,
         messages: [
@@ -84,9 +109,6 @@ export async function askGroq(
     cache.set(key, { result, ts: Date.now() });
     return result;
   } catch (error: any) {
-    if (error.message.includes('API key not configured')) {
-      throw error;
-    }
     throw new Error(error.message || 'AI service temporarily unavailable');
   }
 }

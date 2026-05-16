@@ -1,22 +1,19 @@
 /*
  * ATHENA - Student Success Platform
- * Section: AI CHAT — Groq Direct Integration
+ * Section: AI CHAT — Groq via Serverless Proxy
  *
- * - Uses VITE_GROQ_API_KEY from import.meta.env
- * - Primary AI: Groq (mixtral-8x7b-32768)
- * - Shows error messages if API key is missing or API fails
+ * - Calls /api/groq proxy (key is server-side, never exposed)
+ * - Uses mixtral-8x7b-32768 model
+ * - Shows error messages if proxy fails
  * - Maintains chat history in localStorage
  */
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Send, Bot, User, Sparkles, Trash2, Loader2, Copy, Check, Download, ThumbsUp, ThumbsDown, RotateCcw } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
 import { cn } from '../lib/utils';
 import Markdown from 'react-markdown';
 
-const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
-const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
-const GROQ_MODEL = 'mixtral-8x7b-32768';
+const GROQ_PROXY_URL = '/api/groq';
 
 interface ChatMsg {
   id: string;
@@ -61,15 +58,12 @@ function exportChat(msgs: ChatMsg[]) {
 }
 
 const AIChatbot: React.FC = () => {
-  const { user } = useAuth();
   const [messages, setMessages] = useState<ChatMsg[]>(loadHistory);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [streamingId, setStreamingId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [fallbackMessage, setFallbackMessage] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     saveHistory(messages);
@@ -88,26 +82,9 @@ const AIChatbot: React.FC = () => {
     localStorage.removeItem(STORAGE_KEY);
   };
 
-  // Send message to Groq AI
+  // Send message to Groq via serverless proxy
   const handleSend = useCallback(async () => {
     if (!input.trim() || isLoading) return;
-
-    if (!GROQ_API_KEY) {
-      setMessages(prev => [...prev, {
-        id: Date.now().toString(),
-        role: 'user',
-        text: input.trim(),
-        timestamp: new Date().toISOString(),
-      }, {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        text: '⚠️ AI is not configured. Ask an admin to add VITE_GROQ_API_KEY to the environment variables.',
-        timestamp: new Date().toISOString(),
-        failed: true,
-      }]);
-      setInput('');
-      return;
-    }
 
     const userMsg: ChatMsg = {
       id: Date.now().toString(),
@@ -138,14 +115,11 @@ const AIChatbot: React.FC = () => {
     chatHistory.push({ role: 'user', content: userText });
 
     try {
-      const res = await fetch(GROQ_API_URL, {
+      const res = await fetch(GROQ_PROXY_URL, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${GROQ_API_KEY}`,
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: GROQ_MODEL,
+          model: 'mixtral-8x7b-32768',
           messages: [
             { role: 'system', content: 'You are PLASU Athena, an academic assistant for Plateau State University. Answer questions helpfully, concisely, and stay on academic topics.' },
             ...chatHistory.slice(-20),
@@ -155,9 +129,13 @@ const AIChatbot: React.FC = () => {
         }),
       });
 
+      if (res.status === 429) {
+        throw new Error('AI is busy, try again in a moment');
+      }
+
       if (!res.ok) {
         const errBody = await res.json().catch(() => ({}));
-        const errMsg = (errBody as any)?.error?.message || `Groq API error (${res.status})`;
+        const errMsg = (errBody as any)?.error || `AI service error (${res.status})`;
         throw new Error(errMsg);
       }
 
@@ -167,7 +145,7 @@ const AIChatbot: React.FC = () => {
     } catch (err: any) {
       setMessages(prev => prev.map(m => m.id === aiId ? {
         ...m,
-        text: `❌ Error: ${err.message || 'AI service unavailable. Please check your Groq API key.'}`,
+        text: `❌ Error: ${err.message || 'AI service unavailable. Please check your Groq API key configuration.'}`,
         failed: true,
       } : m));
     } finally {
@@ -228,14 +206,6 @@ const AIChatbot: React.FC = () => {
           </button>
         </div>
       </header>
-
-      {/* Fallback notification banner */}
-      {fallbackMessage && (
-        <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-xs text-amber-700 dark:text-amber-300 font-medium">
-          <Loader2 size={14} className="animate-spin" />
-          {fallbackMessage}
-        </div>
-      )}
 
       <div className="flex-1 glass rounded-[24px] sm:rounded-[40px] flex flex-col overflow-hidden border border-slate-200/50 dark:border-slate-700/50 shadow-2xl" style={{ maxHeight: 'calc(100vh - 220px)' }}>
         <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-4 no-scrollbar">
