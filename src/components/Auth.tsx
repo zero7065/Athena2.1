@@ -99,7 +99,8 @@ const Auth: React.FC<AuthProps> = ({ mode, setMode, onClose }) => {
         return value.trim() ? '' : 'Student ID is required';
       case 'email':
         if (!value.trim()) return 'Email is required';
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? '' : 'Invalid email format';
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Invalid email format';
+        return value.toLowerCase().endsWith('@plasu.edu.ng') ? '' : 'Please use your official @plasu.edu.ng email';
       case 'password':
         if (!value) return 'Password is required';
         const pwdValidation = validatePassword(value);

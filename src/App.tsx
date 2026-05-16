@@ -13,6 +13,7 @@ import Profile from './components/Profile';
 import AdminPanel from './components/AdminPanel';
 import LecturerPortal from './components/LecturerPortal';
 import AIChatbot from './components/AIChatbot';
+import Homepage from './components/Homepage';
 import { cn } from './lib/utils';
 import { useKeyboardShortcuts } from './lib/useKeyboard';
 import { useCurrentUser } from './hooks/useCurrentUser';
@@ -49,6 +50,7 @@ const AppContent: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
+  const [showAuth, setShowAuth] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
@@ -105,8 +107,13 @@ const AppContent: React.FC = () => {
   }
 
   if (!user) {
+    if (!showAuth) {
+      return <Homepage onSignUp={() => setShowAuth(true)} />;
+    }
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4"><Auth mode={authMode} setMode={setAuthMode} onClose={() => {}} /></div>
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+        <Auth mode={authMode} setMode={setAuthMode} onClose={() => setShowAuth(false)} />
+      </div>
     );
   }
 
