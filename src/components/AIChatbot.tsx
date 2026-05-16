@@ -3,7 +3,7 @@
  * Section: AI CHAT — Groq via Serverless Proxy
  *
  * - Calls /api/groq proxy (key is server-side, never exposed)
- * - Uses mixtral-8x7b-32768 model
+ * - Uses llama-3.1-70b-versatile model (mixtral deprecated)
  * - Shows error messages if proxy fails
  * - Maintains chat history in localStorage
  */
@@ -119,7 +119,7 @@ const AIChatbot: React.FC = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'mixtral-8x7b-32768',
+          model: 'llama-3.1-70b-versatile',
           messages: [
             { role: 'system', content: 'You are PLASU Athena, an academic assistant for Plateau State University. Answer questions helpfully, concisely, and stay on academic topics.' },
             ...chatHistory.slice(-20),
