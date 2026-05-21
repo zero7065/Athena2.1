@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00843D"/>
+      <stop offset="100%" style="stop-color:#006a2f"/>
+    </linearGradient>
+  </defs>
+  <!-- Shield shape -->
+  <path d="M200 20 L360 100 L360 220 Q360 320 200 380 Q40 320 40 220 L40 100 Z" fill="url(#bg)" stroke="#FFD700" stroke-width="6"/>
+  <!-- Inner shield -->
+  <path d="M200 50 L330 115 L330 215 Q330 295 200 350 Q70 295 70 215 L70 115 Z" fill="none" stroke="#FFD700" stroke-width="3"/>
+  <!-- Open book -->
+  <path d="M140 200 Q200 170 260 200 L260 280 Q200 250 140 280 Z" fill="#FFD700" opacity="0.9"/>
+  <path d="M140 200 Q200 230 260 200" fill="none" stroke="#FFD700" stroke-width="2"/>
+  <!-- Book pages -->
+  <line x1="200" y1="195" x2="200" y2="270" stroke="#006a2f" stroke-width="2"/>
+  <!-- Text: PLASU -->
+  <text x="200" y="150" text-anchor="middle" fill="#FFD700" font-family="serif" font-weight="bold" font-size="28">PLASU</text>
+  <!-- Year -->
+  <text x="200" y="330" text-anchor="middle" fill="#FFD700" font-family="serif" font-size="18">2005</text>
+  <!-- Star -->
+  <polygon points="200,100 205,115 220,115 208,125 212,140 200,130 188,140 192,125 180,115 195,115" fill="#FFD700"/>
+</svg>
