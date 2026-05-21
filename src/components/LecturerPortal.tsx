@@ -13,15 +13,15 @@ import React, { useState, useMemo, useCallback } from 'react';
 import {
   BookOpen, Users, CheckCircle, Clock, Search, Filter, Download,
   GraduationCap, Trophy, Star, TrendingUp, ArrowUp, ArrowDown,
-  Plus, X, Send, Eye, User, FileText, AlertCircle, Loader2
+  Plus, X, Send, Eye, User, FileText, AlertCircle, Loader2, DoorOpen, Hash, Copy, Check
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { cn } from '../lib/utils';
-import { loadData, getSubmissions, saveSubmission, getAssignments, saveAssignment, deleteAssignment, Submission, Assignment, LocalTask } from '../lib/storage';
+import { loadData, getSubmissions, saveSubmission, getAssignments, saveAssignment, deleteAssignment, Submission, Assignment, LocalTask, getRooms, saveRoom, deleteRoom, generateRoomCode, StudyRoom } from '../lib/storage';
 
 const LecturerPortal: React.FC = () => {
   const { user, appData, updateAppData, addUserXp } = useAuth();
-  const [activeTab, setActiveTab] = useState<'students' | 'submissions' | 'assignments' | 'export'>('students');
+  const [activeTab, setActiveTab] = useState<'students' | 'submissions' | 'assignments' | 'export' | 'rooms'>('students');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'graded'>('all');
   const [selectedStudent, setSelectedStudent] = useState<string | null>(null);
@@ -37,9 +37,14 @@ const LecturerPortal: React.FC = () => {
   });
   const [confirmDeleteAssign, setConfirmDeleteAssign] = useState<string | null>(null);
   const [assignError, setAssignError] = useState('');
+  const [copiedRoom, setCopiedRoom] = useState<string | null>(null);
+  const [showDeleteRoom, setShowDeleteRoom] = useState<string | null>(null);
+  const [showCreateRoom, setShowCreateRoom] = useState(false);
+  const [newRoomData, setNewRoomData] = useState({ name: '', subject: '', description: '' });
 
   const allUsers = useMemo(() => loadData('users', []), []);
   const students = useMemo(() => allUsers.filter((u: any) => u.role === 'student'), [allUsers]);
+  const myRooms = useMemo(() => getRooms().filter(r => r.createdByEmail === user?.email), [user?.email]);
   const submissions = useMemo(() => getSubmissions(), []);
   const assignments = useMemo(() => getAssignments(), []);
 
@@ -127,6 +132,39 @@ const LecturerPortal: React.FC = () => {
     setConfirmDeleteAssign(null);
   };
 
+  // Create room
+  const handleCreateRoom = () => {
+    if (!newRoomData.name.trim() || !newRoomData.subject.trim()) return;
+    const code = generateRoomCode();
+    const room: StudyRoom = {
+      id: Date.now().toString(),
+      name: newRoomData.name.trim(),
+      subject: newRoomData.subject.trim(),
+      code,
+      createdBy: user?.name || '',
+      createdByEmail: user?.email || '',
+      createdAt: Date.now(),
+      description: newRoomData.description.trim(),
+      members: [{
+        name: user?.name || '',
+        email: user?.email || '',
+        studentId: user?.studentId || '',
+        role: 'lecturer',
+        joinedAt: Date.now(),
+      }],
+      announcements: [],
+    };
+    saveRoom(room);
+    setShowCreateRoom(false);
+    setNewRoomData({ name: '', subject: '', description: '' });
+  };
+
+  const copyCode = (code: string) => {
+    navigator.clipboard.writeText(code);
+    setCopiedRoom(code);
+    setTimeout(() => setCopiedRoom(null), 2000);
+  };
+
   // Export CSV
   const handleExportCSV = () => {
     const rows = [
@@ -191,6 +229,7 @@ const LecturerPortal: React.FC = () => {
     { id: 'students' as const, label: 'Students', icon: Users, count: students.length },
     { id: 'submissions' as const, label: 'Submissions', icon: CheckCircle, count: pendingSubmissions },
     { id: 'assignments' as const, label: 'Assignments', icon: BookOpen, count: assignments.length },
+    { id: 'rooms' as const, label: 'Rooms', icon: DoorOpen, count: myRooms.length },
     { id: 'export' as const, label: 'Export', icon: Download },
   ];
 
@@ -492,6 +531,120 @@ const LecturerPortal: React.FC = () => {
                     <button type="submit" className="flex-1 py-3 font-bold text-sm bg-[#00843D] text-white rounded-xl hover:bg-[#006a2f] transition-all">Create</button>
                   </div>
                 </form>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* === ROOMS TAB === */}
+      {activeTab === 'rooms' && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="font-bold text-sm text-slate-800 dark:text-white">My Study Rooms ({myRooms.length})</h3>
+            <button onClick={() => setShowCreateRoom(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-xs font-bold hover:bg-emerald-700 transition-all min-h-[44px]">
+              <Plus size={16} /> New Room
+            </button>
+          </div>
+
+          {myRooms.length === 0 ? (
+            <div className="glass p-8 rounded-[32px] text-center">
+              <DoorOpen size={40} className="mx-auto mb-3 text-slate-300" />
+              <h3 className="text-sm font-bold text-slate-500">No study rooms yet</h3>
+              <p className="text-xs text-slate-400 mt-1">Create a room and share the code with your students.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {myRooms.map(room => (
+                <div key={room.id} className="glass p-4 sm:p-5 rounded-[32px]">
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2.5 rounded-2xl bg-primary/10 text-primary">
+                        <BookOpen size={20} />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-sm text-slate-800 dark:text-white">{room.name}</h4>
+                        <p className="text-[10px] text-slate-400">{room.subject}</p>
+                      </div>
+                    </div>
+                    <button onClick={() => setShowDeleteRoom(room.id)}
+                      className="p-1.5 text-slate-300 hover:text-red-500 transition-colors rounded-lg hover:bg-red-50">
+                      <X size={14} />
+                    </button>
+                  </div>
+                  {room.description && <p className="text-xs text-slate-500 mb-2">{room.description}</p>}
+                  <div className="flex items-center gap-2 mb-3">
+                    <Hash size={14} className="text-primary shrink-0" />
+                    <span className="text-sm font-mono font-bold text-primary tracking-wider">{room.code}</span>
+                    <button onClick={() => copyCode(room.code)}
+                      className="p-1 hover:bg-primary/10 rounded-lg transition-colors">
+                      {copiedRoom === room.code ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} className="text-slate-400" />}
+                    </button>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-xs text-slate-400">
+                      <Users size={14} />
+                      <span>{room.members.length} member{room.members.length !== 1 ? 's' : ''}</span>
+                      {room.announcements.length > 0 && (
+                        <><span className="text-slate-300">|</span><span>{room.announcements.length} announcement{room.announcements.length !== 1 ? 's' : ''}</span></>
+                      )}
+                    </div>
+                    <div className="flex -space-x-1.5">
+                      {room.members.slice(0, 4).map((m, i) => (
+                        <div key={i} className={`w-6 h-6 rounded-full border-2 border-white dark:border-slate-800 flex items-center justify-center text-white text-[8px] font-bold ${m.role === 'lecturer' ? 'bg-primary' : 'bg-slate-400'}`}
+                          title={`${m.name} (${m.role})`}>
+                          {m.name[0]}
+                        </div>
+                      ))}
+                      {room.members.length > 4 && (
+                        <div className="w-6 h-6 rounded-full border-2 border-white dark:border-slate-800 bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[8px] font-bold text-slate-500">
+                          +{room.members.length - 4}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {showDeleteRoom && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm">
+              <div className="bg-white dark:bg-slate-900 p-6 rounded-[32px] shadow-2xl max-w-sm w-full mx-4">
+                <h3 className="font-bold text-sm text-slate-800 dark:text-white mb-2">Delete Room?</h3>
+                <p className="text-xs text-slate-500 mb-4">All students will be removed from this room. This cannot be undone.</p>
+                <div className="flex gap-3">
+                  <button onClick={() => setShowDeleteRoom(null)}
+                    className="flex-1 py-3 font-bold text-sm text-slate-500 hover:bg-slate-100 rounded-xl transition-colors">Cancel</button>
+                  <button onClick={() => { deleteRoom(showDeleteRoom); setShowDeleteRoom(null); }}
+                    className="flex-1 py-3 font-bold text-sm bg-red-500 text-white rounded-xl hover:bg-red-600 transition-all">Delete</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {showCreateRoom && (
+            <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-slate-900/40 backdrop-blur-sm">
+              <div className="bg-white dark:bg-slate-900 p-5 sm:p-8 rounded-t-[32px] sm:rounded-[32px] shadow-2xl w-full sm:max-w-md sm:m-4">
+                <h2 className="text-lg font-bold mb-5 text-slate-800 dark:text-white">Create Study Room</h2>
+                <div className="space-y-4">
+                  <input type="text" placeholder="Room Name (e.g. CSC 201 Study Group)"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 outline-none focus:ring-2 focus:ring-primary text-base"
+                    value={newRoomData.name} onChange={e => setNewRoomData({ ...newRoomData, name: e.target.value })} />
+                  <input type="text" placeholder="Subject (e.g. Computer Science)"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 outline-none focus:ring-2 focus:ring-primary text-base"
+                    value={newRoomData.subject} onChange={e => setNewRoomData({ ...newRoomData, subject: e.target.value })} />
+                  <textarea placeholder="Description (optional)"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 outline-none focus:ring-2 focus:ring-primary h-20 resize-none text-base"
+                    value={newRoomData.description} onChange={e => setNewRoomData({ ...newRoomData, description: e.target.value })} />
+                  <div className="flex gap-3">
+                    <button onClick={() => { setShowCreateRoom(false); setNewRoomData({ name: '', subject: '', description: '' }); }}
+                      className="flex-1 py-3 font-bold text-sm text-slate-500 hover:bg-slate-100 rounded-xl transition-colors">Cancel</button>
+                    <button onClick={handleCreateRoom}
+                      className="flex-1 py-3 font-bold text-sm bg-primary text-white rounded-xl hover:bg-emerald-700 transition-all">Create Room</button>
+                  </div>
+                </div>
               </div>
             </div>
           )}

@@ -317,3 +317,135 @@ export function deleteAssignment(id: string) {
   const all = getAssignments().filter(a => a.id !== id);
   localStorage.setItem(ASSIGNMENTS_KEY, JSON.stringify(all));
 }
+
+/* ========================================
+ * Study Rooms System
+ * ======================================== */
+
+export interface StudyRoom {
+  id: string;
+  name: string;
+  subject: string;
+  code: string;
+  createdBy: string;
+  createdByEmail: string;
+  createdAt: number;
+  description: string;
+  members: RoomMember[];
+  announcements: Announcement[];
+}
+
+export interface RoomMember {
+  name: string;
+  email: string;
+  studentId: string;
+  role: 'lecturer' | 'student';
+  joinedAt: number;
+}
+
+export interface Announcement {
+  id: string;
+  title: string;
+  content: string;
+  author: string;
+  authorEmail: string;
+  createdAt: number;
+}
+
+const ROOMS_KEY = 'athena_rooms';
+
+export function getRooms(): StudyRoom[] {
+  try {
+    const raw = localStorage.getItem(ROOMS_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+
+export function saveRoom(room: StudyRoom) {
+  const all = getRooms();
+  const idx = all.findIndex(r => r.id === room.id);
+  if (idx >= 0) {
+    all[idx] = room;
+  } else {
+    all.push(room);
+  }
+  localStorage.setItem(ROOMS_KEY, JSON.stringify(all));
+}
+
+export function deleteRoom(id: string) {
+  const all = getRooms().filter(r => r.id !== id);
+  localStorage.setItem(ROOMS_KEY, JSON.stringify(all));
+}
+
+export function getRoomByCode(code: string): StudyRoom | undefined {
+  return getRooms().find(r => r.code === code);
+}
+
+export function getUserRooms(email: string): StudyRoom[] {
+  return getRooms().filter(r => r.members.some(m => m.email === email));
+}
+
+export function generateRoomCode(): string {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = '';
+  for (let i = 0; i < 6; i++) {
+    code += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return code;
+}
+
+/* ========================================
+ * Direct Messaging System
+ * ======================================== */
+
+export interface DirectMessage {
+  id: string;
+  from: string;
+  fromEmail: string;
+  to: string;
+  toEmail: string;
+  text: string;
+  timestamp: number;
+  read: boolean;
+}
+
+const MESSAGES_KEY = 'athena_messages';
+
+export function getMessages(): DirectMessage[] {
+  try {
+    const raw = localStorage.getItem(MESSAGES_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+
+export function sendMessage(msg: DirectMessage) {
+  const all = getMessages();
+  all.push(msg);
+  localStorage.setItem(MESSAGES_KEY, JSON.stringify(all));
+}
+
+export function getUserMessages(email: string): DirectMessage[] {
+  return getMessages().filter(m => m.fromEmail === email || m.toEmail === email)
+    .sort((a, b) => b.timestamp - a.timestamp);
+}
+
+export function getConversation(email1: string, email2: string): DirectMessage[] {
+  return getMessages().filter(m =>
+    (m.fromEmail === email1 && m.toEmail === email2) ||
+    (m.fromEmail === email2 && m.toEmail === email1)
+  ).sort((a, b) => a.timestamp - b.timestamp);
+}
+
+export function markMessagesRead(email: string, fromEmail: string) {
+  const all = getMessages();
+  all.forEach(m => {
+    if (m.toEmail === email && m.fromEmail === fromEmail) {
+      m.read = true;
+    }
+  });
+  localStorage.setItem(MESSAGES_KEY, JSON.stringify(all));
+}
+
+export function getUnreadCount(email: string): number {
+  return getMessages().filter(m => m.toEmail === email && !m.read).length;
+}

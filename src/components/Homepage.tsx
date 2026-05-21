@@ -9,9 +9,28 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   ArrowRight, BookOpen, Clock, Users, BarChart3, Brain, GraduationCap,
-  Star, MapPin, Quote, Award, ChevronRight, Play, Sun, Moon,
-  Calendar, ChevronLeft, Sparkles, Zap, Trophy, ExternalLink
+  Star, MapPin, Quote, Award, ChevronRight, Sun, Moon,
+  Calendar, ChevronLeft, Sparkles, Zap, Trophy, ExternalLink, ChevronLeftCircle, ChevronRightCircle
 } from 'lucide-react';
+
+const carouselImages = [
+  { src: 'https://images.unsplash.com/photo-1523050854058-8df90110c7f1?w=800&h=600&fit=crop', caption: 'PLASU Campus — Main Gate' },
+  { src: 'https://images.unsplash.com/photo-1562774053-701939374585?w=800&h=600&fit=crop', caption: 'University Library' },
+  { src: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=800&h=600&fit=crop', caption: 'Graduation Ceremony' },
+  { src: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&h=600&fit=crop', caption: 'Students Studying Together' },
+  { src: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&h=600&fit=crop', caption: 'Lecture Hall Session' },
+  { src: 'https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=800&h=600&fit=crop', caption: 'Library Reading Room' },
+  { src: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&h=600&fit=crop', caption: 'Group Discussion' },
+  { src: 'https://images.unsplash.com/photo-1596495578065-6e0763fa1178?w=800&h=600&fit=crop', caption: 'Science Laboratory' },
+  { src: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&h=600&fit=crop', caption: 'Exam Preparation' },
+  { src: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&h=600&fit=crop', caption: 'Student Writing Exam' },
+  { src: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800&h=600&fit=crop', caption: 'Academic Achievement' },
+  { src: 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=800&h=600&fit=crop', caption: 'Lecturer Teaching' },
+  { src: 'https://images.unsplash.com/photo-1607237138185-eedd9c632b0b?w=800&h=600&fit=crop', caption: 'Computer Lab' },
+  { src: 'https://images.unsplash.com/photo-1529390079861-591de354faf5?w=800&h=600&fit=crop', caption: 'Collaborative Learning' },
+  { src: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=800&h=600&fit=crop', caption: 'Campus Life' },
+  { src: 'https://images.unsplash.com/photo-1526603426857-2da4c34c34ae?w=800&h=600&fit=crop', caption: 'Research & Innovation' },
+];
 
 // Animated counter hook
 function useCountUp(end: number, duration: number = 2000, startOnView: boolean = true) {
@@ -123,8 +142,9 @@ interface HomepageProps {
 
 export default function Homepage({ onSignUp, theme = 'dark', onToggleTheme }: HomepageProps) {
   const [activeTestimonial, setActiveTestimonial] = useState(0);
-  const [showVideo, setShowVideo] = useState(false);
+  const [activeImage, setActiveImage] = useState(0);
   const autoPlayRef = useRef<ReturnType<typeof setInterval>>();
+  const imageAutoRef = useRef<ReturnType<typeof setInterval>>();
 
   useEffect(() => {
     autoPlayRef.current = setInterval(() => {
@@ -132,6 +152,43 @@ export default function Homepage({ onSignUp, theme = 'dark', onToggleTheme }: Ho
     }, 5000);
     return () => clearInterval(autoPlayRef.current);
   }, []);
+
+  useEffect(() => {
+    imageAutoRef.current = setInterval(() => {
+      setActiveImage((prev) => (prev + 1) % carouselImages.length);
+    }, 4000);
+    return () => clearInterval(imageAutoRef.current);
+  }, []);
+
+  const goToImage = (index: number) => {
+    setActiveImage(index);
+    if (imageAutoRef.current) {
+      clearInterval(imageAutoRef.current);
+      imageAutoRef.current = setInterval(() => {
+        setActiveImage((prev) => (prev + 1) % carouselImages.length);
+      }, 4000);
+    }
+  };
+
+  const prevImage = () => {
+    setActiveImage((prev) => (prev - 1 + carouselImages.length) % carouselImages.length);
+    if (imageAutoRef.current) {
+      clearInterval(imageAutoRef.current);
+      imageAutoRef.current = setInterval(() => {
+        setActiveImage((prev) => (prev + 1) % carouselImages.length);
+      }, 4000);
+    }
+  };
+
+  const nextImage = () => {
+    setActiveImage((prev) => (prev + 1) % carouselImages.length);
+    if (imageAutoRef.current) {
+      clearInterval(imageAutoRef.current);
+      imageAutoRef.current = setInterval(() => {
+        setActiveImage((prev) => (prev + 1) % carouselImages.length);
+      }, 4000);
+    }
+  };
 
   const typedText = useTypewriter(
     ['organize your coursework', 'track your progress', 'ace your exams', 'collaborate with peers'],
@@ -297,35 +354,61 @@ export default function Homepage({ onSignUp, theme = 'dark', onToggleTheme }: Ho
               </div>
             </div>
 
-            {/* Right - Hero image / showcase */}
+            {/* Right - Image Carousel */}
             <div className="relative animate-fade-in">
-              {/* Main showcase card */}
-              <div className={`relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl animate-pulse-glow ${
+              <div className={`relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl ${
                 isLight ? 'bg-emerald-50 border border-emerald-200' : 'bg-slate-900/50 border border-slate-700'
               }`}>
                 <div className="aspect-[4/3] relative overflow-hidden">
-                  <img
-                    src="https://images.unsplash.com/photo-1523050854058-8df90110c7f1?w=800&h=600&fit=crop"
-                    alt="PLASU Campus"
-                    className="w-full h-full object-cover opacity-80"
-                    loading="lazy"
-                  />
+                  {carouselImages.map((img, i) => (
+                    <img key={i}
+                      src={img.src}
+                      alt={img.caption}
+                      className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
+                        i === activeImage ? 'opacity-80' : 'opacity-0'
+                      }`}
+                      loading="lazy"
+                    />
+                  ))}
                   <div className={`absolute inset-0 bg-gradient-to-tr ${
                     isLight ? 'from-emerald-900/70 via-emerald-800/30 to-transparent' : 'from-slate-950/80 via-blue-950/40 to-transparent'
                   }`} />
 
-                  {/* Overlay content */}
+                  {/* Caption */}
                   <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6">
                     <div className="flex items-center gap-2 mb-2">
                       <MapPin size={14} className="text-emerald-400" />
                       <span className="text-xs font-bold text-emerald-300 uppercase tracking-wider">Plateau State University, Bokkos</span>
                     </div>
-                    <h3 className="text-lg sm:text-xl font-bold text-white">Where Knowledge Meets Innovation</h3>
+                    <h3 className="text-lg sm:text-xl font-bold text-white">{carouselImages[activeImage].caption}</h3>
                     <p className="text-xs sm:text-sm text-slate-300 mt-1">Est. 2005 — 66th University in Nigeria</p>
                   </div>
 
-                  {/* Floating stat badges */}
-                  <div className={`absolute top-4 right-4 px-3 py-2 rounded-xl backdrop-blur-md ${
+                  {/* Arrows */}
+                  <button onClick={prevImage}
+                    className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/30 text-white/80 hover:bg-black/50 transition-all min-h-[36px] min-w-[36px] flex items-center justify-center">
+                    <ChevronLeft size={18} />
+                  </button>
+                  <button onClick={nextImage}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/30 text-white/80 hover:bg-black/50 transition-all min-h-[36px] min-w-[36px] flex items-center justify-center">
+                    <ChevronRight size={18} />
+                  </button>
+
+                  {/* Dots */}
+                  <div className="absolute top-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                    {carouselImages.slice(0, 8).map((_, i) => (
+                      <button key={i} onClick={() => goToImage(i)}
+                        className={`w-1.5 h-1.5 rounded-full transition-all ${
+                          i === activeImage
+                            ? 'bg-white w-4'
+                            : 'bg-white/40 hover:bg-white/60'
+                        }`} />
+                    ))}
+                    {carouselImages.length > 8 && <span className="text-[10px] text-white/60 self-center">+{carouselImages.length - 8}</span>}
+                  </div>
+
+                  {/* Floating stat badge */}
+                  <div className={`absolute top-3 right-3 px-3 py-2 rounded-xl backdrop-blur-md ${
                     isLight ? 'bg-white/80' : 'bg-slate-900/80'
                   } shadow-lg border ${isLight ? 'border-emerald-200' : 'border-slate-700'}`}>
                     <div className="flex items-center gap-2">
@@ -334,17 +417,10 @@ export default function Homepage({ onSignUp, theme = 'dark', onToggleTheme }: Ho
                     </div>
                   </div>
 
-                  {/* Play button */}
-                  <button
-                    onClick={() => setShowVideo(true)}
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-white/30 transition-all group"
-                  >
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                      isLight ? 'bg-emerald-600' : 'bg-amber-500'
-                    } group-hover:scale-110 transition-transform`}>
-                      <Play size={24} className="text-white ml-1" />
-                    </div>
-                  </button>
+                  {/* Image counter */}
+                  <div className="absolute bottom-16 right-4 px-2 py-1 rounded-lg bg-black/40 text-white text-[10px] font-bold">
+                    {activeImage + 1} / {carouselImages.length}
+                  </div>
                 </div>
               </div>
 
@@ -358,7 +434,7 @@ export default function Homepage({ onSignUp, theme = 'dark', onToggleTheme }: Ho
                   </div>
                   <div>
                     <p className={`text-lg font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>{students.count.toLocaleString()}+</p>
-                    <p className={`text-[10px] font-bold uppercase tracking-wider ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>{students.ref ? '' : ''}Students Strong</p>
+                    <p className={`text-[10px] font-bold uppercase tracking-wider ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>Students Strong</p>
                   </div>
                 </div>
               </div>

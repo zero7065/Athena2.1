@@ -1,21 +1,10 @@
-/*
- * ATHENA - Student Success Platform
- * Section: FRIENDS & STUDY ROOM
- *
- * Changes made:
- * - Add friend by Student ID — checks against registered users in localStorage
- * - Friends list persists under "athena_friends"
- * - Remove friend requires confirmation dialog
- * - Study room shows friends list with simulated online/offline status
- * - Empty friends list shows: "No study buddies yet — share your Student ID to connect"
- */
-
-import React, { useState, useMemo } from 'react';
-import { Users, UserPlus, MessageSquare, Search, Zap, Globe, Clock, Check, X, UserMinus, DoorOpen, Copy } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Users, UserPlus, MessageSquare, Search, Check, X, UserMinus, Copy, Send, ArrowLeft } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAuth } from '../context/AuthContext';
-import { LocalFriend } from '../lib/storage';
-import { loadData } from '../lib/storage';
+import { LocalFriend, loadData } from '../lib/storage';
+import { sendMessage, getConversation, markMessagesRead, DirectMessage, getUnreadCount } from '../lib/storage';
+import StudyRooms from './StudyRooms';
 
 const Social: React.FC = () => {
   const { appData, updateAppData, user } = useAuth();
@@ -23,9 +12,50 @@ const Social: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [confirmRemove, setConfirmRemove] = useState<string | null>(null);
   const [addError, setAddError] = useState('');
+  const [chatFriend, setChatFriend] = useState<LocalFriend | null>(null);
+  const [chatMessage, setChatMessage] = useState('');
+  const [messages, setMessages] = useState<DirectMessage[]>([]);
+  const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
 
   const friends = appData.friends;
   const allUsers = useMemo(() => loadData('users', []).filter((u: any) => u.email !== user?.email), [user?.email]);
+
+  useEffect(() => {
+    const counts: Record<string, number> = {};
+    friends.forEach(f => {
+      if (f.studentId) {
+        const matchedUser = allUsers.find((u: any) => u.studentId === f.studentId);
+        if (matchedUser) {
+          counts[f.id] = getUnreadCount(user?.email || '');
+        }
+      }
+    });
+    setUnreadCounts(counts);
+  }, [friends, allUsers, user?.email]);
+
+  useEffect(() => {
+    if (chatFriend) {
+      const matchedUser = allUsers.find((u: any) => u.studentId === chatFriend.studentId);
+      if (matchedUser) {
+        const conv = getConversation(user?.email || '', matchedUser.email);
+        setMessages(conv);
+        markMessagesRead(user?.email || '', matchedUser.email);
+      }
+    }
+  }, [chatFriend, allUsers, user?.email]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (chatFriend) {
+        const matchedUser = allUsers.find((u: any) => u.studentId === chatFriend.studentId);
+        if (matchedUser) {
+          const conv = getConversation(user?.email || '', matchedUser.email);
+          setMessages(conv);
+        }
+      }
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [chatFriend, allUsers, user?.email]);
 
   const handleAddFriend = () => {
     if (!searchQuery.trim()) return;
@@ -70,6 +100,82 @@ const Social: React.FC = () => {
       setTimeout(() => setCopied(false), 2000);
     }
   };
+
+  const handleSendMessage = () => {
+    if (!chatMessage.trim() || !chatFriend || !user) return;
+    const matchedUser = allUsers.find((u: any) => u.studentId === chatFriend.studentId);
+    if (!matchedUser) return;
+    const msg: DirectMessage = {
+      id: Date.now().toString(),
+      from: user.name || '',
+      fromEmail: user.email || '',
+      to: chatFriend.name,
+      toEmail: matchedUser.email,
+      text: chatMessage.trim(),
+      timestamp: Date.now(),
+      read: false,
+    };
+    sendMessage(msg);
+    setMessages(prev => [...prev, msg]);
+    setChatMessage('');
+  };
+
+  const findFriendEmail = (friend: LocalFriend): string | undefined => {
+    const matched = allUsers.find((u: any) => u.studentId === friend.studentId);
+    return matched?.email;
+  };
+
+  if (chatFriend) {
+    const friendEmail = findFriendEmail(chatFriend);
+    return (
+      <div className="p-3 sm:p-5 md:p-8 space-y-4 h-full flex flex-col overflow-y-auto">
+        <div className="flex items-center gap-3">
+          <button onClick={() => setChatFriend(null)}
+            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center">
+            <ArrowLeft size={20} />
+          </button>
+          <div>
+            <h3 className="font-bold text-sm text-slate-800 dark:text-white">{chatFriend.name}</h3>
+            <p className="text-[10px] text-slate-400">{chatFriend.department}</p>
+          </div>
+        </div>
+        <div className="flex-1 overflow-y-auto space-y-3 p-3">
+          {messages.length === 0 && (
+            <div className="text-center py-8 text-slate-400">
+              <MessageSquare size={32} className="mx-auto mb-2 opacity-40" />
+              <p className="text-xs">No messages yet. Say hello!</p>
+            </div>
+          )}
+          {messages.map(msg => (
+            <div key={msg.id} className={cn("flex", msg.fromEmail === user?.email ? "justify-end" : "justify-start")}>
+              <div className={cn("max-w-[75%] p-3 rounded-2xl text-xs",
+                msg.fromEmail === user?.email
+                  ? "bg-primary text-white rounded-br-md"
+                  : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-bl-md"
+              )}>
+                <p>{msg.text}</p>
+                <p className={cn("text-[10px] mt-1",
+                  msg.fromEmail === user?.email ? "text-white/60" : "text-slate-400"
+                )}>
+                  {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="flex gap-2 pt-2 border-t border-slate-200 dark:border-slate-700">
+          <input type="text" placeholder="Type a message..."
+            className="flex-1 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary outline-none text-sm text-base"
+            value={chatMessage} onChange={e => setChatMessage(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleSendMessage()} />
+          <button onClick={handleSendMessage}
+            className="p-3 bg-primary text-white rounded-xl hover:bg-emerald-700 transition-all min-h-[44px] min-w-[44px] flex items-center justify-center">
+            <Send size={18} />
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-3 sm:p-5 md:p-8 space-y-4 sm:space-y-6 h-full flex flex-col overflow-y-auto">
@@ -149,7 +255,8 @@ const Social: React.FC = () => {
                     </span>
                   </div>
                   <div className="flex gap-1">
-                    <button className="p-2 hover:bg-primary/10 rounded-xl transition-colors text-primary min-w-[36px] min-h-[36px] flex items-center justify-center" title="Message">
+                    <button onClick={() => setChatFriend(f)}
+                      className="p-2 hover:bg-primary/10 rounded-xl transition-colors text-primary min-w-[36px] min-h-[36px] flex items-center justify-center" title="Message">
                       <MessageSquare size={16} />
                     </button>
                     {confirmRemove === f.id ? (
@@ -178,26 +285,7 @@ const Social: React.FC = () => {
         </div>
       )}
 
-      {activeTab === 'rooms' && (
-        <div className="glass p-8 sm:p-12 rounded-[32px] text-center">
-          <DoorOpen size={48} className="mx-auto mb-4 text-slate-300" />
-          <h3 className="text-lg font-bold text-slate-600 dark:text-slate-400 mb-2">Study Rooms</h3>
-          <p className="text-sm text-slate-400 max-w-sm mx-auto leading-relaxed">
-            Study rooms let you collaborate in real-time with friends. Invite your study buddies to join a shared session.
-          </p>
-          <div className="flex flex-wrap justify-center gap-3 mt-6">
-            {friends.filter(f => f.online).map(f => (
-              <div key={f.id} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary/5 border border-primary/20 text-xs font-medium text-primary">
-                <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                {f.name}
-              </div>
-            ))}
-            {friends.filter(f => f.online).length === 0 && (
-              <p className="text-xs text-slate-400 italic">Add friends who are online to start a study room.</p>
-            )}
-          </div>
-        </div>
-      )}
+      {activeTab === 'rooms' && <StudyRooms />}
     </div>
   );
 };
