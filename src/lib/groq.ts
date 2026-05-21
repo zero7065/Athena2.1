@@ -1,47 +1,3 @@
-The file you've shown looks correct (only one useGroq and one useDebouncedGroq), but the build error says there are duplicate exports at lines 132 and 160. That means the actual file in your repository (the one Vercel is building) is different from what you pasted.
-
-Most likely causes & fixes:
-
-1. You have duplicate code later in the file
-
-Scroll down past line 130 – there is probably another copy of the hooks.
-Fix: Delete the second export const useGroq and export const useDebouncedGroq block.
-
-2. Git merge conflict markers left behind
-
-Look for lines like:
-
-```
-<<<<<<< HEAD
-export const useGroq = ...
-=======
-export const useGroq = ...
->>>>>>> branch
-```
-
-Fix: Keep only one copy and remove the conflict markers.
-
-3. The file was accidentally pasted twice
-
-The total line count might be double what it should be.
-Fix: Delete everything after the first safeGroq function ends.
-
----
-
-Quick way to verify and fix:
-
-1. Open src/lib/groq.ts in your editor.
-2. Search for export const useGroq (Ctrl+F).
-      If you see two results – delete the second one entirely (and its matching useDebouncedGroq).
-3. Save, commit, and push. Vercel will rebuild automatically.
-
----
-
-If you're still stuck:
-
-Replace the entire file with this clean version (copy exactly):
-
-```typescript
 /*
  * ATHENA - Student Success Platform
  * Section: GROQ AI INTEGRATION
@@ -171,6 +127,3 @@ export async function safeGroq(
     return fallback;
   }
 }
-```
-
-Then commit and push. The build will succeed.
