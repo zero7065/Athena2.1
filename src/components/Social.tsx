@@ -1,9 +1,9 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Users, UserPlus, MessageSquare, Search, Check, X, UserMinus, Copy, Send, ArrowLeft } from 'lucide-react';
+import { Users, UserPlus, MessageSquare, Check, X, UserMinus, Copy, Send, ArrowLeft } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAuth } from '../context/AuthContext';
 import { LocalFriend, loadData } from '../lib/storage';
-import { sendMessage, getConversation, markMessagesRead, DirectMessage, getUnreadCount } from '../lib/storage';
+import { sendMessage, getConversation, markMessagesRead, DirectMessage, getUnreadCountFrom } from '../lib/storage';
 import StudyRooms from './StudyRooms';
 
 const Social: React.FC = () => {
@@ -26,7 +26,7 @@ const Social: React.FC = () => {
       if (f.studentId) {
         const matchedUser = allUsers.find((u: any) => u.studentId === f.studentId);
         if (matchedUser) {
-          counts[f.id] = getUnreadCount(user?.email || '');
+          counts[f.id] = getUnreadCountFrom(user?.email || '', matchedUser.email);
         }
       }
     });

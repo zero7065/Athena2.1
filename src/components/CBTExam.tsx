@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { Clock, Trophy, CheckCircle2, XCircle, ChevronRight, ChevronLeft, RotateCcw, BookOpen, AlertCircle, Award } from 'lucide-react';
+import { Clock, Trophy, CheckCircle2, ChevronRight, ChevronLeft, RotateCcw, BookOpen, AlertCircle, Sparkles, Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { cn } from '../lib/utils';
+import { safeGroq } from '../lib/groq';
 
 interface Question {
   id: number;
@@ -32,6 +33,28 @@ const QUESTION_BANK: Question[] = [
 
 const SUBJECTS = ['All', 'Mathematics', 'English', 'Physics', 'Chemistry', 'Biology'];
 
+const FALLBACK_QUESTIONS: Question[] = QUESTION_BANK.slice(0, 3);
+
+const generateQuestions = async (subject: string): Promise<Question[]> => {
+  const prompt = subject === 'All'
+    ? 'Generate 10 JAMB-style exam questions covering Mathematics, English, Physics, Chemistry, and Biology. Mix subjects evenly.'
+    : `Generate 10 JAMB-style exam questions for the subject: ${subject}.`;
+  const result = await safeGroq(
+    'You are a JAMB exam question generator for Nigerian university entrance exams. Return ONLY a JSON array of objects with fields: id (number), subject (string), question (string), options (string array of 4), answer (number index 0-3), explanation (string). No markdown, no code fences, pure JSON array only.',
+    prompt,
+    'mixtral-8x7b-32768',
+    JSON.stringify(FALLBACK_QUESTIONS),
+  );
+  try {
+    const cleaned = result.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(cleaned);
+    if (Array.isArray(parsed) && parsed.length > 0) return parsed as Question[];
+    return FALLBACK_QUESTIONS;
+  } catch {
+    return FALLBACK_QUESTIONS;
+  }
+};
+
 const CBTExam: React.FC = () => {
   const { addUserXp, updateAppData } = useAuth();
   const [subject, setSubject] = useState('All');
@@ -41,12 +64,34 @@ const CBTExam: React.FC = () => {
   const [started, setStarted] = useState(false);
   const [finished, setFinished] = useState(false);
   const [showResults, setShowResults] = useState(false);
+  const [questions, setQuestions] = useState<Question[]>(QUESTION_BANK);
+  const [generating, setGenerating] = useState(true);
+  const [genError, setGenError] = useState('');
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const questions = useMemo(() =>
-    subject === 'All' ? QUESTION_BANK : QUESTION_BANK.filter(q => q.subject === subject),
-    [subject]
+  const filteredQuestions = useMemo(() =>
+    subject === 'All' ? questions : questions.filter(q => q.subject === subject),
+    [subject, questions]
   );
+
+  const handleGenerate = useCallback(async (subj?: string) => {
+    setGenerating(true);
+    setGenError('');
+    const targetSubject = subj || subject;
+    const generated = await generateQuestions(targetSubject);
+    if (generated.length > 0) {
+      setQuestions(generated);
+    } else {
+      setGenError('Failed to generate questions. Using default set.');
+    }
+    setGenerating(false);
+  }, [subject]);
+
+  useEffect(() => {
+    if (!started && !finished) {
+      handleGenerate(subject);
+    }
+  }, [subject]);
 
   const handleStart = () => {
     setStarted(true);
@@ -93,7 +138,7 @@ const CBTExam: React.FC = () => {
       setShowResults(true);
       const xpEarned = Math.round((score / questions.length) * 100);
       addUserXp(xpEarned);
-      updateAppData(prev => ({ ...prev, gameScores: { ...prev.gameScores, artGuesser: prev.gameScores.artGuesser + 1 } }));
+      updateAppData(prev => ({ ...prev, gameScores: { ...prev.gameScores, cbtExam: (prev.gameScores.cbtExam || 0) + 1 } }));
     }
   }, [finished, showResults, score, questions.length, addUserXp, updateAppData]);
 
@@ -117,21 +162,35 @@ const CBTExam: React.FC = () => {
             <h2 className="text-2xl font-bold text-slate-800 dark:text-white">CBT Exam Simulator</h2>
             <p className="text-sm text-slate-500 mt-2">Test your knowledge with JAMB-style questions</p>
           </div>
-          <div className="grid grid-cols-3 gap-4">
-            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50">
-              <p className="text-lg font-bold text-primary">{questions.length}</p>
-              <p className="text-[10px] text-slate-400 font-medium">Questions</p>
+          {generating ? (
+            <div className="flex flex-col items-center gap-3 py-6">
+              <Loader2 size={32} className="animate-spin text-primary" />
+              <p className="text-sm text-slate-500">Generating questions with AI...</p>
             </div>
-            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50">
-              <p className="text-lg font-bold text-primary">20</p>
-              <p className="text-[10px] text-slate-400 font-medium">Minutes</p>
-            </div>
-            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50">
-              <p className="text-lg font-bold text-primary">{subject}</p>
-              <p className="text-[10px] text-slate-400 font-medium">Subject</p>
-            </div>
-          </div>
-          <button onClick={handleStart} className="w-full btn-primary py-3 sm:py-4 text-base min-h-[48px]">Start Exam</button>
+          ) : (
+            <>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50">
+                  <p className="text-lg font-bold text-primary">{questions.length}</p>
+                  <p className="text-[10px] text-slate-400 font-medium">Questions</p>
+                </div>
+                <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50">
+                  <p className="text-lg font-bold text-primary">20</p>
+                  <p className="text-[10px] text-slate-400 font-medium">Minutes</p>
+                </div>
+                <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50">
+                  <p className="text-lg font-bold text-primary">{subject}</p>
+                  <p className="text-[10px] text-slate-400 font-medium">Subject</p>
+                </div>
+              </div>
+              {genError && <p className="text-xs text-red-500">{genError}</p>}
+              <button onClick={handleStart} className="w-full btn-primary py-3 sm:py-4 text-base min-h-[48px]">Start Exam</button>
+              <button onClick={() => handleGenerate(subject)}
+                className="w-full flex items-center justify-center gap-2 py-3 text-sm font-bold text-primary border-2 border-primary/30 rounded-2xl hover:bg-primary/5 transition-all min-h-[48px]">
+                <Sparkles size={16} /> Generate New Set
+              </button>
+            </>
+          )}
         </div>
       </div>
     );

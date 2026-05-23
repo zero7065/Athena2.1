@@ -16,8 +16,20 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
   const sessions = appData.sessions;
   const achievements = appData.achievements;
 
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  const encouragements = [
+    'Your academic performance is looking sharp today.',
+    'Keep pushing — excellence is a habit, not an act.',
+    'Every study session brings you closer to your goals.',
+    'Great things never come from comfort zones.',
+    'Success is the sum of small efforts repeated daily.',
+    'Your potential is endless. Keep learning!',
+  ];
+  const encouragement = encouragements[Math.floor(Math.random() * encouragements.length)];
+
   const avgFocus = sessions.length > 0
-    ? Math.round(sessions.reduce((acc, s) => acc + 7, 0) / sessions.length * 10) / 10
+    ? Math.round(sessions.reduce((acc, s) => acc + s.duration, 0) / sessions.length * 10) / 10
     : 0;
 
   const xp = profile?.xp ?? 0;
@@ -163,9 +175,9 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
       <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
           <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-slate-800 dark:text-white tracking-tight">
-            Welcome back, <span className="text-primary">{user?.name}</span>
+            {greeting}, <span className="text-primary">{user?.name}</span> <span className="text-2xl">{hour < 12 ? '🌅' : hour < 17 ? '☀️' : '🌙'}</span>
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 font-medium">Your academic performance is looking sharp today.</p>
+          <p className="text-xs sm:text-sm text-slate-500 font-medium">{encouragement}</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <div className="glass px-3 sm:px-5 py-2 rounded-2xl flex items-center gap-2 sm:gap-3 border-orange-100">

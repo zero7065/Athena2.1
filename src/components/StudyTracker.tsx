@@ -13,7 +13,7 @@
  */
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Play, Pause, RotateCcw, BookOpen, TrendingUp, History, Trophy, Sparkles } from 'lucide-react';
+import { Play, Pause, RotateCcw, BookOpen, TrendingUp, History, Trophy } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { cn } from '../lib/utils';
 
@@ -100,7 +100,6 @@ const StudyTracker: React.FC = () => {
             } catch { /* audio not available */ }
           } else {
             setSessionComplete(true);
-            addUserXp(0);
             sendNotification('Break Complete!', 'Time to get back to work!');
             setTimeout(() => setSessionComplete(false), 3000);
           }
@@ -138,7 +137,7 @@ const StudyTracker: React.FC = () => {
 
   const handleLogSession = useCallback(() => {
     if (!subject.trim()) return;
-    const newSession = { id: Date.now().toString(), date: Date.now(), duration: 25, subject: subject.trim() };
+    const newSession = { id: Date.now().toString(), date: Date.now(), duration: 25, subject: subject.trim(), focusScore };
     const nextCount = pomodoro.sessionCount + 1;
     updateAppData(prev => ({
       ...prev,

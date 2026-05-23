@@ -15,7 +15,7 @@
  */
 
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
-import { Plus, Search, Trash2, AlertCircle, Moon, Sun, ChevronDown, Loader2, Brain, User, Send, Clock, XCircle } from 'lucide-react';
+import { Plus, Search, Trash2, AlertCircle, Sun, ChevronDown, Loader2, Brain, User, Send, Clock, XCircle } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { useAuth } from '../context/AuthContext';
 import { LocalTask, getSubmissions, saveSubmission, getStudentSubmissions } from '../lib/storage';

@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { Plus, DoorOpen, Users, MessageSquare, LogIn, Copy, Check, X, Send, Megaphone, BookOpen, Hash, ArrowLeft, Clock, UserPlus } from 'lucide-react';
+import { Plus, DoorOpen, Users, LogIn, Copy, Check, Megaphone, BookOpen, Hash, ArrowLeft } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAuth } from '../context/AuthContext';
 import { getRooms, saveRoom, getRoomByCode, generateRoomCode, getUserRooms, StudyRoom, RoomMember, Announcement } from '../lib/storage';
@@ -92,7 +92,7 @@ const StudyRooms: React.FC<StudyRoomsProps> = ({ onBack }) => {
       name: user?.name || '',
       email: user?.email || '',
       studentId: user?.studentId || '',
-      role: user?.role || 'student',
+      role: user?.role === 'student' ? 'student' : 'lecturer',
       joinedAt: Date.now(),
     };
     room.members.push(member);
@@ -152,12 +152,18 @@ const StudyRooms: React.FC<StudyRoomsProps> = ({ onBack }) => {
           </div>
         </div>
 
-        {isRoomLecturer(activeRoom) && (
-          <button onClick={() => setShowAnnounce(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-xs font-bold hover:bg-emerald-700 transition-all mb-3 w-fit min-h-[44px]">
-            <Megaphone size={16} /> Post Announcement
+        <div className="flex items-center gap-2 mb-3">
+          {isRoomLecturer(activeRoom) && (
+            <button onClick={() => setShowAnnounce(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-xs font-bold hover:bg-emerald-700 transition-all min-h-[44px]">
+              <Megaphone size={16} /> Post Announcement
+            </button>
+          )}
+          <button onClick={() => handleLeaveRoom(activeRoom.id)}
+            className="flex items-center gap-2 px-4 py-2 border border-red-200 text-red-500 rounded-xl text-xs font-bold hover:bg-red-50 transition-all min-h-[44px] ml-auto">
+            Leave Room
           </button>
-        )}
+        </div>
 
         <div className="flex items-center gap-2 mb-3 p-3 rounded-xl bg-primary/5 border border-primary/20">
           <Hash size={16} className="text-primary shrink-0" />

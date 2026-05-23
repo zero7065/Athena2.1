@@ -11,9 +11,9 @@
 
 import React, { useState, useMemo, useCallback } from 'react';
 import {
-  BookOpen, Users, CheckCircle, Clock, Search, Filter, Download,
-  GraduationCap, Trophy, Star, TrendingUp, ArrowUp, ArrowDown,
-  Plus, X, Send, Eye, User, FileText, AlertCircle, Loader2, DoorOpen, Hash, Copy, Check
+  BookOpen, Users, CheckCircle, Clock, Search, Download,
+  GraduationCap, Trophy,
+  Plus, X, Eye, User, FileText, DoorOpen, Hash, Copy, Check
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { cn } from '../lib/utils';

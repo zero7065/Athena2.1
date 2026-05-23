@@ -15,6 +15,9 @@ import LecturerPortal from './components/LecturerPortal';
 import AIChatbot from './components/AIChatbot';
 import Homepage from './components/Homepage';
 import SecretAdmin from './components/SecretAdmin';
+import FloatingSupport from './components/FloatingSupport';
+import FeedbackModal from './components/FeedbackModal';
+import Confetti from './components/Confetti';
 import { cn } from './lib/utils';
 import { useKeyboardShortcuts } from './lib/useKeyboard';
 import { useCurrentUser } from './hooks/useCurrentUser';
@@ -25,10 +28,11 @@ import { LayoutDashboard, CheckSquare, Timer, Gamepad2, Trophy, Users, UserCircl
  * Achievement Toast Notification
  * Displays when user unlocks an achievement
  */
-const AchievementToast: React.FC = () => {
+  const AchievementToast: React.FC = () => {
   const { showAchievement, setShowAchievement } = useAuth();
   useEffect(() => {
     if (showAchievement) {
+      setConfettiActive(true);
       const t = setTimeout(() => setShowAchievement(null), 4000);
       return () => clearTimeout(t);
     }
@@ -53,18 +57,26 @@ const AchievementToast: React.FC = () => {
  * Handles routing, authentication, and layout
  */
 const AppContent: React.FC = () => {
-  const { user, isLoading, logout } = useAuth();
+  const { user, isLoading, logout, setShowAchievement } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const profile = useCurrentUser();
 
   // ============ STATE ============
-  const [activeTab, setActiveTab] = useState('dashboard');
-  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [activeTab, setActiveTab] = useState(() => {
+    if (user) return localStorage.getItem('athena_active_tab') || 'dashboard';
+    return 'dashboard';
+  });
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    const saved = localStorage.getItem('athena_sidebar_collapsed');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [showAuth, setShowAuth] = useState(false);
   const [showHomepage, setShowHomepage] = useState(!user); // Show homepage when not logged in
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [confettiActive, setConfettiActive] = useState(false);
 
   // ============ HANDLERS ============
 
@@ -95,9 +107,8 @@ const AppContent: React.FC = () => {
    * Logs out user and shows homepage
    */
   const handleReturnHome = useCallback(() => {
-    // Clear auth data
+    // Clear auth data (do NOT remove athena_users — that destroys all accounts)
     localStorage.removeItem('athena_auth');
-    localStorage.removeItem('athena_users');
     if (user?.email) {
       localStorage.removeItem(`app_data_${user.email}`);
     }
@@ -167,6 +178,16 @@ const AppContent: React.FC = () => {
         .trim() + ' ' + (fonts[profile.fontPreference] || 'font-sans');
     }
   }, [profile]);
+
+  // Persist sidebar collapsed state
+  useEffect(() => {
+    localStorage.setItem('athena_sidebar_collapsed', JSON.stringify(isCollapsed));
+  }, [isCollapsed]);
+
+  // Save active tab for resume
+  useEffect(() => {
+    if (user) localStorage.setItem('athena_active_tab', activeTab);
+  }, [activeTab, user]);
 
   // ============ SECRET ADMIN ROUTE ============
   if (typeof window !== 'undefined' && window.location.pathname === '/admin-secret') {
@@ -326,6 +347,13 @@ const AppContent: React.FC = () => {
 
       {/* Achievement Toast */}
       <AchievementToast />
+
+      {/* Floating Support Button — visible on all authenticated pages */}
+      <FloatingSupport onOpenFeedback={() => setShowFeedback(true)} />
+
+      {/* Feedback Modal */}
+      {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} onUnlockAchievement={(a) => setShowAchievement(a)} />}
+      <Confetti active={confettiActive} onDone={() => setConfettiActive(false)} />
     </>
   );
 };

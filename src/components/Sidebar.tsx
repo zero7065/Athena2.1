@@ -69,9 +69,8 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   // Enhanced logout with full session clearing
   const handleLogout = () => {
-    // Clear all auth data
+    // Clear auth data (do NOT remove athena_users — that destroys all accounts)
     localStorage.removeItem('athena_auth');
-    localStorage.removeItem('athena_users');
     
     // Clear app data by email if available
     if (user?.email) {

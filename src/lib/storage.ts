@@ -65,6 +65,7 @@ export interface LocalSession {
   date: number;
   duration: number;
   subject: string;
+  focusScore?: number;
 }
 
 export interface LocalPomodoro {
@@ -96,6 +97,7 @@ export interface LocalGameScore {
   memory: number;
   sudoku: number;
   artGuesser: number;
+  cbtExam: number;
 }
 
 export interface AppData {
@@ -128,6 +130,10 @@ const DEFAULT_ACHIEVEMENTS: LocalAchievement[] = [
   { id: 'xp_500', title: 'Scholar', description: 'Earn 500 XP', icon: 'GraduationCap', unlockedAt: null, requirement: 'Earn 500 XP' },
   { id: 'xp_1000', title: 'Professor', description: 'Earn 1000 XP', icon: 'Award', unlockedAt: null, requirement: 'Earn 1000 XP' },
   { id: 'three_games', title: 'Gamer', description: 'Play 3 different games', icon: 'Gamepad2', unlockedAt: null, requirement: 'Play 3 different game types' },
+  { id: 'first_feedback', title: 'Voice Your Mind', description: 'Submit your first feedback rating', icon: 'Star', unlockedAt: null, requirement: 'Submit 1 feedback' },
+  { id: 'five_feedback', title: 'Reviewer', description: 'Submit 5 feedback ratings', icon: 'MessageSquare', unlockedAt: null, requirement: 'Submit 5 feedback ratings' },
+  { id: 'rating_5', title: 'Five Stars', description: 'Give a 5-star rating', icon: 'Star', unlockedAt: null, requirement: 'Rate 5 stars' },
+  { id: 'support_contact', title: 'Connected', description: 'Contact support via the help button', icon: 'Headphones', unlockedAt: null, requirement: 'Contact support once' },
 ];
 
 export function getDefaultAppData(): AppData {
@@ -148,14 +154,17 @@ export function getDefaultAppData(): AppData {
     fontPreference: 'sans',
     aiPersonality: 'charming',
     isAnonymous: false,
+    feedbackCount: 0,
+    gaveFiveStar: false,
+    contactedSupport: false,
   },
     tasks: [],
     sessions: [],
     pomodoro: { sessionCount: 0, totalSessions: 0, lastDate: '' },
     achievements: DEFAULT_ACHIEVEMENTS.map(a => ({ ...a })),
     friends: [],
-    gameScores: { chess: 0, memory: 0, sudoku: 0, artGuesser: 0 },
-    adminData: { tasksByStatus: { todo: 0, 'in-progress': 0, done: 0 }, totalXp: 0, gamePlays: { chess: 0, memory: 0, sudoku: 0, artGuesser: 0 } },
+    gameScores: { chess: 0, memory: 0, sudoku: 0, artGuesser: 0, cbtExam: 0 },
+    adminData: { tasksByStatus: { todo: 0, 'in-progress': 0, done: 0 }, totalXp: 0, gamePlays: { chess: 0, memory: 0, sudoku: 0, artGuesser: 0, cbtExam: 0 } },
   };
 }
 
@@ -214,6 +223,18 @@ export function checkAndUnlockAchievements(data: AppData): { data: AppData; newl
         break;
       case 'three_games':
         shouldUnlock = Object.values(data.gameScores).filter(v => v > 0).length >= 3;
+        break;
+      case 'first_feedback':
+        shouldUnlock = data.user.feedbackCount >= 1;
+        break;
+      case 'five_feedback':
+        shouldUnlock = data.user.feedbackCount >= 5;
+        break;
+      case 'rating_5':
+        shouldUnlock = data.user.gaveFiveStar === true;
+        break;
+      case 'support_contact':
+        shouldUnlock = data.user.contactedSupport === true;
         break;
     }
     if (shouldUnlock) {
@@ -448,4 +469,149 @@ export function markMessagesRead(email: string, fromEmail: string) {
 
 export function getUnreadCount(email: string): number {
   return getMessages().filter(m => m.toEmail === email && !m.read).length;
+}
+
+export function getUnreadCountFrom(email: string, fromEmail: string): number {
+  return getMessages().filter(m => m.toEmail === email && m.fromEmail === fromEmail && !m.read).length;
+}
+
+/* ========================================
+ * Audit Log — Immutable Activity Trail
+ * ======================================== */
+
+export interface AuditEntry {
+  id: string;
+  timestamp: number;
+  userEmail: string;
+  userName: string;
+  action: string;
+  details: string;
+  checksum: string;
+  readonly marked?: true;
+}
+
+const AUDIT_KEY = 'athena_audit';
+
+function hashEntry(e: Omit<AuditEntry, 'checksum' | 'id'> & { id: string }): string {
+  let s = `${e.id}|${e.timestamp}|${e.userEmail}|${e.action}|${e.details}`;
+  let h = 0;
+  for (let i = 0; i < s.length; i++) {
+    h = ((h << 5) - h) + s.charCodeAt(i);
+    h |= 0;
+  }
+  return 'v2_' + Math.abs(h).toString(36);
+}
+
+export function logAudit(userEmail: string, userName: string, action: string, details: string) {
+  const all = getAuditLog();
+  const entry: AuditEntry = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    timestamp: Date.now(),
+    userEmail,
+    userName,
+    action,
+    details,
+    checksum: '',
+  };
+  entry.checksum = hashEntry(entry);
+  all.push(entry);
+  localStorage.setItem(AUDIT_KEY, JSON.stringify(all));
+}
+
+export function getAuditLog(): AuditEntry[] {
+  try {
+    const raw = localStorage.getItem(AUDIT_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+
+export function verifyAuditLog(): { valid: boolean; tampered: AuditEntry[] } {
+  const all = getAuditLog();
+  const tampered: AuditEntry[] = [];
+  for (const e of all) {
+    const { checksum, ...rest } = e;
+    const expected = hashEntry(rest as any);
+    if (checksum !== expected) {
+      tampered.push(e);
+    }
+  }
+  return { valid: tampered.length === 0, tampered };
+}
+
+/* ========================================
+ * Feedback / Ratings System
+ * ======================================== */
+
+export interface FeedbackEntry {
+  id: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  rating: number; // 1-5
+  comment: string;
+  category: string;
+  createdAt: number;
+}
+
+const FEEDBACK_KEY = 'athena_feedback';
+
+export function submitFeedback(fb: FeedbackEntry) {
+  const all = getFeedback();
+  all.push(fb);
+  localStorage.setItem(FEEDBACK_KEY, JSON.stringify(all));
+}
+
+export function getFeedback(): FeedbackEntry[] {
+  try {
+    const raw = localStorage.getItem(FEEDBACK_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+
+export function getUserFeedback(email: string): FeedbackEntry[] {
+  return getFeedback().filter(f => f.userEmail === email);
+}
+
+export function getFeedbackStats() {
+  const all = getFeedback();
+  if (all.length === 0) return { total: 0, avg: 0, distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 } };
+  const dist: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+  let sum = 0;
+  for (const f of all) {
+    dist[f.rating] = (dist[f.rating] || 0) + 1;
+    sum += f.rating;
+  }
+  return { total: all.length, avg: Math.round((sum / all.length) * 10) / 10, distribution: dist };
+}
+
+/* ========================================
+ * Support / Contact Settings
+ * ======================================== */
+
+export interface SupportSettings {
+  whatsappNumber: string;
+  whatsappMessage: string;
+  email: string;
+  phone: string;
+  enabled: boolean;
+}
+
+const SUPPORT_KEY = 'athena_support_settings';
+
+export function getSupportSettings(): SupportSettings {
+  try {
+    const raw = localStorage.getItem(SUPPORT_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch { /* fall through */ }
+  return {
+    whatsappNumber: '+2348000000000',
+    whatsappMessage: 'Hello%20ATHENA%20Support%2C%20I%20need%20help%20with...',
+    email: 'athena@plasu.edu.ng',
+    phone: '+234-800-ATHENA',
+    enabled: true,
+  };
+}
+
+export function saveSupportSettings(s: SupportSettings) {
+  localStorage.setItem(SUPPORT_KEY, JSON.stringify(s));
 }

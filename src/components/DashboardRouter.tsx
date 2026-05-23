@@ -9,7 +9,6 @@
  */
 
 import React from 'react';
-import { User } from '../context/AuthContext';
 import Dashboard from './Dashboard';
 import LecturerPortal from './LecturerPortal';
 import AdminPanel from './AdminPanel';

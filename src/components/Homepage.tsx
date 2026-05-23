@@ -20,7 +20,7 @@ const carouselImages = [
   { src: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&h=600&fit=crop', caption: 'Students Studying Together' },
   { src: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&h=600&fit=crop', caption: 'Lecture Hall Session' },
   { src: 'https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=800&h=600&fit=crop', caption: 'Library Reading Room' },
-  { src: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&h=600&fit=crop', caption: 'Group Discussion' },
+  { src: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&h=600&fit=crop', caption: 'Group Discussion' },
   { src: 'https://images.unsplash.com/photo-1596495578065-6e0763fa1178?w=800&h=600&fit=crop', caption: 'Science Laboratory' },
   { src: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&h=600&fit=crop', caption: 'Exam Preparation' },
   { src: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&h=600&fit=crop', caption: 'Student Writing Exam' },
@@ -143,8 +143,8 @@ interface HomepageProps {
 export default function Homepage({ onSignUp, theme = 'dark', onToggleTheme }: HomepageProps) {
   const [activeTestimonial, setActiveTestimonial] = useState(0);
   const [activeImage, setActiveImage] = useState(0);
-  const autoPlayRef = useRef<ReturnType<typeof setInterval>>();
-  const imageAutoRef = useRef<ReturnType<typeof setInterval>>();
+  const autoPlayRef = useRef<ReturnType<typeof setInterval>>(null);
+  const imageAutoRef = useRef<ReturnType<typeof setInterval>>(null);
 
   useEffect(() => {
     autoPlayRef.current = setInterval(() => {

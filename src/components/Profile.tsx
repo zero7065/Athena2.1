@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { UserCircle, Mail, Building2, Edit3, Palette, Save, Camera, ShieldCheck, Brain, Star, Sparkles, CheckCircle2 } from 'lucide-react';
+import { UserCircle, Edit3, Palette, Save, Brain, CheckCircle2, LogOut } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCurrentUser } from '../hooks/useCurrentUser';
 import { cn } from '../lib/utils';
 import { calcLevel } from '../lib/storage';
 
 const Profile: React.FC = () => {
-  const { user, updateAppData } = useAuth();
+  const { user, updateAppData, logout } = useAuth();
   const profile = useCurrentUser();
   const [isEditing, setIsEditing] = useState(false);
 
@@ -174,6 +174,14 @@ const Profile: React.FC = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="pt-4 border-t border-slate-200 dark:border-slate-800">
+        <button onClick={logout}
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-500 font-bold text-sm hover:bg-red-100 dark:hover:bg-red-900/40 transition-all min-h-[48px]">
+          <LogOut size={18} /> Logout
+        </button>
+        <p className="text-[10px] text-slate-400 text-center mt-2">You can log back in with your credentials anytime.</p>
       </div>
     </div>
   );

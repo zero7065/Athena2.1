@@ -25,6 +25,9 @@ export interface UserProfile extends AuthUser {
   lastLoginDate: string;
   bio?: string;
   avatar_url?: string;
+  feedbackCount: number;
+  gaveFiveStar: boolean;
+  contactedSupport: boolean;
 }
 
 export interface StoredUser extends AuthUser {

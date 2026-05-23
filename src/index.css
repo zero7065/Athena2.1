@@ -78,3 +78,12 @@
 .input-field {
   @apply w-full px-4 py-3 rounded-xl border border-slate-200/50 dark:border-slate-700/50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm focus:ring-2 focus:ring-[#00843D]/30 focus:border-[#00843D] outline-none transition-all text-slate-900 dark:text-white;
 }
+
+@keyframes confetti-fall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+.animate-confetti {
+  animation: confetti-fall 2s ease-in forwards;
+}

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { ShieldCheck, Users, Clock, Building2, Trophy, Download, TrendingUp, BarChart3, PieChart as PieChartIcon, Calendar } from 'lucide-react';
+import { ShieldCheck, Users, Clock, Trophy, Download, TrendingUp, BarChart3, PieChart as PieChartIcon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { cn } from '../lib/utils';
 import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip, PieChart, Pie, Cell } from 'recharts';
@@ -70,14 +70,6 @@ const AdminPanel: React.FC = () => {
     URL.revokeObjectURL(url);
   };
 
-  const departmentData = [
-    { department: 'Computer Science', count: Math.max(1, tasks.length) },
-    { department: 'Mathematics', count: Math.max(1, Math.floor(tasks.length * 0.7)) },
-    { department: 'Physics', count: Math.max(1, Math.floor(tasks.length * 0.5)) },
-    { department: 'Biology', count: Math.max(1, Math.floor(tasks.length * 0.4)) },
-    { department: 'Chemistry', count: Math.max(1, Math.floor(tasks.length * 0.3)) },
-  ];
-
   const gamesBreakdown = [
     { name: 'Chess', value: gameScores.chess || 0, color: COLORS[0] },
     { name: 'Memory', value: gameScores.memory || 0, color: COLORS[2] },
@@ -91,9 +83,9 @@ const AdminPanel: React.FC = () => {
   ];
 
   const chartData = [
-    { name: 'To Do', value: tasksByStatus['To Do'] || 1 },
-    { name: 'In Progress', value: tasksByStatus['In Progress'] || 1 },
-    { name: 'Done', value: tasksByStatus['Done'] || 1 },
+    { name: 'To Do', value: tasksByStatus['To Do'] },
+    { name: 'In Progress', value: tasksByStatus['In Progress'] },
+    { name: 'Done', value: tasksByStatus['Done'] },
   ];
 
   return (
@@ -268,27 +260,7 @@ const AdminPanel: React.FC = () => {
         </div>
       </div>
 
-      <div className="glass p-4 sm:p-6 md:p-8 rounded-[24px] sm:rounded-[40px]">
-        <div className="flex items-center gap-3 mb-4">
-          <Building2 size={20} className="text-slate-500" />
-          <h3 className="font-bold text-sm sm:text-base">Department Engagement</h3>
-        </div>
-        <div className="overflow-x-auto -mx-4 sm:mx-0">
-          <div className="min-w-[400px] px-4 sm:px-0">
-            {departmentData.map((d, i) => (
-              <div key={i} className="flex items-center justify-between p-3 sm:p-4 rounded-2xl border-b border-slate-100 dark:border-slate-800 last:border-0">
-                <span className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300">{d.department}</span>
-                <div className="flex items-center gap-3 sm:gap-4 flex-1 max-w-[200px] mx-4">
-                  <div className="flex-1 h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                    <div className="h-full bg-primary rounded-full" style={{ width: `${Math.min(100, d.count * 20)}%` }} />
-                  </div>
-                </div>
-                <span className="text-xs sm:text-sm font-bold text-primary">{d.count}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+
     </div>
   );
 };
