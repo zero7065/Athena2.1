@@ -60,6 +60,8 @@ interface AuthContextType {
   token: string | null;
   login: (user: AuthUser) => void;
   logout: () => void;
+  switchAccount: () => void;
+  knownAccounts: AuthUser[];
   isLoading: boolean;
   appData: StorageAppData;
   updateAppData: (updater: (prev: StorageAppData) => StorageAppData) => void;
@@ -76,6 +78,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [appData, setAppDataState] = useState<StorageAppData>(getDefaultAppData());
   const [showAchievement, setShowAchievement] = useState<unknown>(null);
+  const [knownAccounts, setKnownAccounts] = useState<AuthUser[]>(() => {
+    try {
+      const stored = localStorage.getItem('athena_known_accounts');
+      return stored ? JSON.parse(stored) : [];
+    } catch { return []; }
+  });
+
+  const saveKnownAccount = useCallback((authUser: AuthUser) => {
+    setKnownAccounts(prev => {
+      const exists = prev.some(a => a.email === authUser.email);
+      if (exists) return prev;
+      const updated = [...prev, authUser];
+      localStorage.setItem('athena_known_accounts', JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
 
   useEffect(() => {
     seedDemoUsers();
@@ -97,10 +115,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem('athena_auth', JSON.stringify(userData));
     setUser(userData);
     setToken('logged-in');
-    setAppDataState(loadAppDataForUser(userData));
-  }, []);
+    const data = loadAppDataForUser(userData);
+    setAppDataState(data);
+    saveKnownAccount(userData);
+  }, [saveKnownAccount]);
 
   const logout = useCallback(() => {
+    if (user) {
+      const dataKey = getAppDataKey(user.email);
+      localStorage.setItem(dataKey, JSON.stringify(appData));
+    }
+    localStorage.removeItem('athena_auth');
+    setUser(null);
+    setToken(null);
+  }, [user, appData]);
+
+  const switchAccount = useCallback(() => {
     if (user) {
       const dataKey = getAppDataKey(user.email);
       localStorage.setItem(dataKey, JSON.stringify(appData));
@@ -138,7 +168,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   return (
     <AuthContext.Provider value={{
-      user, token, login, logout, isLoading,
+      user, token, login, logout, switchAccount, knownAccounts, isLoading,
       appData, updateAppData, addUserXp,
       showAchievement, setShowAchievement,
     }}>

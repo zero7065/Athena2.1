@@ -716,9 +716,15 @@ export default function Homepage({ onSignUp, theme = 'dark', onToggleTheme }: Ho
               </div>
               <span className={`font-bold text-sm ${isLight ? 'text-emerald-200' : 'text-white'}`}>ATHENA — PLASU Edition</span>
             </div>
-            <p className={`text-xs sm:text-sm text-center ${isLight ? 'text-emerald-300' : 'text-slate-500'}`}>
-              &copy; 2025 ATHENA — Designed to empower every student at Plateau State University, Bokkos.
-            </p>
+            <div className="flex flex-col items-center gap-1">
+              <div className="flex items-center gap-1.5">
+                <div className="w-4 h-4 rounded-md bg-gradient-to-br from-emerald-500 to-emerald-400 flex items-center justify-center text-white text-[6px] font-bold">J</div>
+                <span className="text-[9px] font-bold tracking-wider text-emerald-400">JADAI STUDIOS</span>
+              </div>
+              <p className={`text-xs text-center ${isLight ? 'text-emerald-300' : 'text-slate-500'}`}>
+                &copy; 2025 ATHENA — Designed to empower every student at Plateau State University, Bokkos.
+              </p>
+            </div>
             <div className="flex gap-4 sm:gap-6 text-xs sm:text-sm font-medium">
               <a href="https://plasu.edu.ng" target="_blank" rel="noopener noreferrer" className={`transition-colors ${isLight ? 'text-emerald-300 hover:text-white' : 'text-slate-400 hover:text-emerald-400'}`}>
                 PLASU Website

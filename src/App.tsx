@@ -271,6 +271,7 @@ const AppContent: React.FC = () => {
                   <Sparkles size={16} />
                 </div>
                 <span className="font-bold text-sm">ATHENA</span>
+                <span className="text-[7px] text-[#00843D] font-bold uppercase tracking-wider hidden xs:inline">by JADAI</span>
               </div>
               <div className="w-8 h-8 rounded-lg bg-[#00843D]/10 flex items-center justify-center text-[#00843D] font-bold text-xs">
                 {user.name?.[0] || 'S'}

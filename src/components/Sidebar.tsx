@@ -40,7 +40,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   onCloseMobile,
   onReturnHome 
 }) => {
-  const { user, logout } = useAuth();
+  const { user, logout, switchAccount } = useAuth();
   const { theme, toggleTheme } = useTheme();
 
   const menuItems = [
@@ -152,6 +152,9 @@ const Sidebar: React.FC<SidebarProps> = ({
             <span className="font-bold text-sm">Logout</span>
           </button>
         </div>
+        <div className="pt-3 text-center">
+          <span className="text-[8px] font-bold tracking-wider text-slate-400 dark:text-slate-500">POWERED BY JADAI STUDIOS</span>
+        </div>
       </div>
     );
   }
@@ -242,12 +245,37 @@ const Sidebar: React.FC<SidebarProps> = ({
           {!isCollapsed && <span className="font-bold text-sm">{theme === 'light' ? 'Dark Mode' : 'Light Mode'}</span>}
         </button>
 
+        {/* Switch Account Button */}
+        <button onClick={switchAccount}
+          className={cn("w-full flex items-center gap-3 p-3 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors min-h-[44px]", isCollapsed ? "justify-center" : "")}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+          {!isCollapsed && <span className="font-bold text-sm">Switch Account</span>}
+        </button>
+
         {/* Logout Button */}
         <button onClick={handleLogout}
           className={cn("w-full flex items-center gap-3 p-3 rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors min-h-[44px]", isCollapsed ? "justify-center" : "")}>
           <LogOut size={20} />
           {!isCollapsed && <span className="font-bold text-sm">Logout</span>}
         </button>
+
+        {/* Jadai Studios Branding */}
+        {!isCollapsed && (
+          <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+            <div className="flex items-center gap-2 px-2 py-2">
+              <div className="w-5 h-5 rounded-md bg-gradient-to-br from-[#00843D] to-emerald-500 flex items-center justify-center text-white text-[8px] font-bold">J</div>
+              <div className="flex flex-col">
+                <span className="text-[8px] font-black tracking-tighter text-slate-500 dark:text-slate-400 leading-none">JADAI STUDIOS</span>
+                <span className="text-[6px] text-slate-400 dark:text-slate-500 leading-none mt-0.5">PLASU Edition</span>
+              </div>
+            </div>
+          </div>
+        )}
+        {isCollapsed && (
+          <div className="flex justify-center pt-1">
+            <div className="w-5 h-5 rounded-md bg-gradient-to-br from-[#00843D] to-emerald-500 flex items-center justify-center text-white text-[7px] font-bold">J</div>
+          </div>
+        )}
       </div>
 
       {/* Future Enhancement Hooks (Development Ready) */}

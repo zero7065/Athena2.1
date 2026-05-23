@@ -176,12 +176,19 @@ const Profile: React.FC = () => {
         </div>
       </div>
 
-      <div className="pt-4 border-t border-slate-200 dark:border-slate-800">
+      <div className="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-3">
         <button onClick={logout}
           className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-500 font-bold text-sm hover:bg-red-100 dark:hover:bg-red-900/40 transition-all min-h-[48px]">
           <LogOut size={18} /> Logout
         </button>
-        <p className="text-[10px] text-slate-400 text-center mt-2">You can log back in with your credentials anytime.</p>
+        <p className="text-[10px] text-slate-400 text-center">You can log back in with your credentials anytime.</p>
+        <div className="text-center pt-2 border-t border-slate-100 dark:border-slate-800">
+          <div className="inline-flex items-center gap-1.5">
+            <div className="w-4 h-4 rounded-md bg-gradient-to-br from-[#00843D] to-emerald-500 flex items-center justify-center text-white text-[6px] font-bold">J</div>
+            <span className="text-[9px] font-bold tracking-wider text-slate-400 dark:text-slate-500">JADAI STUDIOS</span>
+          </div>
+          <p className="text-[8px] text-slate-400 mt-1">ATHENA for PLASU &bull; All rights reserved</p>
+        </div>
       </div>
     </div>
   );
