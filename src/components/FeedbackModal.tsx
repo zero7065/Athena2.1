@@ -11,7 +11,7 @@ interface FeedbackModalProps {
 const categories = ['General', 'Feature Request', 'Bug Report', 'Study Tools', 'AI Chat', 'Games', 'UI/UX'];
 
 const FeedbackModal: React.FC<FeedbackModalProps> = ({ onClose, onUnlockAchievement }) => {
-  const { user, appData, updateAppData, addUserXp } = useAuth();
+  const { user, updateAppData } = useAuth();
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [comment, setComment] = useState('');
@@ -38,7 +38,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ onClose, onUnlockAchievem
       data = addXp(data, 25);
       const checked = checkAndUnlockAchievements(data);
       if (checked.newlyUnlocked.length > 0) {
-        setTimeout(() => checked.newlyUnlocked.forEach(a => onUnlockAchievement(a)), 500);
+        setTimeout(() => onUnlockAchievement(checked.newlyUnlocked[0]), 500);
       }
       return checked.data;
     });

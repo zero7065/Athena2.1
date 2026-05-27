@@ -111,7 +111,7 @@ const StudyTracker: React.FC = () => {
       rafRef.current = requestAnimationFrame(tick);
     }
     return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
-  }, [isActive, mode, getDuration, addUserXp]);
+  }, [isActive, mode, getDuration]);
 
   const toggleTimer = useCallback(() => {
     if (timeLeft <= 0) return;

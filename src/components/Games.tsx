@@ -418,9 +418,10 @@ const SudokuGame: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    setConflicts(findConflicts(board));
+    const newConflicts = findConflicts(board);
+    setConflicts(newConflicts);
     const allFilled = board.every(row => row.every(v => v !== 0));
-    if (allFilled && conflicts.size === 0 && board.some(row => row.some(v => v !== 0))) {
+    if (allFilled && newConflicts.size === 0 && board.some(row => row.some(v => v !== 0))) {
       setCompleted(true);
       addUserXp(80);
       updateAppData(prev => ({ ...prev, gameScores: { ...prev.gameScores, sudoku: prev.gameScores.sudoku + 1 } }));

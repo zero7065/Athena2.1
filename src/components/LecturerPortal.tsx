@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { cn } from '../lib/utils';
-import { loadData, getSubmissions, saveSubmission, getAssignments, saveAssignment, deleteAssignment, Submission, Assignment, LocalTask, getRooms, saveRoom, deleteRoom, generateRoomCode, StudyRoom } from '../lib/storage';
+import { loadData, getSubmissions, saveSubmission, getAssignments, saveAssignment, deleteAssignment, Submission, Assignment, getRooms, saveRoom, deleteRoom, generateRoomCode, StudyRoom } from '../lib/storage';
 
 const LecturerPortal: React.FC = () => {
   const { user, appData, updateAppData, addUserXp } = useAuth();

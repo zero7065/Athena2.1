@@ -77,11 +77,6 @@ const AdminPanel: React.FC = () => {
     { name: 'Art', value: gameScores.artGuesser || 0, color: COLORS[4] },
   ];
 
-  // Simple leaderboard based on available metrics
-  const leaderboardData = [
-    { rank: 1, name: user.name || 'You', xp: totalXp, tasks: tasks.filter(t => t.status === 'done').length, sessions: sessions.length },
-  ];
-
   const chartData = [
     { name: 'To Do', value: tasksByStatus['To Do'] },
     { name: 'In Progress', value: tasksByStatus['In Progress'] },

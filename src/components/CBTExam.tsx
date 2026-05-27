@@ -103,20 +103,19 @@ const CBTExam: React.FC = () => {
   };
 
   useEffect(() => {
-    if (started && !finished && timeLeft > 0) {
-      timerRef.current = setInterval(() => {
-        setTimeLeft(prev => {
-          if (prev <= 1) {
-            clearInterval(timerRef.current!);
-            setFinished(true);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
+    if (!started || finished) return;
+    timerRef.current = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 1) {
+          clearInterval(timerRef.current!);
+          setFinished(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [started, finished, timeLeft]);
+  }, [started, finished]);
 
   const handleAnswer = (idx: number) => {
     if (finished) return;

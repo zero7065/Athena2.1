@@ -67,23 +67,10 @@ const Sidebar: React.FC<SidebarProps> = ({
     if (isMobile && onCloseMobile) onCloseMobile();
   };
 
-  // Enhanced logout with full session clearing
+  // Logout — AuthContext handles persistence and cleanup correctly
   const handleLogout = () => {
-    // Clear auth data (do NOT remove athena_users — that destroys all accounts)
-    localStorage.removeItem('athena_auth');
-    
-    // Clear app data by email if available
-    if (user?.email) {
-      localStorage.removeItem(`app_data_${user.email}`);
-    }
-
-    // Call logout from auth context
     logout();
-
-    // Close mobile menu if open
     if (isMobile && onCloseMobile) onCloseMobile();
-
-    // Redirect to home
     if (onReturnHome) {
       onReturnHome();
     } else {
@@ -91,7 +78,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     }
   };
 
-  // Return to homepage handler
+  // Return to homepage (logs out, returns to public landing)
   const handleReturnHome = () => {
     if (onReturnHome) {
       onReturnHome();

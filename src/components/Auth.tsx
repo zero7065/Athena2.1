@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Mail, Lock, User, GraduationCap, Eye, EyeOff, AlertCircle, ShieldCheck, BookOpen } from 'lucide-react';
+import { X, Mail, Lock, User, GraduationCap, Eye, EyeOff, AlertCircle, ShieldCheck, BookOpen, RefreshCw } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import type { AuthUser } from '../types';
 
@@ -7,6 +7,8 @@ interface AuthProps {
   mode: 'login' | 'register';
   setMode: (mode: 'login' | 'register') => void;
   onClose: () => void;
+  knownAccounts?: AuthUser[];
+  onSelectAccount?: () => void;
 }
 
 const USERS_KEY = 'athena_users';
@@ -45,7 +47,7 @@ function validatePassword(password: string): { valid: boolean; errors: string[] 
   return { valid: errors.length === 0, errors };
 }
 
-const Auth: React.FC<AuthProps> = ({ mode, setMode, onClose }) => {
+const Auth: React.FC<AuthProps> = ({ mode, setMode, onClose, knownAccounts, onSelectAccount }) => {
   const { login, isLoading: authLoading } = useAuth();
 
   const [formData, setFormData] = useState({
@@ -172,6 +174,33 @@ const Auth: React.FC<AuthProps> = ({ mode, setMode, onClose }) => {
               </button>
             ))}
           </div>
+
+          {/* Known Accounts (from device) */}
+          {knownAccounts && knownAccounts.length > 0 && (
+            <>
+              <div className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-700">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 text-center">Switch Account</p>
+                <div className="flex flex-col gap-1.5">
+                  {knownAccounts.filter(ka => !DEMO_ACCOUNTS.some(d => d.email === ka.email)).map(acc => (
+                    <button key={acc.email} type="button" onClick={() => {
+                      handleChange('email', acc.email);
+                      if (onSelectAccount) onSelectAccount();
+                    }} disabled={isLoading}
+                      className="flex items-center gap-2 p-2 rounded-xl bg-white dark:bg-slate-800 hover:bg-[#00843D]/10 border border-slate-200 dark:border-slate-700 hover:border-[#00843D]/30 transition-all min-h-[40px]">
+                      <div className="w-7 h-7 rounded-lg bg-[#00843D]/10 flex items-center justify-center text-[#00843D] font-bold text-xs shrink-0">
+                        {acc.name[0]}
+                      </div>
+                      <div className="text-left flex-1 min-w-0">
+                        <p className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate">{acc.name}</p>
+                        <p className="text-[9px] text-slate-400 truncate">{acc.email} &middot; {acc.role}</p>
+                      </div>
+                      <RefreshCw size={14} className="text-slate-400 shrink-0" />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
         </div>
       )}
 

@@ -24,40 +24,17 @@ import { useCurrentUser } from './hooks/useCurrentUser';
 import { useTheme } from './context/ThemeContext';
 import { LayoutDashboard, CheckSquare, Timer, Gamepad2, Trophy, Users, UserCircle, Sparkles, Menu, X, BookOpen, ShieldCheck } from 'lucide-react';
 
-/**
- * Achievement Toast Notification
- * Displays when user unlocks an achievement
- */
-  const AchievementToast: React.FC = () => {
-  const { showAchievement, setShowAchievement } = useAuth();
-  useEffect(() => {
-    if (showAchievement) {
-      setConfettiActive(true);
-      const t = setTimeout(() => setShowAchievement(null), 4000);
-      return () => clearTimeout(t);
-    }
-  }, [showAchievement, setShowAchievement]);
-  if (!showAchievement) return null;
-  const achievement = showAchievement as { title: string; description: string };
-  return (
-    <div className="fixed bottom-4 sm:bottom-6 right-4 sm:right-6 z-[200] animate-bounce">
-      <div className="bg-gradient-to-r from-amber-500 to-yellow-500 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-2xl shadow-2xl flex items-center gap-3 sm:gap-4">
-        <div className="text-2xl sm:text-3xl">&#127942;</div>
-        <div>
-          <p className="font-bold text-sm sm:text-base">Achievement Unlocked!</p>
-          <p className="text-xs sm:text-sm opacity-90">{achievement.title} &mdash; {achievement.description}</p>
-        </div>
-      </div>
-    </div>
-  );
-};
+/** Helper: sanitize email for use as localStorage key */
+function sanitizeEmail(email: string): string {
+  return email.replace(/[@.]/g, '_');
+}
 
 /**
  * Main App Content Component
  * Handles routing, authentication, and layout
  */
 const AppContent: React.FC = () => {
-  const { user, isLoading, logout, setShowAchievement } = useAuth();
+  const { user, isLoading, logout, showAchievement, setShowAchievement, knownAccounts } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const profile = useCurrentUser();
 
@@ -77,6 +54,7 @@ const AppContent: React.FC = () => {
   const [showHomepage, setShowHomepage] = useState(!user); // Show homepage when not logged in
   const [showFeedback, setShowFeedback] = useState(false);
   const [confettiActive, setConfettiActive] = useState(false);
+  const [showAccountPicker, setShowAccountPicker] = useState(false);
 
   // ============ HANDLERS ============
 
@@ -107,21 +85,12 @@ const AppContent: React.FC = () => {
    * Logs out user and shows homepage
    */
   const handleReturnHome = useCallback(() => {
-    // Clear auth data (do NOT remove athena_users — that destroys all accounts)
-    localStorage.removeItem('athena_auth');
-    if (user?.email) {
-      localStorage.removeItem(`app_data_${user.email}`);
-    }
-    
-    // Logout
     logout();
-    
-    // Show homepage
     setShowHomepage(true);
     setShowAuth(false);
     setMobileMenuOpen(false);
     setActiveTab('dashboard');
-  }, [user?.email, logout]);
+  }, [logout]);
 
   /**
    * Handle sign up from homepage
@@ -179,6 +148,15 @@ const AppContent: React.FC = () => {
     }
   }, [profile]);
 
+  // Trigger confetti on achievement unlock
+  useEffect(() => {
+    if (showAchievement) {
+      setConfettiActive(true);
+      const t = setTimeout(() => setShowAchievement(null), 4000);
+      return () => clearTimeout(t);
+    }
+  }, [showAchievement, setShowAchievement]);
+
   // Persist sidebar collapsed state
   useEffect(() => {
     localStorage.setItem('athena_sidebar_collapsed', JSON.stringify(isCollapsed));
@@ -219,7 +197,9 @@ const AppContent: React.FC = () => {
         <Auth 
           mode={authMode} 
           setMode={setAuthMode} 
-          onClose={handleAuthClose} 
+          onClose={handleAuthClose}
+          knownAccounts={knownAccounts}
+          onSelectAccount={() => setShowAccountPicker(false)}
         />
       </div>
     );
@@ -347,7 +327,20 @@ const AppContent: React.FC = () => {
       </div>
 
       {/* Achievement Toast */}
-      <AchievementToast />
+      {showAchievement && (() => {
+        const a = showAchievement as { title: string; description: string };
+        return (
+          <div className="fixed bottom-4 sm:bottom-6 right-4 sm:right-6 z-[200] animate-bounce">
+            <div className="bg-gradient-to-r from-amber-500 to-yellow-500 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-2xl shadow-2xl flex items-center gap-3 sm:gap-4">
+              <div className="text-2xl sm:text-3xl">&#127942;</div>
+              <div>
+                <p className="font-bold text-sm sm:text-base">Achievement Unlocked!</p>
+                <p className="text-xs sm:text-sm opacity-90">{a.title} &mdash; {a.description}</p>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Floating Support Button — visible on all authenticated pages */}
       <FloatingSupport onOpenFeedback={() => setShowFeedback(true)} />
