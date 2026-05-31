@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Mail, Lock, User, GraduationCap, Eye, EyeOff, AlertCircle, ShieldCheck, BookOpen, RefreshCw } from 'lucide-react';
+import { X, Mail, Lock, User, GraduationCap, Eye, EyeOff, AlertCircle, BookOpen, RefreshCw } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import type { AuthUser } from '../types';
 
@@ -24,7 +24,6 @@ interface StoredUser {
 const DEMO_ACCOUNTS = [
   { name: 'Student Demo', email: 'student@plasu.edu.ng', password: 'student123', role: 'student' as const, color: 'text-emerald-600', bg: 'bg-emerald-50 dark:bg-emerald-900/20', icon: GraduationCap },
   { name: 'Lecturer Demo', email: 'lecturer@plasu.edu.ng', password: 'lecturer123', role: 'lecturer' as const, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/20', icon: BookOpen },
-  { name: 'Admin Demo', email: 'admin@plasu.edu.ng', password: 'admin123', role: 'admin' as const, color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-900/20', icon: ShieldCheck },
 ];
 
 function getStoredUsers(): StoredUser[] {
@@ -164,7 +163,7 @@ const Auth: React.FC<AuthProps> = ({ mode, setMode, onClose, knownAccounts }) =>
       {mode === 'login' && (
         <div className="mb-5 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 text-center">Quick Access</p>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 gap-2">
             {DEMO_ACCOUNTS.map(demo => (
               <button key={demo.email} type="button" onClick={() => quickLogin(demo)} disabled={isLoading}
                 className={`flex flex-col items-center gap-1 p-2 rounded-xl ${demo.bg} hover:scale-105 transition-all min-h-[56px]`}>
@@ -180,7 +179,7 @@ const Auth: React.FC<AuthProps> = ({ mode, setMode, onClose, knownAccounts }) =>
               <div className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-700">
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 text-center">Switch Account</p>
                 <div className="flex flex-col gap-1.5">
-                  {knownAccounts.filter(ka => !DEMO_ACCOUNTS.some(d => d.email === ka.email)).map(acc => (
+                  {knownAccounts.filter(ka => ka.role !== 'admin' && !DEMO_ACCOUNTS.some(d => d.email === ka.email)).map(acc => (
                     <button key={acc.email} type="button" onClick={() => handleChange('email', acc.email)} disabled={isLoading}
                       className="flex items-center gap-2 p-2 rounded-xl bg-white dark:bg-slate-800 hover:bg-[#00843D]/10 border border-slate-200 dark:border-slate-700 hover:border-[#00843D]/30 transition-all min-h-[40px]">
                       <div className="w-7 h-7 rounded-lg bg-[#00843D]/10 flex items-center justify-center text-[#00843D] font-bold text-xs shrink-0">
