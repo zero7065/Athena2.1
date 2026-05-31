@@ -8,7 +8,6 @@ interface AuthProps {
   setMode: (mode: 'login' | 'register') => void;
   onClose: () => void;
   knownAccounts?: AuthUser[];
-  onSelectAccount?: () => void;
 }
 
 const USERS_KEY = 'athena_users';
@@ -47,7 +46,7 @@ function validatePassword(password: string): { valid: boolean; errors: string[] 
   return { valid: errors.length === 0, errors };
 }
 
-const Auth: React.FC<AuthProps> = ({ mode, setMode, onClose, knownAccounts, onSelectAccount }) => {
+const Auth: React.FC<AuthProps> = ({ mode, setMode, onClose, knownAccounts }) => {
   const { login, isLoading: authLoading } = useAuth();
 
   const [formData, setFormData] = useState({
@@ -182,10 +181,7 @@ const Auth: React.FC<AuthProps> = ({ mode, setMode, onClose, knownAccounts, onSe
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 text-center">Switch Account</p>
                 <div className="flex flex-col gap-1.5">
                   {knownAccounts.filter(ka => !DEMO_ACCOUNTS.some(d => d.email === ka.email)).map(acc => (
-                    <button key={acc.email} type="button" onClick={() => {
-                      handleChange('email', acc.email);
-                      if (onSelectAccount) onSelectAccount();
-                    }} disabled={isLoading}
+                    <button key={acc.email} type="button" onClick={() => handleChange('email', acc.email)} disabled={isLoading}
                       className="flex items-center gap-2 p-2 rounded-xl bg-white dark:bg-slate-800 hover:bg-[#00843D]/10 border border-slate-200 dark:border-slate-700 hover:border-[#00843D]/30 transition-all min-h-[40px]">
                       <div className="w-7 h-7 rounded-lg bg-[#00843D]/10 flex items-center justify-center text-[#00843D] font-bold text-xs shrink-0">
                         {acc.name[0]}

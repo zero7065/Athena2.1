@@ -24,11 +24,6 @@ import { useCurrentUser } from './hooks/useCurrentUser';
 import { useTheme } from './context/ThemeContext';
 import { LayoutDashboard, CheckSquare, Timer, Gamepad2, Trophy, Users, UserCircle, Sparkles, Menu, X, BookOpen, ShieldCheck } from 'lucide-react';
 
-/** Helper: sanitize email for use as localStorage key */
-function sanitizeEmail(email: string): string {
-  return email.replace(/[@.]/g, '_');
-}
-
 /**
  * Main App Content Component
  * Handles routing, authentication, and layout
@@ -54,7 +49,6 @@ const AppContent: React.FC = () => {
   const [showHomepage, setShowHomepage] = useState(!user); // Show homepage when not logged in
   const [showFeedback, setShowFeedback] = useState(false);
   const [confettiActive, setConfettiActive] = useState(false);
-  const [showAccountPicker, setShowAccountPicker] = useState(false);
 
   // ============ HANDLERS ============
 
@@ -199,7 +193,6 @@ const AppContent: React.FC = () => {
           setMode={setAuthMode} 
           onClose={handleAuthClose}
           knownAccounts={knownAccounts}
-          onSelectAccount={() => setShowAccountPicker(false)}
         />
       </div>
     );
