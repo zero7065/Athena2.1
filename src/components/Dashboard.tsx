@@ -173,25 +173,27 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
   return (
     <div className="p-3 sm:p-5 md:p-8 space-y-4 sm:space-y-6 h-full flex flex-col overflow-y-auto">
       <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        <div>
+        <div className="space-y-1">
           <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-slate-800 dark:text-white tracking-tight">
-            {greeting}, <span className="text-primary">{user?.name}</span> <span className="text-2xl">{hour < 12 ? '🌅' : hour < 17 ? '☀️' : '🌙'}</span>
+            {greeting}, <span className="gradient-text">{user?.name}</span> <span className="text-2xl">{hour < 12 ? '🌅' : hour < 17 ? '☀️' : '🌙'}</span>
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 font-medium">{encouragement}</p>
+          <p className="text-xs sm:text-sm text-slate-500 font-medium flex items-center gap-1.5">
+            <Sparkles size={12} className="text-[#00843D]" /> {encouragement}
+          </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <div className="glass px-3 sm:px-5 py-2 rounded-2xl flex items-center gap-2 sm:gap-3 border-orange-100">
+          <div className="glass-gradient px-3 sm:px-5 py-2.5 rounded-2xl flex items-center gap-2 sm:gap-3 border-orange-100/50 hover:shadow-lg hover:shadow-orange-500/10 transition-all duration-300">
             <Flame className="text-orange-500 shrink-0" size={22} />
             <div>
               <p className="text-[10px] font-bold text-slate-400 uppercase">Streak</p>
-              <p className="text-sm sm:text-base font-bold text-slate-800 dark:text-white">{profile?.streak || 0} Days</p>
+              <p className="text-sm sm:text-base font-bold text-slate-800 dark:text-white">{profile?.streak || 0}<span className="text-xs font-medium text-slate-400 ml-0.5">days</span></p>
             </div>
           </div>
-          <div className="glass px-3 sm:px-5 py-2 rounded-2xl flex items-center gap-2 sm:gap-3 border-primary/20">
-            <Star className="text-primary shrink-0" size={22} />
+          <div className="glass-gradient px-3 sm:px-5 py-2.5 rounded-2xl flex items-center gap-2 sm:gap-3 border-primary/20 hover:shadow-lg hover:shadow-primary/10 transition-all duration-300">
+            <Star className="text-[#00843D] shrink-0" size={22} />
             <div>
               <p className="text-[10px] font-bold text-slate-400 uppercase">Level {level}</p>
-              <p className="text-sm sm:text-base font-bold text-slate-800 dark:text-white">{xp} XP</p>
+              <p className="text-sm sm:text-base font-bold text-slate-800 dark:text-white">{xp}<span className="text-xs font-medium text-slate-400 ml-0.5">XP</span></p>
             </div>
           </div>
         </div>
@@ -199,10 +201,11 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5">
         {widgets.map((w) => (
-          <div key={w.id} className="glass p-4 sm:p-5 md:p-6 rounded-[24px] sm:rounded-[32px] flex flex-col gap-3 min-h-[180px] relative overflow-hidden">
+          <div key={w.id} className="group glass-gradient p-4 sm:p-5 md:p-6 rounded-[24px] sm:rounded-[32px] flex flex-col gap-3 min-h-[180px] relative overflow-hidden hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-0.5 transition-all duration-500">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-[#00843D]/5 to-transparent rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 sm:gap-3">
-                <div className={cn("p-1.5 rounded-lg bg-slate-50 dark:bg-slate-800", w.color)}>
+                <div className={cn("p-2 rounded-xl bg-white/60 dark:bg-slate-800/60 shadow-sm group-hover:scale-110 transition-transform duration-300", w.color)}>
                   <w.icon size={18} />
                 </div>
                 <h3 className="font-bold text-xs sm:text-sm text-slate-700 dark:text-slate-200">{w.title}</h3>
