@@ -136,11 +136,12 @@ const events = [
 
 interface HomepageProps {
   onSignUp: () => void;
+  onLecturer?: () => void;
   theme?: 'light' | 'dark';
   onToggleTheme?: () => void;
 }
 
-export default function Homepage({ onSignUp, theme = 'dark', onToggleTheme }: HomepageProps) {
+export default function Homepage({ onSignUp, onLecturer, theme = 'dark', onToggleTheme }: HomepageProps) {
   const [activeTestimonial, setActiveTestimonial] = useState(0);
   const [activeImage, setActiveImage] = useState(0);
   const autoPlayRef = useRef<ReturnType<typeof setInterval>>(null);
@@ -333,7 +334,17 @@ export default function Homepage({ onSignUp, theme = 'dark', onToggleTheme }: Ho
                       : 'bg-amber-500 hover:bg-amber-600 text-slate-950 shadow-amber-500/30 hover:translate-y-[-2px]'
                   }`}
                 >
-                  Create Free Account <ArrowRight size={20} />
+                  <GraduationCap size={20} /> Student Sign In
+                </button>
+                <button
+                  onClick={onLecturer}
+                  className={`flex items-center justify-center gap-2 px-6 sm:px-8 py-3 sm:py-4 font-bold text-sm sm:text-base rounded-xl transition-all min-h-[48px] shadow-xl ${
+                    isLight
+                      ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-600/30 hover:translate-y-[-2px]'
+                      : 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-600/30 hover:translate-y-[-2px]'
+                  }`}
+                >
+                  <BookOpen size={20} /> Lecturer Portal
                 </button>
                 <button
                   onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
@@ -692,7 +703,17 @@ export default function Homepage({ onSignUp, theme = 'dark', onToggleTheme }: Ho
                       : 'bg-amber-500 hover:bg-amber-600 text-slate-950 shadow-xl shadow-amber-500/20 hover:scale-105'
                   }`}
                 >
-                  Create Free Account →
+                  <GraduationCap size={20} className="inline mr-2" /> Student Access
+                </button>
+                <button
+                  onClick={onLecturer}
+                  className={`px-8 py-4 font-bold text-lg rounded-xl transition-all min-h-[48px] ${
+                    isLight
+                      ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-xl shadow-blue-600/20 hover:scale-105'
+                      : 'bg-blue-600 hover:bg-blue-700 text-white shadow-xl shadow-blue-600/20 hover:scale-105'
+                  }`}
+                >
+                  <BookOpen size={20} className="inline mr-2" /> Lecturer Portal
                 </button>
                 <button
                   onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}

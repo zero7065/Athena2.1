@@ -22,6 +22,8 @@
   --color-primary: #00843D;
   --color-secondary: #FFD700;
   --color-accent: #059669;
+  --color-plasu-blue: #0B2A5A;
+  --color-plasu-gold: #D4AF37;
   --color-background: #FFFFFF;
   --color-foreground: #1E293B;
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
@@ -209,4 +211,61 @@
 /* ===== Focus ring ===== */
 .focus-ring {
   @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00843D]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900 transition-all;
+}
+
+/* ===== PLASU Themed ===== */
+.gradient-plasu {
+  @apply bg-gradient-to-br from-[#0B2A5A] via-[#0B2A5A]/90 to-[#D4AF37]/20;
+}
+
+.gradient-plasu-light {
+  @apply bg-gradient-to-br from-blue-50 via-white to-amber-50/30;
+}
+
+.text-plasu-gold {
+  color: #D4AF37;
+}
+
+.bg-plasu-blue {
+  background-color: #0B2A5A;
+}
+
+.border-plasu-gold {
+  border-color: #D4AF37;
+}
+
+/* ===== Enhanced Data Display ===== */
+.stat-card {
+  @apply p-3 rounded-xl bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm border border-slate-200/50 dark:border-slate-700/50 shadow-sm hover:shadow-md transition-all duration-300;
+}
+
+.stat-card-primary {
+  @apply stat-card border-l-2 border-l-primary;
+}
+
+.stat-card-blue {
+  @apply stat-card border-l-2 border-l-blue-500;
+}
+
+.stat-card-amber {
+  @apply stat-card border-l-2 border-l-amber-500;
+}
+
+/* ===== Loading Skeleton ===== */
+.skeleton {
+  @apply bg-slate-200 dark:bg-slate-700 animate-pulse rounded-lg;
+}
+
+/* ===== Scrollbar Styling ===== */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-slate-300 dark:bg-slate-600 rounded-full;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  @apply bg-slate-400 dark:bg-slate-500;
 }

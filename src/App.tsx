@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import Auth from './components/Auth';
+import LecturerAuth from './components/LecturerAuth';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import TaskBoard from './components/TaskBoard';
@@ -46,6 +47,7 @@ const AppContent: React.FC = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [showAuth, setShowAuth] = useState(false);
+  const [showLecturerAuth, setShowLecturerAuth] = useState(false);
   const [showHomepage, setShowHomepage] = useState(!user); // Show homepage when not logged in
   const [showFeedback, setShowFeedback] = useState(false);
   const [confettiActive, setConfettiActive] = useState(false);
@@ -91,8 +93,18 @@ const AppContent: React.FC = () => {
    */
   const handleSignUp = useCallback(() => {
     setShowAuth(true);
+    setShowLecturerAuth(false);
     setShowHomepage(false);
     setAuthMode('register');
+  }, []);
+
+  /**
+   * Handle lecturer auth from homepage
+   */
+  const handleLecturerAuth = useCallback(() => {
+    setShowLecturerAuth(true);
+    setShowAuth(false);
+    setShowHomepage(false);
   }, []);
 
   /**
@@ -100,6 +112,7 @@ const AppContent: React.FC = () => {
    */
   const handleAuthClose = useCallback(() => {
     setShowAuth(false);
+    setShowLecturerAuth(false);
     setShowHomepage(true);
   }, []);
 
@@ -183,7 +196,11 @@ const AppContent: React.FC = () => {
   // ============ NOT LOGGED IN - SHOW HOMEPAGE OR AUTH ============
   if (!user) {
     if (showHomepage) {
-      return <Homepage onSignUp={handleSignUp} theme={theme} onToggleTheme={toggleTheme} />;
+      return <Homepage onSignUp={handleSignUp} onLecturer={handleLecturerAuth} theme={theme} onToggleTheme={toggleTheme} />;
+    }
+    
+    if (showLecturerAuth) {
+      return <LecturerAuth onBack={handleAuthClose} />;
     }
     
     return (

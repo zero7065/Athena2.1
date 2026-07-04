@@ -1,5 +1,5 @@
-import React from 'react';
-import { Calendar, CheckSquare, Zap, Users, TrendingUp, Flame, Star, School, MessageSquare, Sparkles, Brain, Trophy, BookOpen } from 'lucide-react';
+import React, { useMemo } from 'react';
+import { Calendar, CheckSquare, Zap, Users, TrendingUp, Flame, Star, School, MessageSquare, Sparkles, Brain, Trophy, BookOpen, Target, Clock, Quote } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAuth } from '../context/AuthContext';
 import { useCurrentUser } from '../hooks/useCurrentUser';
@@ -39,6 +39,11 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
   const progressInLevel = xp - currentLevelXp;
   const xpNeeded = nextLevelXp - currentLevelXp;
   const progressPct = Math.min(100, Math.round((progressInLevel / (xpNeeded || 1)) * 100));
+
+  const completedTasks = useMemo(() => tasks.filter(t => t.status === 'done').length, [tasks]);
+  const pendingTasks = useMemo(() => tasks.filter(t => t.status !== 'done').length, [tasks]);
+  const totalSessions = sessions.length;
+  const unlockedAchievements = useMemo(() => achievements.filter(a => a.unlockedAt !== null).length, [achievements]);
 
   const widgets = [
     {
@@ -84,15 +89,21 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
     {
       id: 'xp-progress', title: 'Level Progress', icon: Star, color: 'text-amber-500',
       content: (
-        <div className="space-y-2">
+        <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500">Level {level}</span>
-            <span className="text-xs font-bold text-primary">{xp} XP</span>
+            <div className="flex items-center gap-2">
+              <span className="text-lg font-bold gradient-text">Level {level}</span>
+              <span className="px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 text-[9px] font-bold">{xp} XP</span>
+            </div>
+            <Target size={18} className="text-amber-400" />
           </div>
-          <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2.5 overflow-hidden">
-            <div className="h-full bg-gradient-to-r from-primary to-emerald-400 rounded-full transition-all" style={{ width: `${progressPct}%` }} />
+          <div className="progress-bar">
+            <div className="progress-bar-fill" style={{ width: `${progressPct}%` }} />
           </div>
-          <p className="text-[10px] text-slate-400 text-center">{xpNeeded - progressInLevel} XP to Level {level + 1}</p>
+          <div className="flex justify-between text-[10px]">
+            <span className="text-slate-400 font-medium">{progressInLevel} / {xpNeeded} XP</span>
+            <span className="text-primary font-bold">{xpNeeded - progressInLevel} XP to Level {level + 1}</span>
+          </div>
         </div>
       )
     },
@@ -100,15 +111,25 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
       id: 'achievements', title: 'Achievements', icon: Trophy, color: 'text-amber-500',
       content: (
         <div className="space-y-2">
-          <p className="text-xs text-slate-500">{achievements.filter(a => a.unlockedAt !== null).length}/{achievements.length} unlocked</p>
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-slate-500 font-medium">{unlockedAchievements}/{achievements.length} unlocked</p>
+            <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-bold", unlockedAchievements === achievements.length ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600")}>
+              {Math.round((unlockedAchievements / achievements.length) * 100)}%
+            </span>
+          </div>
           <div className="grid grid-cols-4 gap-2">
             {achievements.filter(a => a.unlockedAt !== null).slice(0, 8).map(a => (
-              <div key={a.id} className="w-full aspect-square rounded-lg bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center text-emerald-500 text-lg" title={a.title}>
+              <div key={a.id} className="w-full aspect-square rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/30 dark:to-emerald-800/30 flex items-center justify-center text-emerald-500 text-lg shadow-sm border border-emerald-200 dark:border-emerald-800" title={a.title}>
                 {'\u2B50'}
               </div>
             ))}
+            {Array.from({ length: Math.max(0, 8 - unlockedAchievements) }).map((_, i) => (
+              <div key={`locked-${i}`} className="w-full aspect-square rounded-xl bg-slate-50 dark:bg-slate-800/50 flex items-center justify-center text-slate-300 dark:text-slate-600 text-lg border border-slate-100 dark:border-slate-700">
+                ?
+              </div>
+            ))}
           </div>
-          <button onClick={() => setActiveTab?.('achievements')} className="w-full text-center text-[10px] font-bold text-primary hover:underline pt-1">View All</button>
+          <button onClick={() => setActiveTab?.('achievements')} className="w-full text-center text-[10px] font-bold text-primary hover:underline pt-1">View All Achievements</button>
         </div>
       )
     },
@@ -117,16 +138,22 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
       content: (
         <div className="space-y-2">
           {appData.friends.filter(f => f.online).slice(0, 3).map(f => (
-            <div key={f.id} className="flex items-center gap-2 text-xs">
-              <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-[10px]">{f.name[0]}</div>
-              <span className="font-medium text-slate-600 dark:text-slate-300">
-                <span className="font-bold">{f.name}</span>{' '}
-                <span className="text-emerald-500">Online</span>
+            <div key={f.id} className="flex items-center gap-2 p-2 rounded-lg bg-white/50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700">
+              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-[10px]">{f.name[0]}</div>
+              <div className="flex-1 min-w-0">
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate block">{f.name}</span>
+              </div>
+              <span className="flex items-center gap-1 text-[9px] font-bold text-emerald-500">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Online
               </span>
             </div>
           ))}
           {appData.friends.filter(f => f.online).length === 0 && (
-            <p className="text-xs text-slate-400 italic text-center py-3">Add friends to see their activity.</p>
+            <div className="text-center py-4">
+              <Users size={24} className="mx-auto text-slate-300 mb-2" />
+              <p className="text-xs text-slate-400 font-medium">No friends online</p>
+              <button onClick={() => setActiveTab?.('social')} className="text-[10px] font-bold text-primary hover:underline mt-1">Add Friends</button>
+            </div>
           )}
         </div>
       )
@@ -134,22 +161,24 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
     {
       id: 'study-progress', title: 'Study Progress', icon: BookOpen, color: 'text-blue-500',
       content: (
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-slate-500">Sessions</span>
-            <span className="font-bold text-primary">{sessions.length}</span>
-          </div>
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-slate-500">Tasks Completed</span>
-            <span className="font-bold text-primary">{tasks.filter(t => t.status === 'done').length}</span>
-          </div>
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-slate-500">Friends</span>
-            <span className="font-bold text-primary">{appData.friends.length}</span>
-          </div>
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-slate-500">Games Played</span>
-            <span className="font-bold text-primary">{Object.values(appData.gameScores).reduce((a, b) => a + b, 0)}</span>
+        <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-2">
+            <div className="p-2.5 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 text-center">
+              <p className="text-lg font-bold text-blue-600 dark:text-blue-400">{totalSessions}</p>
+              <p className="text-[9px] font-bold text-blue-500/70 uppercase tracking-wider">Sessions</p>
+            </div>
+            <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800 text-center">
+              <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">{completedTasks}</p>
+              <p className="text-[9px] font-bold text-emerald-500/70 uppercase tracking-wider">Done</p>
+            </div>
+            <div className="p-2.5 rounded-xl bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800 text-center">
+              <p className="text-lg font-bold text-purple-600 dark:text-purple-400">{appData.friends.length}</p>
+              <p className="text-[9px] font-bold text-purple-500/70 uppercase tracking-wider">Friends</p>
+            </div>
+            <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800 text-center">
+              <p className="text-lg font-bold text-amber-600 dark:text-amber-400">{Object.values(appData.gameScores).reduce((a, b) => a + b, 0)}</p>
+              <p className="text-[9px] font-bold text-amber-500/70 uppercase tracking-wider">Games</p>
+            </div>
           </div>
         </div>
       )
@@ -157,13 +186,30 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
     {
       id: 'plasu-info', title: 'PLASU Bokkos', icon: School, color: 'text-accent',
       content: (
-        <div className="space-y-2">
-          <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-            Established 2005 &bull; 66th Nigerian University &bull; Motto: "Knowledge, Diligence &amp; Integrity"
-          </p>
-          <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-            <span className="text-[10px] font-bold text-slate-400 uppercase">Location</span>
-            <span className="text-[10px] font-bold text-primary">Bokkos, Plateau State</span>
+        <div className="space-y-3">
+          <div className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-100 dark:border-blue-800">
+            <School size={32} className="text-blue-600 shrink-0" />
+            <div>
+              <p className="text-xs font-extrabold text-blue-700 dark:text-blue-300">Plateau State University</p>
+              <p className="text-[9px] text-blue-500/70 font-medium">Bokkos, Plateau State, Nigeria</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            <div className="text-center p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+              <p className="text-xs font-bold text-slate-800 dark:text-slate-200">2005</p>
+              <p className="text-[8px] text-slate-400 uppercase tracking-wider">Founded</p>
+            </div>
+            <div className="text-center p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+              <p className="text-xs font-bold text-slate-800 dark:text-slate-200">66th</p>
+              <p className="text-[8px] text-slate-400 uppercase tracking-wider">In Nigeria</p>
+            </div>
+            <div className="text-center p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+              <p className="text-xs font-bold text-slate-800 dark:text-slate-200">24th</p>
+              <p className="text-[8px] text-slate-400 uppercase tracking-wider">State-Owned</p>
+            </div>
+          </div>
+          <div className="flex items-center justify-center gap-1.5 text-[9px] text-slate-400 font-medium italic">
+            <Quote size={10} /> Knowledge, Diligence &amp; Integrity
           </div>
         </div>
       )
