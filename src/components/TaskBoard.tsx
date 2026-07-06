@@ -21,6 +21,7 @@ import { useAuth } from '../context/AuthContext';
 import { LocalTask, getSubmissions, saveSubmission, getStudentSubmissions } from '../lib/storage';
 import { cn } from '../lib/utils';
 import { safeGroq } from '../lib/groq';
+import { logActivity } from './ActivityFeed';
 
 const TaskBoard: React.FC = () => {
   const { user, appData, updateAppData, addUserXp } = useAuth();
@@ -255,6 +256,7 @@ const TaskBoard: React.FC = () => {
       const task = prev.tasks.find(t => t.id === id);
       if (task && task.status !== 'done' && newStatus === 'done') {
         addUserXp(50);
+        if (user) logActivity(user.email, user.name, 'submitted assignment', `${task.title} - Task completed`, 'CheckSquare');
         // Student: start auto-submit timer (10 min)
         if (isStudent && user) {
           const existingSubs = getStudentSubmissions(user.email);

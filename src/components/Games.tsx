@@ -5,6 +5,7 @@ import { cn } from '../lib/utils';
 import { useAuth } from '../context/AuthContext';
 import { safeGroq } from '../lib/groq';
 import CBTExam from './CBTExam';
+import { logActivity } from './ActivityFeed';
 
 /* ===== Chess Game ===== */
 const PIECE_SET: Record<string, Record<string, { char: string; label: string }>> = {
@@ -28,7 +29,7 @@ const ChessGame: React.FC = () => {
   const [copied, setCopied] = useState(false);
   const [boardTheme, setBoardTheme] = useState<'green' | 'blue' | 'brown'>('green');
   const [pieceStyle, setPieceStyle] = useState<'standard'>('standard');
-  const { addUserXp, appData, updateAppData } = useAuth();
+  const { addUserXp, appData, updateAppData, user } = useAuth();
 
   const themeColors = {
     green: { dark: 'bg-emerald-700', light: 'bg-emerald-50' },
@@ -100,6 +101,7 @@ const ChessGame: React.FC = () => {
         if (g.isCheckmate()) {
           addUserXp(100);
           updateAppData(prev => ({ ...prev, gameScores: { ...prev.gameScores, chess: prev.gameScores.chess + 1 } }));
+          if (user) logActivity(user.email, user.name, 'won chess game', 'Defeated AI opponent', 'Gamepad2');
         }
       }
       return result;
@@ -302,7 +304,7 @@ const ChessGame: React.FC = () => {
 const DIFFICULTIES = { easy: 30, medium: 40, hard: 50 };
 
 const SudokuGame: React.FC = () => {
-  const { addUserXp, appData, updateAppData } = useAuth();
+  const { addUserXp, appData, updateAppData, user } = useAuth();
   const [board, setBoard] = useState<number[][]>([]);
   const [initial, setInitial] = useState<boolean[][]>([]);
   const [selected, setSelected] = useState<[number, number] | null>(null);
@@ -425,8 +427,9 @@ const SudokuGame: React.FC = () => {
       setCompleted(true);
       addUserXp(80);
       updateAppData(prev => ({ ...prev, gameScores: { ...prev.gameScores, sudoku: prev.gameScores.sudoku + 1 } }));
+      if (user) logActivity(user.email, user.name, 'completed sudoku puzzle', `Difficulty: ${difficulty}`, 'Grid3X3');
     }
-  }, [board, findConflicts, addUserXp, updateAppData]);
+  }, [board, findConflicts, addUserXp, updateAppData, user, difficulty]);
 
   const handleInput = (val: number) => {
     if (!selected || completed) return;
@@ -514,7 +517,7 @@ const MemoryMatch: React.FC = () => {
   const [startTime, setStartTime] = useState<number>(0);
   const [elapsed, setElapsed] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
-  const { addUserXp, appData, updateAppData } = useAuth();
+  const { addUserXp, appData, updateAppData, user } = useAuth();
 
   const initGame = useCallback(() => {
     const deck = [...icons.slice(0, 8), ...icons.slice(0, 8)]
@@ -545,6 +548,7 @@ const MemoryMatch: React.FC = () => {
       setCompleted(true);
       addUserXp(75);
       updateAppData(prev => ({ ...prev, gameScores: { ...prev.gameScores, memory: prev.gameScores.memory + 1 } }));
+      if (user) logActivity(user.email, user.name, 'won memory game', 'Completed memory match', 'Gamepad2');
     }
   }, [matched, cards.length, completed, addUserXp, updateAppData]);
 

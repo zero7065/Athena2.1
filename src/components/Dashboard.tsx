@@ -1,9 +1,10 @@
 import React, { useMemo } from 'react';
-import { Calendar, CheckSquare, Zap, Users, TrendingUp, Flame, Star, School, MessageSquare, Sparkles, Brain, Trophy, BookOpen, Target, Clock, Quote } from 'lucide-react';
+import { Calendar, CheckSquare, Zap, Users, TrendingUp, Flame, Star, School, MessageSquare, Sparkles, Brain, Trophy, BookOpen, Target, Clock, Quote, Activity } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAuth } from '../context/AuthContext';
 import { useCurrentUser } from '../hooks/useCurrentUser';
 import { calcLevel, xpForNextLevel } from '../lib/storage';
+import ActivityFeed from './ActivityFeed';
 
 interface DashboardProps {
   setActiveTab?: (tab: string) => void;
@@ -134,27 +135,10 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
       )
     },
     {
-      id: 'friend-activity', title: 'Friend Activity', icon: Users, color: 'text-indigo-500',
+      id: 'activity-feed', title: 'Activity Feed', icon: Activity, color: 'text-indigo-500',
       content: (
-        <div className="space-y-2">
-          {appData.friends.filter(f => f.online).slice(0, 3).map(f => (
-            <div key={f.id} className="flex items-center gap-2 p-2 rounded-lg bg-white/50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700">
-              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-[10px]">{f.name[0]}</div>
-              <div className="flex-1 min-w-0">
-                <span className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate block">{f.name}</span>
-              </div>
-              <span className="flex items-center gap-1 text-[9px] font-bold text-emerald-500">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Online
-              </span>
-            </div>
-          ))}
-          {appData.friends.filter(f => f.online).length === 0 && (
-            <div className="text-center py-4">
-              <Users size={24} className="mx-auto text-slate-300 mb-2" />
-              <p className="text-xs text-slate-400 font-medium">No friends online</p>
-              <button onClick={() => setActiveTab?.('social')} className="text-[10px] font-bold text-primary hover:underline mt-1">Add Friends</button>
-            </div>
-          )}
+        <div className="-mx-1">
+          <ActivityFeed limit={5} compact />
         </div>
       )
     },

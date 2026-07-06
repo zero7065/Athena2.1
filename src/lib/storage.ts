@@ -615,3 +615,61 @@ export function getSupportSettings(): SupportSettings {
 export function saveSupportSettings(s: SupportSettings) {
   localStorage.setItem(SUPPORT_KEY, JSON.stringify(s));
 }
+
+/* ========================================
+ * Activity Feed — User-Facing Timeline
+ * ======================================== */
+
+export interface ActivityEntry {
+  id: string;
+  timestamp: number;
+  userEmail: string;
+  userName: string;
+  action: string;
+  details: string;
+  icon: string; // lucide icon name
+}
+
+const ACTIVITY_KEY = 'athena_activity';
+
+export function logActivity(userEmail: string, userName: string, action: string, details: string, icon: string = 'Sparkles') {
+  const all = getActivities();
+  const entry: ActivityEntry = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    timestamp: Date.now(),
+    userEmail,
+    userName,
+    action,
+    details,
+    icon,
+  };
+  all.unshift(entry);
+  if (all.length > 100) all.length = 100;
+  localStorage.setItem(ACTIVITY_KEY, JSON.stringify(all));
+}
+
+export function getActivities(): ActivityEntry[] {
+  try {
+    const raw = localStorage.getItem(ACTIVITY_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+
+export function getUserActivities(email: string, limit: number = 20): ActivityEntry[] {
+  return getActivities().filter(a => a.userEmail === email).slice(0, limit);
+}
+
+export function seedActivityLog() {
+  if (localStorage.getItem('athena_activity')) return;
+  const entries: ActivityEntry[] = [
+    { id: 'a1', timestamp: Date.now() - 60000, userEmail: 'student1@plasu.edu.ng', userName: 'Jehu Nanpan Luke', action: 'submitted assignment', details: 'CSC301 - Data Structures Assignment 1', icon: 'CheckSquare' },
+    { id: 'a2', timestamp: Date.now() - 180000, userEmail: 'student2@plasu.edu.ng', userName: 'Amina Bello', action: 'completed study session', details: '25 min focus session - Mathematics', icon: 'Timer' },
+    { id: 'a3', timestamp: Date.now() - 300000, userEmail: 'lecturer1@plasu.edu.ng', userName: 'Dr. Chukwuma Okoro', action: 'posted new assignment', details: 'CSC401 - Algorithm Analysis Due 15/07', icon: 'BookOpen' },
+    { id: 'a4', timestamp: Date.now() - 600000, userEmail: 'student3@plasu.edu.ng', userName: 'John Musa', action: 'earned achievement', details: 'Task Master - 5 tasks completed', icon: 'Trophy' },
+    { id: 'a5', timestamp: Date.now() - 900000, userEmail: 'student4@plasu.edu.ng', userName: 'Grace Okon', action: 'won chess game', details: 'Defeated AI on Medium difficulty', icon: 'Gamepad2' },
+    { id: 'a6', timestamp: Date.now() - 1800000, userEmail: 'student1@plasu.edu.ng', userName: 'Jehu Nanpan Luke', action: 'completed CBT exam', details: 'Mathematics - Score: 85%', icon: 'Brain' },
+    { id: 'a7', timestamp: Date.now() - 3600000, userEmail: 'student5@plasu.edu.ng', userName: 'Samuel Obi', action: 'joined study room', details: 'CSC301 Group Discussion', icon: 'Users' },
+    { id: 'a8', timestamp: Date.now() - 7200000, userEmail: 'lecturer2@plasu.edu.ng', userName: 'Prof. Fatima Ali', action: 'graded submissions', details: 'MTH201 - 12 assignments graded', icon: 'CheckCircle2' },
+  ];
+  localStorage.setItem(ACTIVITY_KEY, JSON.stringify(entries));
+}

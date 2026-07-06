@@ -16,13 +16,14 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Play, Pause, RotateCcw, BookOpen, TrendingUp, History, Trophy } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { cn } from '../lib/utils';
+import { logActivity } from './ActivityFeed';
 
 const WORK_TIME = 25 * 60;
 const SHORT_BREAK = 5 * 60;
 const LONG_BREAK = 15 * 60;
 
 const StudyTracker: React.FC = () => {
-  const { appData, updateAppData, addUserXp } = useAuth();
+  const { appData, updateAppData, addUserXp, user } = useAuth();
   const [mode, setMode] = useState<'work' | 'shortBreak' | 'longBreak'>('work');
   const [isActive, setIsActive] = useState(false);
   const [timeLeft, setTimeLeft] = useState(WORK_TIME);
@@ -149,6 +150,7 @@ const StudyTracker: React.FC = () => {
       },
     }));
     addUserXp(30);
+    if (user) logActivity(user.email, user.name, 'completed study session', `${25} min focus session - ${subject.trim()}`, 'Timer');
     setShowLogModal(false);
     setSubject('');
     setSessionComplete(true);

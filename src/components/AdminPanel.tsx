@@ -36,7 +36,7 @@ const AdminPanel: React.FC = () => {
     : 0;
 
   const gamesPlayed = Object.values(gameScores).reduce((a, b) => a + b, 0);
-  const totalRegisteredUsers = allUsers.length + 1; // +1 for current user
+  const totalRegisteredUsers = allUsers.length; // Loaded from stored users list
 
   const handleExport = () => {
     const rows = [
