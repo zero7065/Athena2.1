@@ -1,5 +1,5 @@
 /*
- * ATHENA - Student Success Platform
+ * CampusIQ - Student Success Platform
  * Section: DASHBOARD ROUTER
  *
  * Routes users to the correct dashboard based on their role:

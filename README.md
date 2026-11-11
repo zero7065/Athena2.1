@@ -1,7 +1,7 @@
-# ATHENA — AI-Powered Student Success Platform
+# CampusIQ — AI-Powered Student Success Platform
 ## Plateau State University, Bokkos Edition
 
-ATHENA is a comprehensive student success platform for Plateau State University (PLASU). It combines task management, Pomodoro study tracking, gamified achievements, cognitive games, and AI assistance to help students achieve their academic goals. Fully offline-capable with localStorage persistence — no backend required.
+CampusIQ is a comprehensive student success platform for Plateau State University (CampusIQ). It combines task management, Pomodoro study tracking, gamified achievements, cognitive games, and AI assistance to help students achieve their academic goals. Fully offline-capable with localStorage persistence — no backend required.
 
 ### Features
 
@@ -10,7 +10,7 @@ ATHENA is a comprehensive student success platform for Plateau State University 
 - **4 Cognitive Games** — Chess (legal-move AI with alpha-beta pruning), Memory Match, Sudoku (unique-solution guaranteed), AI Art Guesser (Groq-powered dynamic challenges)
 - **CBT Exam Simulator** — 15 JAMB-style questions across 5 subjects with auto-grading, timer, XP rewards
 - **Achievement / XP System** — 14 achievements, level progression, toast notifications on unlock
-- **AI Academic Assistant** — Groq-powered (llama-3.3-70b) chat with PLASU context and personality preferences
+- **AI Academic Assistant** — Groq-powered (llama-3.3-70b) chat with CampusIQ context and personality preferences
 - **Friends & Study Rooms** — Add friends, see online status, shared study spaces
 - **Admin Analytics Panel** — Multi-user overview, tasks by status, CSV export, date range filtering
 - **Full Role-Based Access** — Student, Lecturer, and Admin roles with respective portals
@@ -21,7 +21,7 @@ ATHENA is a comprehensive student success platform for Plateau State University 
 - **Frontend**: React 19, TypeScript, Vite 6, Tailwind CSS 4, Motion, Recharts
 - **AI**: Groq SDK (llama-3.3-70b, mixtral-8x7b, gemma2-9b-it)
 - **Games**: Chess.js, custom board renderer
-- **Storage**: localStorage (namespace `athena_` prefix, corruption-safe)
+- **Storage**: localStorage (namespace `campusiq_` prefix, corruption-safe)
 - **PWA**: Manifest inline, apple-mobile-web-app meta tags, installable
 
 ### Quick Start
@@ -44,9 +44,9 @@ The app runs fully **offline** — no server or database needed. All data is sto
 
 | Role     | Email                     | Password      |
 |----------|---------------------------|---------------|
-| Admin    | admin@plasu.edu.ng        | admin123      |
-| Lecturer | lecturer@plasu.edu.ng     | lecturer123   |
-| Student  | student@plasu.edu.ng      | student123    |
+| Admin    | admin@campusiq.io        | admin123      |
+| Lecturer | lecturer@campusiq.io     | lecturer123   |
+| Student  | student@campusiq.io      | student123    |
 
 Or register a new account with any email and choose your role during sign-up.
 

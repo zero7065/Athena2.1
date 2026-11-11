@@ -63,7 +63,7 @@ const AdminPanel: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `athena_analytics_${new Date().toISOString().split('T')[0]}.csv`;
+    link.download = `campusiq_analytics_${new Date().toISOString().split('T')[0]}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

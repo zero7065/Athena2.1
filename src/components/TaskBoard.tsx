@@ -1,5 +1,5 @@
 /*
- * ATHENA - Student Success Platform
+ * CampusIQ - Student Success Platform
  * Section: KANBAN (TaskBoard)
  *
  * Changes made:
@@ -11,7 +11,7 @@
  * - Moving task to Done awards 50 XP and triggers achievement check
  * - Task count in column headers
  * - Empty columns show styled empty state
- * - All task state persists in localStorage under "athena_tasks"
+ * - All task state persists in localStorage under "campusiq_tasks"
  */
 
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
@@ -46,7 +46,7 @@ const TaskBoard: React.FC = () => {
 
   // Load pending auto-submit timers from localStorage
   useEffect(() => {
-    const stored = localStorage.getItem('athena_autosubmit');
+    const stored = localStorage.getItem('campusiq_autosubmit');
     if (stored) {
       try {
         setPendingAutoSubmit(JSON.parse(stored));
@@ -92,7 +92,7 @@ const TaskBoard: React.FC = () => {
           }
         }
         if (changed) {
-          localStorage.setItem('athena_autosubmit', JSON.stringify(updated));
+          localStorage.setItem('campusiq_autosubmit', JSON.stringify(updated));
         }
         return updated;
       });
@@ -130,7 +130,7 @@ const TaskBoard: React.FC = () => {
       const updated = { ...pendingAutoSubmit };
       delete updated[taskId];
       setPendingAutoSubmit(updated);
-      localStorage.setItem('athena_autosubmit', JSON.stringify(updated));
+      localStorage.setItem('campusiq_autosubmit', JSON.stringify(updated));
     }
 
     // Save submission
@@ -159,7 +159,7 @@ const TaskBoard: React.FC = () => {
     const updated = { ...pendingAutoSubmit };
     delete updated[taskId];
     setPendingAutoSubmit(updated);
-    localStorage.setItem('athena_autosubmit', JSON.stringify(updated));
+    localStorage.setItem('campusiq_autosubmit', JSON.stringify(updated));
     
     // Save as draft
     const task = tasks.find(t => t.id === taskId);
@@ -265,7 +265,7 @@ const TaskBoard: React.FC = () => {
             const autoSubmitTime = Date.now() + 10 * 60 * 1000; // 10 minutes
             setPendingAutoSubmit(prev => {
               const updated = { ...prev, [id]: autoSubmitTime };
-              localStorage.setItem('athena_autosubmit', JSON.stringify(updated));
+              localStorage.setItem('campusiq_autosubmit', JSON.stringify(updated));
               return updated;
             });
           }

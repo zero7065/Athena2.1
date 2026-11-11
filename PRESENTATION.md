@@ -1,16 +1,16 @@
-# ATHENA: Empowering PLASU Students
+# CampusIQ: Empowering CampusIQ Students
 
 ## Stakeholder Presentation Summary
 
 ### The Problem
 Students at Plateau State University struggle with time management, focus, and tracking academic progress across multiple subjects. Tools are fragmented — Google Classroom for assignments, WhatsApp for study groups, paper notes for planning. No single platform connects tasks, study habits, and performance data.
 
-### The Solution: ATHENA
-ATHENA is a centralized platform that acts as a digital academic companion. It combines task management, Pomodoro study tracking, gamified achievements, and AI-powered assistance into one cohesive experience. Every interaction earns XP and contributes to the student's growth profile.
+### The Solution: CampusIQ
+CampusIQ is a centralized platform that acts as a digital academic companion. It combines task management, Pomodoro study tracking, gamified achievements, and AI-powered assistance into one cohesive experience. Every interaction earns XP and contributes to the student's growth profile.
 
 ### Key Value Propositions
 
-1. **AI-Powered Assistance** — Groq-powered chat assistant with real PLASU context. Helps with coursework, study strategies, and university inquiries.
+1. **AI-Powered Assistance** — Groq-powered chat assistant with real CampusIQ context. Helps with coursework, study strategies, and university inquiries.
 2. **Gamified Engagement** — 14 achievements, level progression, XP economy across tasks, study sessions, and games.
 3. **Cognitive Training** — Chess AI, Sudoku, Memory Match, and AI Art Guesser built in as study break activities that sharpen focus.
 4. **JAMB Preparation** — Built-in CBT exam simulator with 15 practice questions across 5 subjects, auto-grading, and XP rewards.
@@ -18,7 +18,7 @@ ATHENA is a centralized platform that acts as a digital academic companion. It c
 6. **Fully Offline-Capable** — No backend required. All data persists in browser localStorage. Deploy as static site anywhere.
 
 ### Visual Identity
-The platform uses PLASU's official green (#00843D) and gold (#FFD700), combined with glassmorphism (backdrop-blur, frosted panels, subtle shadows) for a modern, professional feel. Supports dark mode.
+The platform uses CampusIQ's official green (#00843D) and gold (#FFD700), combined with glassmorphism (backdrop-blur, frosted panels, subtle shadows) for a modern, professional feel. Supports dark mode.
 
 ### Architecture
 - **Single-page application** built with React 19 + TypeScript + Vite

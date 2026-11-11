@@ -1,5 +1,5 @@
 /*
- * ATHENA - Student Success Platform
+ * CampusIQ - Student Success Platform
  * Section: GROQ AI INTEGRATION
  * - All calls go through /api/groq proxy (key is server-side)
  * - Error handling with user-facing messages

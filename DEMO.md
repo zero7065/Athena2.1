@@ -1,4 +1,4 @@
-# ATHENA Demo Guide
+# CampusIQ Demo Guide
 
 ### 1. Login / Register
 - Open the app and click "Get Started" or "Login".
@@ -8,7 +8,7 @@
 ### 2. Dashboard
 - View your XP bar, streak, and level progress.
 - Quick-access widgets: AI assistant, task preview, focus score, achievements.
-- Real PLASU info section with VC's message and university statistics.
+- Real CampusIQ info section with VC's message and university statistics.
 
 ### 3. Task Management
 - Go to **Tasks** from the navigation.
@@ -37,7 +37,7 @@
 - Toast notification on every unlock.
 
 ### 7. AI Academic Assistant
-- Ask questions about your courses, study tips, or PLASU.
+- Ask questions about your courses, study tips, or CampusIQ.
 - Powered by Groq (llama-3.3-70b). Press `?` for keyboard shortcuts.
 
 ### 8. Social

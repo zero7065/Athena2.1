@@ -1,9 +1,9 @@
-export const PLASU_BRANDING = {
-  schoolName: 'Plateau State University',
-  shortName: 'PLASU',
-  motto: 'Knowledge, Diligence and Integrity',
-  emblemUrl: '/plasu-emblem.svg',
-  established: 2005,
+export const CAMPUSIQ_BRANDING = {
+  platformName: 'CampusIQ',
+  shortName: 'CampusIQ',
+  motto: 'Intelligence. Integrity. Innovation.',
+  emblemUrl: '/campusiq-logo.svg',
+  established: 2025,
   colors: {
     primary: '#00843D',
     secondary: '#FFD700',
@@ -11,9 +11,15 @@ export const PLASU_BRANDING = {
     dark: '#0f172a',
   },
   contact: {
-    email: 'athena@plasu.edu.ng',
-    website: 'https://plasu.edu.ng',
-    address: 'Bokkos, Plateau State, Nigeria',
+    email: 'support@campusiq.io',
+    website: 'https://campusiq.io',
+    address: 'Multi-Tenant Platform',
   },
-  version: '2.1.0',
+  version: '3.0.0',
 };
+
+export const DEMO_USERS = [
+  { name: 'Admin User', email: 'admin@campusiq.io', password: 'admin123', role: 'admin' as const, studentId: 'ADM001', department: 'Administration' },
+  { name: 'Lecturer User', email: 'lecturer@campusiq.io', password: 'lecturer123', role: 'lecturer' as const, studentId: 'LEC001', department: 'Computer Science' },
+  { name: 'Student User', email: 'student@campusiq.io', password: 'student123', role: 'student' as const, studentId: 'STU001', department: 'Computer Science' },
+];

@@ -36,11 +36,11 @@ const AppContent: React.FC = () => {
 
   // ============ STATE ============
   const [activeTab, setActiveTab] = useState(() => {
-    if (user) return localStorage.getItem('athena_active_tab') || 'dashboard';
+    if (user) return localStorage.getItem('campusiq_active_tab') || 'dashboard';
     return 'dashboard';
   });
   const [isCollapsed, setIsCollapsed] = useState(() => {
-    const saved = localStorage.getItem('athena_sidebar_collapsed');
+    const saved = localStorage.getItem('campusiq_sidebar_collapsed');
     return saved !== null ? JSON.parse(saved) : true;
   });
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -166,12 +166,12 @@ const AppContent: React.FC = () => {
 
   // Persist sidebar collapsed state
   useEffect(() => {
-    localStorage.setItem('athena_sidebar_collapsed', JSON.stringify(isCollapsed));
+    localStorage.setItem('campusiq_sidebar_collapsed', JSON.stringify(isCollapsed));
   }, [isCollapsed]);
 
   // Save active tab for resume
   useEffect(() => {
-    if (user) localStorage.setItem('athena_active_tab', activeTab);
+    if (user) localStorage.setItem('campusiq_active_tab', activeTab);
   }, [activeTab, user]);
 
   // ============ SECRET ADMIN ROUTE ============
@@ -186,7 +186,7 @@ const AppContent: React.FC = () => {
         <div className="flex flex-col items-center gap-4">
           <div className="w-16 h-16 border-4 border-[#00843D] border-t-transparent rounded-full animate-spin" />
           <p className="text-[#00843D] font-bold animate-pulse uppercase tracking-widest text-xs">
-            Initializing ATHENA...
+            Initializing CampusIQ...
           </p>
         </div>
       </div>
@@ -260,7 +260,7 @@ const AppContent: React.FC = () => {
                 <div className="w-7 h-7 bg-[#00843D] rounded-lg flex items-center justify-center text-white">
                   <Sparkles size={16} />
                 </div>
-                <span className="font-bold text-sm">ATHENA</span>
+                <span className="font-bold text-sm">CampusIQ</span>
                 <span className="text-[7px] text-[#00843D] font-bold uppercase tracking-wider hidden xs:inline">by JADAI</span>
               </div>
               <div className="w-8 h-8 rounded-lg bg-[#00843D]/10 flex items-center justify-center text-[#00843D] font-bold text-xs">

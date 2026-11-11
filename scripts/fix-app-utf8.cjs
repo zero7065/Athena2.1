@@ -14,7 +14,7 @@ const loadingBlock = `  if (isLoading) {
       ${o('div', 'className="min-h-screen flex items-center justify-center bg-slate-50"', false,
         o('motionless', 'className="flex flex-col items-center gap-4"', false,
           o('motionless', 'className="w-16 h-16 border-4 border-[#00843D] border-t-transparent rounded-full animate-spin"', true) +
-          o('p', 'className="text-[#00843D] font-bold animate-pulse uppercase tracking-widest text-xs"', false, 'Initializing ATHENA...')
+          o('p', 'className="text-[#00843D] font-bold animate-pulse uppercase tracking-widest text-xs"', false, 'Initializing CampusIQ...')
         )
       )}
     );
@@ -38,4 +38,4 @@ s = s.replace(
 );
 
 fs.writeFileSync(p, s, 'utf8');
-console.log('done', s.includes('Initializing ATHENA'));
+console.log('done', s.includes('Initializing CampusIQ'));

@@ -1,5 +1,5 @@
 /*
- * ATHENA - Student Success Platform
+ * CampusIQ - Student Success Platform
  * Section: SECRET ADMIN ACCESS
  *
  * Hidden admin login: only accessible via /admin-secret path.
@@ -11,7 +11,7 @@ import React, { useState } from 'react';
 import AdminPanel from './AdminPanel';
 import { AlertCircle, Shield, Eye, EyeOff } from 'lucide-react';
 
-const SECRET_ADMIN_KEY = 'athena_admin_master_2025';
+const SECRET_ADMIN_KEY = 'campusiq_admin_master_2025';
 
 const SecretAdmin: React.FC = () => {
   const [adminKey, setAdminKey] = useState('');

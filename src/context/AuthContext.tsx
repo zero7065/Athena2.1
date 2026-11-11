@@ -1,5 +1,5 @@
 /*
- * ATHENA - Student Success Platform
+ * CampusIQ - Student Success Platform
  * Section: AUTH - LOGIN & SIGNUP
  */
 
@@ -16,12 +16,12 @@ import {
 
 export type { AuthUser };
 
-const USERS_KEY = 'athena_users';
+const USERS_KEY = 'campusiq_users';
 
 const DEMO_USERS = [
-  { name: 'Admin User', email: 'admin@plasu.edu.ng', password: 'admin123', role: 'admin' as const, studentId: 'ADM001', department: 'Administration' },
-  { name: 'Lecturer User', email: 'lecturer@plasu.edu.ng', password: 'lecturer123', role: 'lecturer' as const, studentId: 'LEC001', department: 'Computer Science' },
-  { name: 'Student User', email: 'student@plasu.edu.ng', password: 'student123', role: 'student' as const, studentId: 'STU001', department: 'Computer Science' },
+  { name: 'Admin User', email: 'admin@campusiq.io', password: 'admin123', role: 'admin' as const, studentId: 'ADM001', department: 'Administration' },
+  { name: 'Lecturer User', email: 'lecturer@campusiq.io', password: 'lecturer123', role: 'lecturer' as const, studentId: 'LEC001', department: 'Computer Science' },
+  { name: 'Student User', email: 'student@campusiq.io', password: 'student123', role: 'student' as const, studentId: 'STU001', department: 'Computer Science' },
 ];
 
 function seedDemoUsers() {
@@ -80,7 +80,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [showAchievement, setShowAchievement] = useState<unknown>(null);
   const [knownAccounts, setKnownAccounts] = useState<AuthUser[]>(() => {
     try {
-      const stored = localStorage.getItem('athena_known_accounts');
+      const stored = localStorage.getItem('campusiq_known_accounts');
       return stored ? JSON.parse(stored) : [];
     } catch { return []; }
   });
@@ -90,14 +90,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const exists = prev.some(a => a.email === authUser.email);
       if (exists) return prev;
       const updated = [...prev, authUser];
-      localStorage.setItem('athena_known_accounts', JSON.stringify(updated));
+      localStorage.setItem('campusiq_known_accounts', JSON.stringify(updated));
       return updated;
     });
   }, []);
 
   useEffect(() => {
     seedDemoUsers();
-    const stored = localStorage.getItem('athena_auth');
+    const stored = localStorage.getItem('campusiq_auth');
     if (stored) {
       try {
         const parsed = JSON.parse(stored) as AuthUser;
@@ -105,14 +105,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setToken('logged-in');
         setAppDataState(loadAppDataForUser(parsed));
       } catch {
-        localStorage.removeItem('athena_auth');
+        localStorage.removeItem('campusiq_auth');
       }
     }
     setIsLoading(false);
   }, []);
 
   const login = useCallback((userData: AuthUser) => {
-    localStorage.setItem('athena_auth', JSON.stringify(userData));
+    localStorage.setItem('campusiq_auth', JSON.stringify(userData));
     setUser(userData);
     setToken('logged-in');
     const data = loadAppDataForUser(userData);
@@ -125,7 +125,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const dataKey = getAppDataKey(user.email);
       localStorage.setItem(dataKey, JSON.stringify(appData));
     }
-    localStorage.removeItem('athena_auth');
+    localStorage.removeItem('campusiq_auth');
     setUser(null);
     setToken(null);
   }, [user, appData]);
@@ -135,7 +135,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const dataKey = getAppDataKey(user.email);
       localStorage.setItem(dataKey, JSON.stringify(appData));
     }
-    localStorage.removeItem('athena_auth');
+    localStorage.removeItem('campusiq_auth');
     setUser(null);
     setToken(null);
   }, [user, appData]);

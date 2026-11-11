@@ -60,7 +60,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ onClose, onUnlockAchievem
               <Send size={28} className="text-emerald-500" />
             </div>
             <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-1">Thank You!</h3>
-            <p className="text-sm text-slate-500">Your feedback helps us improve ATHENA. +25 XP earned!</p>
+            <p className="text-sm text-slate-500">Your feedback helps us improve CampusIQ. +25 XP earned!</p>
           </div>
         ) : (
           <>

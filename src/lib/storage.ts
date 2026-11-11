@@ -2,7 +2,7 @@
 
 import type { AuthUser, UserProfile } from '../types';
 
-const PREFIX = 'athena_';
+const PREFIX = 'campusiq_';
 
 export type { UserProfile };
 
@@ -140,7 +140,7 @@ export function getDefaultAppData(): AppData {
   return {
   user: {
     name: 'Demo Student',
-    email: 'demo@plasu.edu.ng',
+    email: 'demo@campusiq.io',
     studentId: 'STU000',
     department: 'Computer Science',
     yearOfStudy: 2,
@@ -286,8 +286,8 @@ export interface Assignment {
 }
 
 // Shared storage key (no PREFIX — always exact key)
-const SUBMISSIONS_KEY = 'athena_submissions';
-const ASSIGNMENTS_KEY = 'athena_assignments';
+const SUBMISSIONS_KEY = 'campusiq_submissions';
+const ASSIGNMENTS_KEY = 'campusiq_assignments';
 
 export function getSubmissions(): Submission[] {
   try {
@@ -373,7 +373,7 @@ export interface Announcement {
   createdAt: number;
 }
 
-const ROOMS_KEY = 'athena_rooms';
+const ROOMS_KEY = 'campusiq_rooms';
 
 export function getRooms(): StudyRoom[] {
   try {
@@ -430,7 +430,7 @@ export interface DirectMessage {
   read: boolean;
 }
 
-const MESSAGES_KEY = 'athena_messages';
+const MESSAGES_KEY = 'campusiq_messages';
 
 export function getMessages(): DirectMessage[] {
   try {
@@ -490,7 +490,7 @@ export interface AuditEntry {
   readonly marked?: true;
 }
 
-const AUDIT_KEY = 'athena_audit';
+const AUDIT_KEY = 'campusiq_audit';
 
 function hashEntry(e: Omit<AuditEntry, 'checksum' | 'id'> & { id: string }): string {
   let s = `${e.id}|${e.timestamp}|${e.userEmail}|${e.action}|${e.details}`;
@@ -553,7 +553,7 @@ export interface FeedbackEntry {
   createdAt: number;
 }
 
-const FEEDBACK_KEY = 'athena_feedback';
+const FEEDBACK_KEY = 'campusiq_feedback';
 
 export function submitFeedback(fb: FeedbackEntry) {
   const all = getFeedback();
@@ -596,7 +596,7 @@ export interface SupportSettings {
   enabled: boolean;
 }
 
-const SUPPORT_KEY = 'athena_support_settings';
+const SUPPORT_KEY = 'campusiq_support_settings';
 
 export function getSupportSettings(): SupportSettings {
   try {
@@ -605,9 +605,9 @@ export function getSupportSettings(): SupportSettings {
   } catch { /* fall through */ }
   return {
     whatsappNumber: '+2348000000000',
-    whatsappMessage: 'Hello%20ATHENA%20Support%2C%20I%20need%20help%20with...',
-    email: 'athena@plasu.edu.ng',
-    phone: '+234-800-ATHENA',
+    whatsappMessage: 'Hello%20CampusIQ%20Support%2C%20I%20need%20help%20with...',
+    email: 'support@campusiq.io',
+    phone: '+234-800-CampusIQ',
     enabled: true,
   };
 }
@@ -630,7 +630,7 @@ export interface ActivityEntry {
   icon: string; // lucide icon name
 }
 
-const ACTIVITY_KEY = 'athena_activity';
+const ACTIVITY_KEY = 'campusiq_activity';
 
 export function logActivity(userEmail: string, userName: string, action: string, details: string, icon: string = 'Sparkles') {
   const all = getActivities();
@@ -660,16 +660,16 @@ export function getUserActivities(email: string, limit: number = 20): ActivityEn
 }
 
 export function seedActivityLog() {
-  if (localStorage.getItem('athena_activity')) return;
+  if (localStorage.getItem('campusiq_activity')) return;
   const entries: ActivityEntry[] = [
-    { id: 'a1', timestamp: Date.now() - 60000, userEmail: 'student1@plasu.edu.ng', userName: 'Jehu Nanpan Luke', action: 'submitted assignment', details: 'CSC301 - Data Structures Assignment 1', icon: 'CheckSquare' },
-    { id: 'a2', timestamp: Date.now() - 180000, userEmail: 'student2@plasu.edu.ng', userName: 'Amina Bello', action: 'completed study session', details: '25 min focus session - Mathematics', icon: 'Timer' },
-    { id: 'a3', timestamp: Date.now() - 300000, userEmail: 'lecturer1@plasu.edu.ng', userName: 'Dr. Chukwuma Okoro', action: 'posted new assignment', details: 'CSC401 - Algorithm Analysis Due 15/07', icon: 'BookOpen' },
-    { id: 'a4', timestamp: Date.now() - 600000, userEmail: 'student3@plasu.edu.ng', userName: 'John Musa', action: 'earned achievement', details: 'Task Master - 5 tasks completed', icon: 'Trophy' },
-    { id: 'a5', timestamp: Date.now() - 900000, userEmail: 'student4@plasu.edu.ng', userName: 'Grace Okon', action: 'won chess game', details: 'Defeated AI on Medium difficulty', icon: 'Gamepad2' },
-    { id: 'a6', timestamp: Date.now() - 1800000, userEmail: 'student1@plasu.edu.ng', userName: 'Jehu Nanpan Luke', action: 'completed CBT exam', details: 'Mathematics - Score: 85%', icon: 'Brain' },
-    { id: 'a7', timestamp: Date.now() - 3600000, userEmail: 'student5@plasu.edu.ng', userName: 'Samuel Obi', action: 'joined study room', details: 'CSC301 Group Discussion', icon: 'Users' },
-    { id: 'a8', timestamp: Date.now() - 7200000, userEmail: 'lecturer2@plasu.edu.ng', userName: 'Prof. Fatima Ali', action: 'graded submissions', details: 'MTH201 - 12 assignments graded', icon: 'CheckCircle2' },
+    { id: 'a1', timestamp: Date.now() - 60000, userEmail: 'student1@campusiq.io', userName: 'Jehu Nanpan Luke', action: 'submitted assignment', details: 'CSC301 - Data Structures Assignment 1', icon: 'CheckSquare' },
+    { id: 'a2', timestamp: Date.now() - 180000, userEmail: 'student2@campusiq.io', userName: 'Amina Bello', action: 'completed study session', details: '25 min focus session - Mathematics', icon: 'Timer' },
+    { id: 'a3', timestamp: Date.now() - 300000, userEmail: 'lecturer1@campusiq.io', userName: 'Dr. Chukwuma Okoro', action: 'posted new assignment', details: 'CSC401 - Algorithm Analysis Due 15/07', icon: 'BookOpen' },
+    { id: 'a4', timestamp: Date.now() - 600000, userEmail: 'student3@campusiq.io', userName: 'John Musa', action: 'earned achievement', details: 'Task Master - 5 tasks completed', icon: 'Trophy' },
+    { id: 'a5', timestamp: Date.now() - 900000, userEmail: 'student4@campusiq.io', userName: 'Grace Okon', action: 'won chess game', details: 'Defeated AI on Medium difficulty', icon: 'Gamepad2' },
+    { id: 'a6', timestamp: Date.now() - 1800000, userEmail: 'student1@campusiq.io', userName: 'Jehu Nanpan Luke', action: 'completed CBT exam', details: 'Mathematics - Score: 85%', icon: 'Brain' },
+    { id: 'a7', timestamp: Date.now() - 3600000, userEmail: 'student5@campusiq.io', userName: 'Samuel Obi', action: 'joined study room', details: 'CSC301 Group Discussion', icon: 'Users' },
+    { id: 'a8', timestamp: Date.now() - 7200000, userEmail: 'lecturer2@campusiq.io', userName: 'Prof. Fatima Ali', action: 'graded submissions', details: 'MTH201 - 12 assignments graded', icon: 'CheckCircle2' },
   ];
   localStorage.setItem(ACTIVITY_KEY, JSON.stringify(entries));
 }

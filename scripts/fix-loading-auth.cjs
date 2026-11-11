@@ -11,7 +11,7 @@ const loading = `  if (isLoading) {
       <${'div'} className="min-h-screen flex items-center justify-center bg-slate-50">
         <${'motionless'} className="flex flex-col items-center gap-4">
           <${'motionless'} className="w-16 h-16 border-4 border-[#00843D] border-t-transparent rounded-full animate-spin" />
-          <${'p'} className="text-[#00843D] font-bold animate-pulse uppercase tracking-widest text-xs">Initializing ATHENA...</${'p'}>
+          <${'p'} className="text-[#00843D] font-bold animate-pulse uppercase tracking-widest text-xs">Initializing CampusIQ...</${'p'}>
         </${'motionless'}>
       </${'motionless'}>
     );
@@ -25,7 +25,7 @@ const loadingBlock = `  if (isLoading) {
       <${D} className="min-h-screen flex items-center justify-center bg-slate-50">
         <${D} className="flex flex-col items-center gap-4">
           <${D} className="w-16 h-16 border-4 border-[#00843D] border-t-transparent rounded-full animate-spin" />
-          <${P} className="text-[#00843D] font-bold animate-pulse uppercase tracking-widest text-xs">Initializing ATHENA...</${P}>
+          <${P} className="text-[#00843D] font-bold animate-pulse uppercase tracking-widest text-xs">Initializing CampusIQ...</${P}>
         </${D}>
       </${D}>
     );
@@ -49,4 +49,4 @@ s = s.replace(bad1, loadingBlock);
 s = s.replace(bad2, authBlock);
 
 fs.writeFileSync(p, s, 'utf8');
-console.log('fixed', s.includes('Initializing ATHENA'));
+console.log('fixed', s.includes('Initializing CampusIQ'));

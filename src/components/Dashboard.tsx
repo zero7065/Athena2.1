@@ -48,13 +48,13 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
 
   const widgets = [
     {
-      id: 'ai-assistant', title: 'ATHENA AI', icon: Sparkles, color: 'text-primary',
+      id: 'ai-assistant', title: 'CampusIQ AI', icon: Sparkles, color: 'text-primary',
       content: (
         <div className="space-y-3">
           <p className="text-xs text-slate-500 font-medium">Your academic assistant is ready to help with your studies.</p>
           <button onClick={() => setActiveTab?.('ai')}
             className="w-full py-3 bg-primary text-white rounded-xl font-bold text-sm shadow-lg shadow-primary/20 hover:scale-105 transition-all flex items-center justify-center gap-2">
-            <MessageSquare size={16} /> Ask ATHENA
+            <MessageSquare size={16} /> Ask CampusIQ
           </button>
         </div>
       )
@@ -168,7 +168,7 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
       )
     },
     {
-      id: 'plasu-info', title: 'PLASU Bokkos', icon: School, color: 'text-accent',
+      id: 'CampusIQ-info', title: 'CampusIQ Bokkos', icon: School, color: 'text-accent',
       content: (
         <div className="space-y-3">
           <div className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-100 dark:border-blue-800">

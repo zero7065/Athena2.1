@@ -10,7 +10,7 @@ interface AuthProps {
   knownAccounts?: AuthUser[];
 }
 
-const USERS_KEY = 'athena_users';
+const USERS_KEY = 'campusiq_users';
 
 interface StoredUser {
   email: string;
@@ -22,8 +22,8 @@ interface StoredUser {
 }
 
 const DEMO_ACCOUNTS = [
-  { name: 'Student Demo', email: 'student@plasu.edu.ng', password: 'student123', role: 'student' as const, color: 'text-emerald-600', bg: 'bg-emerald-50 dark:bg-emerald-900/20', icon: GraduationCap },
-  { name: 'Lecturer Demo', email: 'lecturer@plasu.edu.ng', password: 'lecturer123', role: 'lecturer' as const, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/20', icon: BookOpen },
+  { name: 'Student Demo', email: 'student@campusiq.io', password: 'student123', role: 'student' as const, color: 'text-emerald-600', bg: 'bg-emerald-50 dark:bg-emerald-900/20', icon: GraduationCap },
+  { name: 'Lecturer Demo', email: 'lecturer@campusiq.io', password: 'lecturer123', role: 'lecturer' as const, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/20', icon: BookOpen },
 ];
 
 function getStoredUsers(): StoredUser[] {
@@ -152,12 +152,12 @@ const Auth: React.FC<AuthProps> = ({ mode, setMode, onClose, knownAccounts }) =>
               <GraduationCap size={24} />
             </div>
             <div className="flex flex-col items-start">
-              <span className="text-xl font-black tracking-tighter text-slate-900 dark:text-white leading-none">ATHENA</span>
+              <span className="text-xl font-black tracking-tighter text-slate-900 dark:text-white leading-none">CampusIQ</span>
               <span className="text-[8px] text-[#00843D] font-bold uppercase tracking-[0.2em] leading-none mt-0.5">by Jadai Studios</span>
             </div>
           </div>
           <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight text-center">
-            {mode === 'login' ? 'Welcome Back' : 'Join ATHENA'}
+            {mode === 'login' ? 'Welcome Back' : 'Join CampusIQ'}
           </h2>
           <p className="text-xs text-slate-500 mt-2 font-medium text-center">
             {mode === 'login' ? 'Sign in to your account' : 'Create your account to get started'}

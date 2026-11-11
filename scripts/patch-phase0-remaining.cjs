@@ -9,7 +9,7 @@ const loadingReplacement = `  if (isLoading) {
       ${lt}motionless className="min-h-screen flex items-center justify-center bg-slate-50"${gt}
         ${lt}motionless className="flex flex-col items-center gap-4"${gt}
           ${lt}motionless className="w-16 h-16 border-4 border-[#00843D] border-t-transparent rounded-full animate-spin" /${gt}
-          ${lt}p className="text-[#00843D] font-bold animate-pulse uppercase tracking-widest text-xs"${gt}Initializing ATHENA...${lt}/p${gt}
+          ${lt}p className="text-[#00843D] font-bold animate-pulse uppercase tracking-widest text-xs"${gt}Initializing CampusIQ...${lt}/p${gt}
         ${lt}/motionless${gt}
       ${lt}/motionless${gt}
     );
@@ -64,4 +64,4 @@ if (!games.includes('sq.square as Square')) {
 }
 fs.writeFileSync(path.join(root, 'src', 'components', 'Games.tsx'), games, 'utf8');
 
-console.log('done', { hasBadLoading: app.includes('motionless'), loadingOk: app.includes('Initializing ATHENA') });
+console.log('done', { hasBadLoading: app.includes('motionless'), loadingOk: app.includes('Initializing CampusIQ') });

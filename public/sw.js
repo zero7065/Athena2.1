@@ -1,9 +1,9 @@
-const CACHE_NAME = 'athena-v1';
+const CACHE_NAME = 'campusiq-v3';
 const ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/plasu-emblem.svg',
+  '/campusiq-logo.svg',
 ];
 
 self.addEventListener('install', (event) => {
