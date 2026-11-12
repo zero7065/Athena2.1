@@ -29,11 +29,21 @@ const QUESTION_BANK: Question[] = [
   { id: 13, subject: 'Physics', question: 'The S.I. unit of force is:', options: ['Joule', 'Newton', 'Watt', 'Pascal'], answer: 1, explanation: 'Force is measured in Newtons (N). 1N = 1kg·m/s².' },
   { id: 14, subject: 'Chemistry', question: 'The pH of a neutral solution is:', options: ['0', '7', '14', '1'], answer: 1, explanation: 'A neutral solution has pH 7 at 25°C. pH < 7 is acidic, pH > 7 is alkaline.' },
   { id: 15, subject: 'Biology', question: 'Which vitamin is produced when the skin is exposed to sunlight?', options: ['Vitamin A', 'Vitamin B', 'Vitamin C', 'Vitamin D'], answer: 3, explanation: 'Sunlight triggers vitamin D synthesis in the skin, essential for calcium absorption.' },
+  { id: 16, subject: 'Mathematics', question: 'The derivative of x squared is:', options: ['2x', 'x squared', '2', 'x'], answer: 0, explanation: 'Power rule: d/dx x^n = n*x^(n-1) = 2x.' },
+  { id: 17, subject: 'Chemistry', question: 'The pH of a strongly acidic solution is:', options: ['Less than 0', 'Equal to 0', 'Greater than 7', 'Equal to 14'], answer: 0, explanation: 'A strongly acidic solution has a pH below 0; 0 is the strongest scale value.' },
+  { id: 18, subject: 'Physics', question: 'The SI unit of energy is the:', options: ['Joule', 'Newton', 'Watt', 'Pascal'], answer: 0, explanation: 'Energy is measured in Joules (J).' },
+  { id: 19, subject: 'English', question: 'Choose the best synonym for "commence":', options: ['End', 'Begin', 'Pause', 'Continue'], answer: 1, explanation: 'Commence means to begin or start.' },
+  { id: 20, subject: 'Biology', question: 'DNA stands for:', options: ['Deoxyribonucleic Acid', 'Dinucleic Acid', 'Deoxyribose Nucleic Acid', 'Double Nucleic Acid'], answer: 0, explanation: 'DNA = Deoxyribonucleic Acid.' },
+  { id: 21, subject: 'Mathematics', question: 'The probability of getting heads when tossing a fair coin is:', options: ['0.25', '0.5', '0.75', '1.0'], answer: 1, explanation: 'A fair coin has two equally likely outcomes, so P = 0.5.' },
+  { id: 22, subject: 'Chemistry', question: 'The chemical symbol for gold is:', options: ['Go', 'Gd', 'Au', 'Ag'], answer: 2, explanation: 'Au is the Latin word for aurum, meaning gold.' },
+  { id: 23, subject: 'Physics', question: 'Which phenomenon describes light bending around a corner?', options: ['Refraction', 'Diffraction', 'Reflection', 'Dispersion'], answer: 1, explanation: 'Diffraction is the bending of waves around obstacles or corners.' },
+  { id: 24, subject: 'Biology', question: 'The powerhouse of the cell is:', options: ['Nucleus', 'Ribosome', 'Mitochondrion', 'Lysosome'], answer: 2, explanation: 'The mitochondrion generates ATP through cellular respiration.' },
+  { id: 25, subject: 'English', question: 'Choose the correct form: "Neither of the answers are correct."', options: ['is', 'are', 'were', 'be'], answer: 0, explanation: 'The subject "Neither" is singular, so the verb is singular: "is".' },
 ];
 
 const SUBJECTS = ['All', 'Mathematics', 'English', 'Physics', 'Chemistry', 'Biology'];
 
-const FALLBACK_QUESTIONS: Question[] = QUESTION_BANK.slice(0, 3);
+const FALLBACK_QUESTIONS: Question[] = QUESTION_BANK;
 
 const generateQuestions = async (subject: string): Promise<Question[]> => {
   const prompt = subject === 'All'

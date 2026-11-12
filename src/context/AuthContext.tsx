@@ -4,7 +4,7 @@
  */
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import type { AuthUser } from '../types';
+import type { AuthUser, ManagementRequest } from '../types';
 import {
   loadData,
   AppData as StorageAppData,
@@ -14,19 +14,40 @@ import {
   mergeAppDataUser,
 } from '../lib/storage';
 
-export type { AuthUser };
+export type { AuthUser, ManagementRequest };
 
 const USERS_KEY = 'campusiq_users';
-
-const DEMO_USERS = [
-  { name: 'Admin User', email: 'admin@campusiq.io', password: 'admin123', role: 'admin' as const, studentId: 'ADM001', department: 'Administration' },
-  { name: 'Lecturer User', email: 'lecturer@campusiq.io', password: 'lecturer123', role: 'lecturer' as const, studentId: 'LEC001', department: 'Computer Science' },
-  { name: 'Student User', email: 'student@campusiq.io', password: 'student123', role: 'student' as const, studentId: 'STU001', department: 'Computer Science' },
-];
+const KNOWN_ACCOUNTS_KEY = 'campusiq_known_accounts';
+const AUTH_KEY = 'campusiq_auth';
+const MANAGEMENT_REQUESTS_KEY = 'campusiq_management_requests';
 
 function seedDemoUsers() {
   if (localStorage.getItem(USERS_KEY)) return;
-  localStorage.setItem(USERS_KEY, JSON.stringify(DEMO_USERS));
+  localStorage.setItem(USERS_KEY, JSON.stringify([
+    { name: 'Admin User', email: 'admin@campusiq.io', password: 'admin123', role: 'admin' as const, studentId: 'ADM001', department: 'Administration' },
+    { name: 'Lecturer User', email: 'lecturer@campusiq.io', password: 'lecturer123', role: 'lecturer' as const, studentId: 'LEC001', department: 'Computer Science' },
+    { name: 'Student User', email: 'student@campusiq.io', password: 'student123', role: 'student' as const, studentId: 'STU001', department: 'Computer Science' },
+  ]));
+}
+
+interface StoredUser {
+  email: string;
+  password: string;
+  name: string;
+  studentId: string;
+  department: string;
+  role: 'student' | 'lecturer' | 'admin' | 'management';
+}
+
+function getStoredUsers(): StoredUser[] {
+  try {
+    const stored = localStorage.getItem(USERS_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch { return []; }
+}
+
+function saveStoredUsers(users: StoredUser[]) {
+  localStorage.setItem(USERS_KEY, JSON.stringify(users));
 }
 
 function getAppDataKey(email: string): string {
@@ -68,6 +89,15 @@ interface AuthContextType {
   addUserXp: (amount: number) => { newlyUnlocked: unknown[] };
   showAchievement: unknown;
   setShowAchievement: (a: unknown) => void;
+  adminClickCount: number;
+  setAdminClickCount: (count: number) => void;
+  showTerminal: boolean;
+  setShowTerminal: (show: boolean) => void;
+  managementRequests: ManagementRequest[];
+  setManagementRequests: (requests: ManagementRequest[]) => void;
+  addManagementRequest: (email: string) => void;
+  approveManagementRequest: (id: string) => void;
+  rejectManagementRequest: (id: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -78,26 +108,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [appData, setAppDataState] = useState<StorageAppData>(getDefaultAppData());
   const [showAchievement, setShowAchievement] = useState<unknown>(null);
-  const [knownAccounts, setKnownAccounts] = useState<AuthUser[]>(() => {
+  const [adminClickCount, setAdminClickCount] = useState<number>(0);
+  const [showTerminal, setShowTerminal] = useState<boolean>(false);
+  const [managementRequests, setManagementRequests] = useState<ManagementRequest[]>(() => {
     try {
-      const stored = localStorage.getItem('campusiq_known_accounts');
+      const stored = localStorage.getItem(MANAGEMENT_REQUESTS_KEY);
       return stored ? JSON.parse(stored) : [];
     } catch { return []; }
   });
+
+  const [knownAccounts, setKnownAccounts] = useState<AuthUser[]>([]);
 
   const saveKnownAccount = useCallback((authUser: AuthUser) => {
     setKnownAccounts(prev => {
       const exists = prev.some(a => a.email === authUser.email);
       if (exists) return prev;
       const updated = [...prev, authUser];
-      localStorage.setItem('campusiq_known_accounts', JSON.stringify(updated));
+      localStorage.setItem(KNOWN_ACCOUNTS_KEY, JSON.stringify(updated));
       return updated;
     });
   }, []);
 
   useEffect(() => {
     seedDemoUsers();
-    const stored = localStorage.getItem('campusiq_auth');
+    const stored = localStorage.getItem(AUTH_KEY);
     if (stored) {
       try {
         const parsed = JSON.parse(stored) as AuthUser;
@@ -105,14 +139,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setToken('logged-in');
         setAppDataState(loadAppDataForUser(parsed));
       } catch {
-        localStorage.removeItem('campusiq_auth');
+        localStorage.removeItem(AUTH_KEY);
       }
     }
     setIsLoading(false);
   }, []);
 
   const login = useCallback((userData: AuthUser) => {
-    localStorage.setItem('campusiq_auth', JSON.stringify(userData));
+    localStorage.setItem(AUTH_KEY, JSON.stringify(userData));
     setUser(userData);
     setToken('logged-in');
     const data = loadAppDataForUser(userData);
@@ -125,7 +159,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const dataKey = getAppDataKey(user.email);
       localStorage.setItem(dataKey, JSON.stringify(appData));
     }
-    localStorage.removeItem('campusiq_auth');
+    localStorage.removeItem(AUTH_KEY);
     setUser(null);
     setToken(null);
   }, [user, appData]);
@@ -135,7 +169,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const dataKey = getAppDataKey(user.email);
       localStorage.setItem(dataKey, JSON.stringify(appData));
     }
-    localStorage.removeItem('campusiq_auth');
+    localStorage.removeItem(AUTH_KEY);
     setUser(null);
     setToken(null);
   }, [user, appData]);
@@ -166,12 +200,66 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { newlyUnlocked: result };
   }, [updateAppData]);
 
+  const addManagementRequest = useCallback((email: string) => {
+    const newRequest: ManagementRequest = {
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+      email,
+      requestedAt: Date.now(),
+      status: 'pending',
+    };
+    setManagementRequests(prev => {
+      const exists = prev.some(r => r.email === email);
+      if (exists) return prev;
+      const updated = [...prev, newRequest];
+      localStorage.setItem(MANAGEMENT_REQUESTS_KEY, JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  const approveManagementRequest = useCallback((id: string) => {
+    setManagementRequests(prev => {
+      const idx = prev.findIndex(r => r.id === id);
+      if (idx < 0) return prev;
+      const request = prev[idx];
+      const authUser: AuthUser = {
+        name: `Management - ${request.email.split('@')[0]}`,
+        email: request.email,
+        studentId: `MGMT${Date.now().toString(36).slice(0, 6)}`,
+        role: 'management' as const,
+        department: 'Management',
+      };
+      const users = getStoredUsers();
+      const alreadyExists = users.some(u => u.email === request.email);
+      if (!alreadyExists) {
+        users.push({ ...authUser, password: 'management123', department: 'Management' });
+        saveStoredUsers(users);
+      }
+      const updatedRequests = prev.filter(r => r.id !== id);
+      localStorage.setItem(MANAGEMENT_REQUESTS_KEY, JSON.stringify(updatedRequests));
+      return updatedRequests;
+    });
+  }, []);
+
+  const rejectManagementRequest = useCallback((id: string) => {
+    setManagementRequests(prev => {
+      const updated = prev.filter(r => r.id !== id);
+      localStorage.setItem(MANAGEMENT_REQUESTS_KEY, JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  const value: AuthContextType = {
+    user, token, login, logout, switchAccount, knownAccounts, isLoading,
+    appData, updateAppData, addUserXp,
+    showAchievement, setShowAchievement,
+    adminClickCount, setAdminClickCount,
+    showTerminal, setShowTerminal,
+    managementRequests, setManagementRequests,
+    addManagementRequest, approveManagementRequest, rejectManagementRequest,
+  };
+
   return (
-    <AuthContext.Provider value={{
-      user, token, login, logout, switchAccount, knownAccounts, isLoading,
-      appData, updateAppData, addUserXp,
-      showAchievement, setShowAchievement,
-    }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,7 +1,7 @@
 # CampusIQ — AI-Powered Student Success Platform
-## Plateau State University, Bokkos Edition
+## CampusIQ — Multi-Tenant Student Success Platform
 
-CampusIQ is a comprehensive student success platform for Plateau State University (CampusIQ). It combines task management, Pomodoro study tracking, gamified achievements, cognitive games, and AI assistance to help students achieve their academic goals. Fully offline-capable with localStorage persistence — no backend required.
+CampusIQ is a comprehensive student success platform for universities. It combines task management, Pomodoro study tracking, gamified achievements, cognitive games, and AI assistance to help students achieve their academic goals. Fully offline-capable with localStorage persistence — no backend required.
 
 ### Features
 

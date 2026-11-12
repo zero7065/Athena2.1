@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { 
   LayoutDashboard, 
   CheckSquare, 
@@ -40,7 +40,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   onCloseMobile,
   onReturnHome 
 }) => {
-  const { user, logout, switchAccount } = useAuth();
+  const { user, logout, switchAccount, adminClickCount, setAdminClickCount, showTerminal, setShowTerminal } = useAuth();
   const { theme, toggleTheme } = useTheme();
 
   const menuItems = [
@@ -66,6 +66,15 @@ const Sidebar: React.FC<SidebarProps> = ({
     setActiveTab(id);
     if (isMobile && onCloseMobile) onCloseMobile();
   };
+
+  const handleJadaiClick = useCallback(() => {
+    const next = adminClickCount + 1;
+    setAdminClickCount(next);
+    if (next >= 5) {
+      setShowTerminal(true);
+      setAdminClickCount(0);
+    }
+  }, [adminClickCount, setAdminClickCount, setShowTerminal]);
 
   // Logout — AuthContext handles persistence and cleanup correctly
   const handleLogout = () => {
@@ -264,7 +273,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             <div className="flex items-center gap-2 px-2 py-1.5">
               <div className="w-5 h-5 rounded-md bg-gradient-to-br from-[#00843D] to-emerald-500 flex items-center justify-center text-white text-[8px] font-bold shadow-sm">J</div>
               <div className="flex flex-col">
-                <span className="text-[8px] font-black tracking-tighter text-slate-500 dark:text-slate-400 leading-none">JADAI STUDIOS</span>
+                <span onClick={handleJadaiClick} className="text-[8px] font-black tracking-tighter text-slate-500 dark:text-slate-400 leading-none cursor-pointer select-none">JADAI STUDIOS</span>
                 <span className="text-[6px] text-slate-400 dark:text-slate-500 leading-none mt-0.5">CampusIQ Edition</span>
               </div>
             </div>

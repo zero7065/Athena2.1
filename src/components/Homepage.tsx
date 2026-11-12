@@ -2,7 +2,7 @@
  * CampusIQ - Student Success Platform
  * Section: HOMEPAGE
  *
- * Plateau State University branded landing page.
+ * CampusIQ branded landing page.
  * Features: university imagery, student interaction, events, dark/light toggle
  */
 
@@ -310,7 +310,7 @@ export default function Homepage({ onSignUp, onLecturer, theme = 'dark', onToggl
                 <br />
                 <span className={isLight ? 'text-emerald-600' : 'text-emerald-400'}>Companion</span> at{' '}
                 <br />
-                Plateau State University
+                Your University
               </h1>
 
               <div className={`text-lg sm:text-xl lg:text-2xl ${isLight ? 'text-slate-500' : 'text-slate-300'} font-medium`}>
@@ -389,7 +389,7 @@ export default function Homepage({ onSignUp, onLecturer, theme = 'dark', onToggl
                   <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6">
                     <div className="flex items-center gap-2 mb-2">
                       <MapPin size={14} className="text-emerald-400" />
-                      <span className="text-xs font-bold text-emerald-300 uppercase tracking-wider">Plateau State University, Bokkos</span>
+                      <span className="text-xs font-bold text-emerald-300 uppercase tracking-wider">University · Global</span>
                     </div>
                     <h3 className="text-lg sm:text-xl font-bold text-white">{carouselImages[activeImage].caption}</h3>
                     <p className="text-xs sm:text-sm text-slate-300 mt-1">Est. 2005 — 66th University in Nigeria</p>
@@ -553,7 +553,7 @@ export default function Homepage({ onSignUp, onLecturer, theme = 'dark', onToggl
                   <BookOpen size={14} /> About CampusIQ
                 </div>
                 <h2 className={`text-xl sm:text-2xl md:text-3xl font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                  Plateau State University, Bokkos
+                  University · Global
                 </h2>
                 <p className={`text-sm sm:text-base leading-relaxed ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
                   Established in March 2005 and granted recognition by the National Universities Commission (NUC) on April 29, 2005,
@@ -562,7 +562,7 @@ export default function Homepage({ onSignUp, onLecturer, theme = 'dark', onToggl
                 </p>
                 <div className="flex flex-wrap gap-4 sm:gap-6 pt-2">
                   <div className={`flex items-center gap-2 text-xs sm:text-sm ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
-                    <MapPin size={16} className="text-emerald-500 shrink-0" /> Bokkos, Plateau State
+                    <MapPin size={16} className="text-emerald-500 shrink-0" /> Campus · Your Institution
                   </div>
                   <div className={`flex items-center gap-2 text-xs sm:text-sm ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
                     <Quote size={16} className="text-emerald-500 shrink-0" /> Knowledge, Diligence & Integrity
@@ -743,7 +743,7 @@ export default function Homepage({ onSignUp, onLecturer, theme = 'dark', onToggl
                 <span className="text-[9px] font-bold tracking-wider text-emerald-400">JADAI STUDIOS</span>
               </div>
               <p className={`text-xs text-center ${isLight ? 'text-emerald-300' : 'text-slate-500'}`}>
-                &copy; 2025 CampusIQ — Designed to empower every student at Plateau State University, Bokkos.
+                &copy; 2025 CampusIQ — Designed to empower every student at University · Global.
               </p>
             </div>
             <div className="flex gap-4 sm:gap-6 text-xs sm:text-sm font-medium">

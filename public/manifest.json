@@ -1,7 +1,7 @@
 {
   "name": "CampusIQ — CampusIQ Student Academic Platform",
   "short_name": "CampusIQ",
-  "description": "AI-powered academic platform for Plateau State University students. Track tasks, study with AI, collaborate in rooms, earn XP and achievements.",
+  "description": "AI-powered academic platform for universities. Track tasks, study with AI, collaborate in rooms, earn XP and achievements.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0f172a",

@@ -16,6 +16,7 @@ import LecturerPortal from './components/LecturerPortal';
 import AIChatbot from './components/AIChatbot';
 import Homepage from './components/Homepage';
 import SecretAdmin from './components/SecretAdmin';
+import Terminal from './components/Terminal';
 import FloatingSupport from './components/FloatingSupport';
 import FeedbackModal from './components/FeedbackModal';
 import Confetti from './components/Confetti';
@@ -30,7 +31,7 @@ import { LayoutDashboard, CheckSquare, Timer, Gamepad2, Trophy, Users, UserCircl
  * Handles routing, authentication, and layout
  */
 const AppContent: React.FC = () => {
-  const { user, isLoading, logout, showAchievement, setShowAchievement, knownAccounts } = useAuth();
+  const { user, isLoading, logout, showAchievement, setShowAchievement, knownAccounts, adminClickCount, setAdminClickCount, showTerminal, setShowTerminal } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const profile = useCurrentUser();
 
@@ -115,6 +116,15 @@ const AppContent: React.FC = () => {
     setShowLecturerAuth(false);
     setShowHomepage(true);
   }, []);
+
+  const handleJadaiClick = useCallback(() => {
+    const next = adminClickCount + 1;
+    setAdminClickCount(next);
+    if (next >= 5) {
+      setShowTerminal(true);
+      setAdminClickCount(0);
+    }
+  }, [adminClickCount, setAdminClickCount, setShowTerminal]);
 
   useKeyboardShortcuts(handleTabChange);
 
@@ -261,7 +271,7 @@ const AppContent: React.FC = () => {
                   <Sparkles size={16} />
                 </div>
                 <span className="font-bold text-sm">CampusIQ</span>
-                <span className="text-[7px] text-[#00843D] font-bold uppercase tracking-wider hidden xs:inline">by JADAI</span>
+                <span onClick={handleJadaiClick} className="text-[7px] text-[#00843D] font-bold uppercase tracking-wider hidden xs:inline cursor-pointer select-none">by JADAI</span>
               </div>
               <div className="w-8 h-8 rounded-lg bg-[#00843D]/10 flex items-center justify-center text-[#00843D] font-bold text-xs">
                 {user.name?.[0] || 'S'}
@@ -357,6 +367,7 @@ const AppContent: React.FC = () => {
 
       {/* Feedback Modal */}
       {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} onUnlockAchievement={(a) => setShowAchievement(a)} />}
+      {showTerminal && <Terminal onClose={() => { setShowTerminal(false); setAdminClickCount(0); }} />}
       <Confetti active={confettiActive} onDone={() => setConfettiActive(false)} />
     </>
   );

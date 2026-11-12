@@ -174,8 +174,8 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
           <div className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-100 dark:border-blue-800">
             <School size={32} className="text-blue-600 shrink-0" />
             <div>
-              <p className="text-xs font-extrabold text-blue-700 dark:text-blue-300">Plateau State University</p>
-              <p className="text-[9px] text-blue-500/70 font-medium">Bokkos, Plateau State, Nigeria</p>
+              <p className="text-xs font-extrabold text-blue-700 dark:text-blue-300">Your University</p>
+              <p className="text-[9px] text-blue-500/70 font-medium">Campus · Your Institution</p>
             </div>
           </div>
           <div className="grid grid-cols-3 gap-2">

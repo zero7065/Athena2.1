@@ -1,4 +1,4 @@
-export type UserRole = 'student' | 'lecturer' | 'admin';
+export type UserRole = 'student' | 'lecturer' | 'admin' | 'management';
 export type AIPersonality = 'charming' | 'strict' | 'sarcastic' | 'zen';
 export type FontPreference = 'sans' | 'mono' | 'serif';
 
@@ -28,6 +28,16 @@ export interface UserProfile extends AuthUser {
   feedbackCount: number;
   gaveFiveStar: boolean;
   contactedSupport: boolean;
+}
+
+/** Management onboarding / approval request */
+export interface ManagementRequest {
+  id: string;
+  email: string;
+  requestedAt: number;
+  status: 'pending' | 'approved' | 'rejected';
+  approvedBy?: string;
+  approvedAt?: number;
 }
 
 export interface StoredUser extends AuthUser {

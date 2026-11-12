@@ -44,7 +44,7 @@ function formatTime(ts: string) {
 
 function exportChat(msgs: ChatMsg[]) {
   const lines = msgs.map(m =>
-    `[${formatTime(m.timestamp)}] ${m.role === 'user' ? 'You' : 'CampusIQ Athena'}:\n${m.text}\n`
+    `[${formatTime(m.timestamp)}] ${m.role === 'user' ? 'You' : 'CampusIQ'}:\n${m.text}\n`
   );
   const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
   const url = URL.createObjectURL(blob);
@@ -121,7 +121,7 @@ const AIChatbot: React.FC = () => {
         body: JSON.stringify({
           model: 'llama-3.1-70b-versatile',
           messages: [
-            { role: 'system', content: 'You are CampusIQ Athena, an academic assistant for Plateau State University. Answer questions helpfully, concisely, and stay on academic topics.' },
+            { role: 'system', content: 'You are CampusIQ, an academic assistant for the university. Answer questions helpfully, concisely, and stay on academic topics. Use the university context provided.' },
             ...chatHistory.slice(-20),
           ],
           max_tokens: 1024,
@@ -300,7 +300,7 @@ const AIChatbot: React.FC = () => {
                   <span className="w-2 h-2 bg-[#00843D] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
                   <span className="w-2 h-2 bg-[#00843D] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                 </span>
-                <span className="text-xs font-medium text-slate-500 ml-1">CampusIQ Athena is thinking...</span>
+                <span className="text-xs font-medium text-slate-500 ml-1">CampusIQ is thinking...</span>
               </div>
             </div>
           )}
@@ -319,7 +319,7 @@ const AIChatbot: React.FC = () => {
             </button>
           </div>
           <p className="text-[10px] text-center text-slate-400 mt-2 font-medium leading-relaxed px-2">
-            CampusIQ Athena is an AI tool &mdash; always verify important information with your lecturer.
+            CampusIQ is an AI tool &mdash; always verify important information with your lecturer.
           </p>
         </div>
       </div>

@@ -3,7 +3,7 @@
 ## Stakeholder Presentation Summary
 
 ### The Problem
-Students at Plateau State University struggle with time management, focus, and tracking academic progress across multiple subjects. Tools are fragmented — Google Classroom for assignments, WhatsApp for study groups, paper notes for planning. No single platform connects tasks, study habits, and performance data.
+Students at universities struggle with time management, focus, and tracking academic progress across multiple subjects. Tools are fragmented — Google Classroom for assignments, WhatsApp for study groups, paper notes for planning. No single platform connects tasks, study habits, and performance data.
 
 ### The Solution: CampusIQ
 CampusIQ is a centralized platform that acts as a digital academic companion. It combines task management, Pomodoro study tracking, gamified achievements, and AI-powered assistance into one cohesive experience. Every interaction earns XP and contributes to the student's growth profile.
