@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { BookOpen, Plus, Trash2, FileText, Link as LinkIcon, Video, Presentation } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { getContentResources, saveContentResource, deleteContentResource, ContentResource } from '../lib/storage';
+import { getContentResources, saveContentResource, deleteContentResource } from '../lib/storage';
+import type { ContentResource } from '../types';
 import { cn } from '../lib/utils';
 
 const TYPE_ICONS: Record<string, React.ElementType> = {

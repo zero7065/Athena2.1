@@ -72,7 +72,7 @@ const AIChatbot: React.FC = () => {
   // Welcome greeting when chat is fresh (no history yet)
   useEffect(() => {
       if (!messages.length && !isLoading) {
-        setMessages([{ id: Date.now().toString(), role: 'user', text: "Welcome to UniPulse! I'm your AI tutor. Ask me about study plans, tasks, focus tips, or university info - I stay on academic topics and follow all my instructions." }]);
+        setMessages([{ id: Date.now().toString(), role: 'user', text: "Welcome to UniPulse! I'm your AI tutor. Ask me about study plans, tasks, focus tips, or university info - I stay on academic topics and follow all my instructions.", timestamp: new Date().toISOString() }]);
       }
   }, [messages, isLoading]);
 
