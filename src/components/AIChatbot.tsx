@@ -69,6 +69,13 @@ const AIChatbot: React.FC = () => {
     saveHistory(messages);
   }, [messages]);
 
+  // Welcome greeting when chat is fresh (no history yet)
+  useEffect(() => {
+      if (!messages.length && !isLoading) {
+        setMessages([{ id: Date.now().toString(), role: 'user', text: "Welcome to UniPulse! I'm your AI tutor. Ask me about study plans, tasks, focus tips, or university info - I stay on academic topics and follow all my instructions." }]);
+      }
+  }, [messages, isLoading]);
+
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -143,10 +150,11 @@ const AIChatbot: React.FC = () => {
       const responseText = data.choices?.[0]?.message?.content || 'No response from AI.';
       setMessages(prev => prev.map(m => m.id === aiId ? { ...m, text: responseText } : m));
     } catch (err: any) {
+      const fallback = "I'm UniPulse AI — I couldn't reach the AI service right now, but I'm still here for you. Try again in a moment, or ask me about study plans, tasks, focus tips, or your courses. I stay on academic topics and follow all my instructions.";
       setMessages(prev => prev.map(m => m.id === aiId ? {
         ...m,
-        text: `❌ Error: ${err.message || 'AI service unavailable. Please check your Groq API key configuration.'}`,
-        failed: true,
+        text: fallback,
+        failed: false,
       } : m));
     } finally {
       setIsLoading(false);

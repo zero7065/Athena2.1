@@ -19,6 +19,7 @@ import SecretAdmin from './components/SecretAdmin';
 import ContentLibrary from './components/ContentLibrary';
 import SyllabusManager from './components/SyllabusManager';
 import StudyPlan from './components/StudyPlan';
+import StudentProfiles from './components/StudentProfiles';
 import Terminal from './components/Terminal';
 import FloatingSupport from './components/FloatingSupport';
 import FeedbackModal from './components/FeedbackModal';
@@ -247,6 +248,8 @@ const AppContent: React.FC = () => {
         return <Achievements />;
       case 'social':
         return <Social />;
+      case 'students':
+        return <StudentProfiles />;
       case 'profile':
         return <Profile />;
       case 'content':
