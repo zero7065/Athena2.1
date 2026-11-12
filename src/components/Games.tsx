@@ -167,7 +167,7 @@ const ChessGame: React.FC = () => {
   const shareGame = () => {
     const pgn = game.pgn();
     const fen = game.fen();
-    const text = `CampusIQ Chess Game\n\nPGN: ${pgn}\n\nFEN: ${fen}\n\nPlayed on CampusIQ - CampusIQ Edition`;
+    const text = `UniPulse Chess Game\n\nPGN: ${pgn}\n\nFEN: ${fen}\n\nPlayed on UniPulse - UniPulse Edition`;
     navigator.clipboard.writeText(text).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -627,7 +627,7 @@ const BASE_CHALLENGES = [
   { img: "https://picsum.photos/seed/art2/400/400", prompt: "A robotic owl studying ancient scrolls", options: ["Mechanical Owl", "Scholar Robot", "Ancient Tech", "Wise Machine"], answer: 0 },
   { img: "https://picsum.photos/seed/art3/400/400", prompt: "A neon-lit university campus at night", options: ["Cyber University", "Neon Campus", "Future School", "Night Academy"], answer: 1 },
   { img: "https://picsum.photos/seed/art4/400/400", prompt: "An AI painting a portrait of a philosopher", options: ["Digital Artist", "AI Painter", "Robot Artist", "Thinking Machine"], answer: 1 },
-  { img: "https://picsum.photos/seed/art5/400/400", prompt: "A holographic globe showing CampusIQ campus", options: ["Digital CampusIQ", "Hologram Campus", "Future University", "Virtual CampusIQ"], answer: 1 },
+  { img: "https://picsum.photos/seed/art5/400/400", prompt: "A holographic globe showing UniPulse campus", options: ["Digital UniPulse", "Hologram Campus", "Future University", "Virtual UniPulse"], answer: 1 },
 ];
 
 const THEME_ADJECTIVES = ['futuristic', 'neon-lit', 'steampunk', 'cyberpunk', 'minimalist', 'surreal', 'vaporwave', 'biopunk', 'retro', 'ethereal'];
@@ -636,7 +636,7 @@ const THEME_SUBJECTS = ['library', 'owl', 'campus', 'robot', 'painting', 'globe'
 async function generateChallenge(seed: number): Promise<typeof BASE_CHALLENGES[0] | null> {
   const adj = THEME_ADJECTIVES[seed % THEME_ADJECTIVES.length];
   const subj = THEME_SUBJECTS[(seed + 3) % THEME_SUBJECTS.length];
-  const prompt = `A ${adj} ${subj} at CampusIQ university`;
+  const prompt = `A ${adj} ${subj} at UniPulse university`;
   const wrong1 = `The ${adj} ${subj}`;
   const wrong2 = `${adj.charAt(0).toUpperCase() + adj.slice(1)} Vision`;
   const wrong3 = `Digital ${subj.charAt(0).toUpperCase() + subj.slice(1)}`;
@@ -753,7 +753,7 @@ const AIArtGuesser: React.FC = () => {
         <div className="glass p-12 rounded-[40px] text-center space-y-4">
           <Loader2 size={48} className="animate-spin text-primary mx-auto" />
           <p className="text-lg font-bold text-slate-800 dark:text-white">Generating New Challenges...</p>
-          <p className="text-sm text-slate-500">CampusIQ is creating fresh art for you.</p>
+          <p className="text-sm text-slate-500">UniPulse is creating fresh art for you.</p>
         </div>
       </div>
     );
@@ -838,7 +838,7 @@ const Games: React.FC = () => {
   const { appData } = useAuth();
 
   const games = [
-    { id: 'chess', title: 'Chess AI', icon: Trophy, color: 'text-slate-800', desc: 'Challenge the CampusIQ engine.' },
+    { id: 'chess', title: 'Chess AI', icon: Trophy, color: 'text-slate-800', desc: 'Challenge the UniPulse engine.' },
     { id: 'memory', title: 'Memory Match', icon: Brain, color: 'text-emerald-500', desc: 'Sharpen your visual recall.' },
     { id: 'sudoku', title: 'Sudoku', icon: Grid3X3, color: 'text-blue-500', desc: 'Classic logic puzzles.' },
     { id: 'art', title: 'AI Art Guesser', icon: ImageIcon, color: 'text-purple-500', desc: 'Decode generative prompts.' },

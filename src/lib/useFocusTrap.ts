@@ -1,5 +1,5 @@
 /*
- * CampusIQ - Student Success Platform
+ * UniPulse - Student Success Platform
  * Section: FOCUS TRAP HOOK
  *
  * Traps keyboard focus inside a modal/dialog.

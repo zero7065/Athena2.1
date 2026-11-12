@@ -1,5 +1,5 @@
 /*
- * CampusIQ - Student Success Platform
+ * UniPulse - Student Success Platform
  * Section: POMODORO TIMER (StudyTracker)
  *
  * Changes made:
@@ -7,7 +7,7 @@
  * - Phases: Work (25min) -> Short Break (5min) -> after 4 cycles -> Long Break (15min)
  * - Controls: Start, Pause, Resume, Reset
  * - On phase complete: visual flash + browser notification
- * - Session count persists in localStorage under "campusiq_pomodoro"
+ * - Session count persists in localStorage under "unipulse_pomodoro"
  * - Award 30 XP per completed Work session
  * - Timer resists reset when switching sections (state preserved in parent during lifecycle)
  */
@@ -52,7 +52,7 @@ const StudyTracker: React.FC = () => {
     }
   }, []);
 
-  useEffect(() => { if ('Notification' in window && Notification.permission === 'granted') new Notification('CampusIQ Ready', { body: 'Start your study session!', icon: '/favicon.ico' }); }, []);
+  useEffect(() => { if ('Notification' in window && Notification.permission === 'granted') new Notification('UniPulse Ready', { body: 'Start your study session!', icon: '/favicon.ico' }); }, []);
 
   const getDuration = useCallback(() => {
     switch (mode) {

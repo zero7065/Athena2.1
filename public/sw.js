@@ -1,9 +1,9 @@
-const CACHE_NAME = 'campusiq-v3';
+const CACHE_NAME = 'unipulse-v3';
 const ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/campusiq-logo.svg',
+  '/unipulse-logo.svg',
 ];
 
 self.addEventListener('install', (event) => {

@@ -1,5 +1,5 @@
 /*
- * CampusIQ - Student Success Platform
+ * UniPulse - Student Success Platform
  * Section: AI CHAT — Groq via Serverless Proxy
  *
  * - Calls /api/groq proxy (key is server-side, never exposed)
@@ -24,7 +24,7 @@ interface ChatMsg {
   feedback?: 'up' | 'down' | null;
 }
 
-const STORAGE_KEY = 'campusiq_chat_history';
+const STORAGE_KEY = 'unipulse_chat_history';
 
 function loadHistory(): ChatMsg[] {
   try {
@@ -44,13 +44,13 @@ function formatTime(ts: string) {
 
 function exportChat(msgs: ChatMsg[]) {
   const lines = msgs.map(m =>
-    `[${formatTime(m.timestamp)}] ${m.role === 'user' ? 'You' : 'CampusIQ'}:\n${m.text}\n`
+    `[${formatTime(m.timestamp)}] ${m.role === 'user' ? 'You' : 'UniPulse'}:\n${m.text}\n`
   );
   const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `campusiq_chat_${new Date().toISOString().split('T')[0]}.txt`;
+  a.download = `unipulse_chat_${new Date().toISOString().split('T')[0]}.txt`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -121,7 +121,7 @@ const AIChatbot: React.FC = () => {
         body: JSON.stringify({
           model: 'llama-3.1-70b-versatile',
           messages: [
-            { role: 'system', content: 'You are CampusIQ, an academic assistant for the university. Answer questions helpfully, concisely, and stay on academic topics. Use the university context provided.' },
+            { role: 'system', content: 'You are UniPulse, an academic assistant for the university. Answer questions helpfully, concisely, and stay on academic topics. Use the university context provided.' },
             ...chatHistory.slice(-20),
           ],
           max_tokens: 1024,
@@ -188,7 +188,7 @@ const AIChatbot: React.FC = () => {
           </div>
           <div>
             <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-slate-800 dark:text-white tracking-tight">
-              CampusIQ <span className="text-[#00843D]">Athena</span>
+              UniPulse <span className="text-[#00843D]">Athena</span>
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 font-medium">Your Academic AI Assistant</p>
           </div>
@@ -216,13 +216,13 @@ const AIChatbot: React.FC = () => {
               </div>
               <div className="max-w-xs">
                 <h3 className="text-lg font-bold text-slate-800 dark:text-white">How can I help you today?</h3>
-                <p className="text-xs sm:text-sm text-slate-500 mt-1">Ask about your courses, study tips, or CampusIQ life.</p>
+                <p className="text-xs sm:text-sm text-slate-500 mt-1">Ask about your courses, study tips, or UniPulse life.</p>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full max-w-sm">
                 {[
                   'Explain Binary Search Trees',
                   'Study tips for CSC 301',
-                  'CampusIQ library hours',
+                  'UniPulse library hours',
                   'How to improve focus?',
                 ].map(q => (
                   <button key={q} onClick={() => setInput(q)}
@@ -300,7 +300,7 @@ const AIChatbot: React.FC = () => {
                   <span className="w-2 h-2 bg-[#00843D] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
                   <span className="w-2 h-2 bg-[#00843D] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                 </span>
-                <span className="text-xs font-medium text-slate-500 ml-1">CampusIQ is thinking...</span>
+                <span className="text-xs font-medium text-slate-500 ml-1">UniPulse is thinking...</span>
               </div>
             </div>
           )}
@@ -319,7 +319,7 @@ const AIChatbot: React.FC = () => {
             </button>
           </div>
           <p className="text-[10px] text-center text-slate-400 mt-2 font-medium leading-relaxed px-2">
-            CampusIQ is an AI tool &mdash; always verify important information with your lecturer.
+            UniPulse is an AI tool &mdash; always verify important information with your lecturer.
           </p>
         </div>
       </div>

@@ -1,8 +1,8 @@
-export const CAMPUSIQ_BRANDING = {
-  platformName: 'CampusIQ',
-  shortName: 'CampusIQ',
+export const UNIPULSE_BRANDING = {
+  platformName: 'UniPulse',
+  shortName: 'UniPulse',
   motto: 'Intelligence. Integrity. Innovation.',
-  emblemUrl: '/campusiq-logo.svg',
+  emblemUrl: '/unipulse-logo.svg',
   established: 2025,
   colors: {
     primary: '#00843D',
@@ -11,15 +11,15 @@ export const CAMPUSIQ_BRANDING = {
     dark: '#0f172a',
   },
   contact: {
-    email: 'support@campusiq.io',
-    website: 'https://campusiq.io',
+    email: 'support@unipulse.io',
+    website: 'https://unipulse.io',
     address: 'Multi-Tenant Platform',
   },
   version: '3.0.0',
 };
 
 export const DEMO_USERS = [
-  { name: 'Admin User', email: 'admin@campusiq.io', password: 'admin123', role: 'admin' as const, studentId: 'ADM001', department: 'Administration' },
-  { name: 'Lecturer User', email: 'lecturer@campusiq.io', password: 'lecturer123', role: 'lecturer' as const, studentId: 'LEC001', department: 'Computer Science' },
-  { name: 'Student User', email: 'student@campusiq.io', password: 'student123', role: 'student' as const, studentId: 'STU001', department: 'Computer Science' },
+  { name: 'Admin User', email: 'admin@unipulse.io', password: 'admin123', role: 'admin' as const, studentId: 'ADM001', department: 'Administration' },
+  { name: 'Lecturer User', email: 'lecturer@unipulse.io', password: 'lecturer123', role: 'lecturer' as const, studentId: 'LEC001', department: 'Computer Science' },
+  { name: 'Student User', email: 'student@unipulse.io', password: 'student123', role: 'student' as const, studentId: 'STU001', department: 'Computer Science' },
 ];

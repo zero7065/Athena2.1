@@ -14,8 +14,8 @@
   <path d="M140 200 Q200 230 260 200" fill="none" stroke="#FFD700" stroke-width="2"/>
   <!-- Book pages -->
   <line x1="200" y1="195" x2="200" y2="270" stroke="#006a2f" stroke-width="2"/>
-  <!-- Text: CampusIQ -->
-  <text x="200" y="150" text-anchor="middle" fill="#FFD700" font-family="serif" font-weight="bold" font-size="28">CampusIQ</text>
+  <!-- Text: UniPulse -->
+  <text x="200" y="150" text-anchor="middle" fill="#FFD700" font-family="serif" font-weight="bold" font-size="28">UniPulse</text>
   <!-- Year -->
   <text x="200" y="330" text-anchor="middle" fill="#FFD700" font-family="serif" font-size="18">2005</text>
   <!-- Star -->

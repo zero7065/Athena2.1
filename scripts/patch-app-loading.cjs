@@ -18,7 +18,7 @@ const loadingFixed = `  if (isLoading) {
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="flex flex-col items-center gap-4">
           <div className="w-16 h-16 border-4 border-[#00843D] border-t-transparent rounded-full animate-spin" />
-          <p className="text-[#00843D] font-bold animate-pulse uppercase tracking-widest text-xs">Initializing CampusIQ...</p>
+          <p className="text-[#00843D] font-bold animate-pulse uppercase tracking-widest text-xs">Initializing UniPulse...</p>
         </div>
       </div>
     );

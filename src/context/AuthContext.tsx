@@ -1,5 +1,5 @@
 /*
- * CampusIQ - Student Success Platform
+ * UniPulse - Student Success Platform
  * Section: AUTH - LOGIN & SIGNUP
  */
 
@@ -16,17 +16,17 @@ import {
 
 export type { AuthUser, ManagementRequest };
 
-const USERS_KEY = 'campusiq_users';
-const KNOWN_ACCOUNTS_KEY = 'campusiq_known_accounts';
-const AUTH_KEY = 'campusiq_auth';
-const MANAGEMENT_REQUESTS_KEY = 'campusiq_management_requests';
+const USERS_KEY = 'unipulse_users';
+const KNOWN_ACCOUNTS_KEY = 'unipulse_known_accounts';
+const AUTH_KEY = 'unipulse_auth';
+const MANAGEMENT_REQUESTS_KEY = 'unipulse_management_requests';
 
 function seedDemoUsers() {
   if (localStorage.getItem(USERS_KEY)) return;
   localStorage.setItem(USERS_KEY, JSON.stringify([
-    { name: 'Admin User', email: 'admin@campusiq.io', password: 'admin123', role: 'admin' as const, studentId: 'ADM001', department: 'Administration' },
-    { name: 'Lecturer User', email: 'lecturer@campusiq.io', password: 'lecturer123', role: 'lecturer' as const, studentId: 'LEC001', department: 'Computer Science' },
-    { name: 'Student User', email: 'student@campusiq.io', password: 'student123', role: 'student' as const, studentId: 'STU001', department: 'Computer Science' },
+    { name: 'Admin User', email: 'admin@unipulse.io', password: 'admin123', role: 'admin' as const, studentId: 'ADM001', department: 'Administration' },
+    { name: 'Lecturer User', email: 'lecturer@unipulse.io', password: 'lecturer123', role: 'lecturer' as const, studentId: 'LEC001', department: 'Computer Science' },
+    { name: 'Student User', email: 'student@unipulse.io', password: 'student123', role: 'student' as const, studentId: 'STU001', department: 'Computer Science' },
   ]));
 }
 
