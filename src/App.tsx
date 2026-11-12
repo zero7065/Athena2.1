@@ -24,6 +24,7 @@ import Terminal from './components/Terminal';
 import FloatingSupport from './components/FloatingSupport';
 import FeedbackModal from './components/FeedbackModal';
 import Confetti from './components/Confetti';
+import InstallPrompt from './components/InstallPrompt';
 import { cn } from './lib/utils';
 import { useKeyboardShortcuts } from './lib/useKeyboard';
 import { useCurrentUser } from './hooks/useCurrentUser';
@@ -375,6 +376,9 @@ const AppContent: React.FC = () => {
           </div>
         );
       })()}
+
+      {/* PWA Install Prompt */}
+      <InstallPrompt />
 
       {/* Floating Support Button — visible on all authenticated pages */}
       <FloatingSupport onOpenFeedback={() => setShowFeedback(true)} />
