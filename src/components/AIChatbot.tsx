@@ -188,7 +188,7 @@ const AIChatbot: React.FC = () => {
           </div>
           <div>
             <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-slate-800 dark:text-white tracking-tight">
-              UniPulse <span className="text-[#00843D]">Athena</span>
+              UniPulse
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 font-medium">Your Academic AI Assistant</p>
           </div>
