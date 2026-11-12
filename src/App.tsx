@@ -16,6 +16,9 @@ import LecturerPortal from './components/LecturerPortal';
 import AIChatbot from './components/AIChatbot';
 import Homepage from './components/Homepage';
 import SecretAdmin from './components/SecretAdmin';
+import ContentLibrary from './components/ContentLibrary';
+import SyllabusManager from './components/SyllabusManager';
+import StudyPlan from './components/StudyPlan';
 import Terminal from './components/Terminal';
 import FloatingSupport from './components/FloatingSupport';
 import FeedbackModal from './components/FeedbackModal';
@@ -24,7 +27,7 @@ import { cn } from './lib/utils';
 import { useKeyboardShortcuts } from './lib/useKeyboard';
 import { useCurrentUser } from './hooks/useCurrentUser';
 import { useTheme } from './context/ThemeContext';
-import { LayoutDashboard, CheckSquare, Timer, Gamepad2, Trophy, Users, UserCircle, Sparkles, Menu, X, BookOpen, ShieldCheck } from 'lucide-react';
+import { LayoutDashboard, CheckSquare, Timer, Gamepad2, Trophy, Users, UserCircle, Sparkles, Menu, X, BookOpen, ShieldCheck, GraduationCap } from 'lucide-react';
 
 /**
  * Main App Content Component
@@ -142,6 +145,8 @@ const AppContent: React.FC = () => {
       { id: 'social', icon: Users, label: 'Social' },
       { id: 'achievements', icon: Trophy, label: 'Awards' },
       { id: 'profile', icon: UserCircle, label: 'Profile' },
+      { id: 'content', icon: BookOpen, label: 'Content' },
+      { id: 'syllabus', icon: GraduationCap, label: 'Syllabus' },
     ];
     if (user?.role === 'lecturer') {
       tabs.splice(5, 0, { id: 'lecturer', icon: BookOpen, label: 'Lecturer' });
@@ -244,6 +249,12 @@ const AppContent: React.FC = () => {
         return <Social />;
       case 'profile':
         return <Profile />;
+      case 'content':
+        return <ContentLibrary />;
+      case 'syllabus':
+        return <SyllabusManager />;
+      case 'studyplan':
+        return <StudyPlan />;
       case 'lecturer':
         return user.role === 'lecturer' ? <LecturerPortal /> : <Dashboard setActiveTab={handleTabChange} />;
       case 'admin':

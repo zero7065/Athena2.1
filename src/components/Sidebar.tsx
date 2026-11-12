@@ -15,7 +15,8 @@ import {
   Moon,
   Sparkles,
   Home,
-  ArrowLeft
+  ArrowLeft,
+  GraduationCap
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAuth } from '../context/AuthContext';
@@ -52,6 +53,8 @@ const Sidebar: React.FC<SidebarProps> = ({
     { id: 'achievements', label: 'Achievements', icon: Trophy },
     { id: 'social', label: 'Friends & Rooms', icon: Users },
     { id: 'profile', label: 'Profile', icon: UserCircle },
+    { id: 'content', label: 'Content Library', icon: BookOpen },
+    { id: 'syllabus', label: 'Syllabus & Study Plan', icon: GraduationCap },
   ];
 
   // Role-based menu items

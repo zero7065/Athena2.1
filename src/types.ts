@@ -71,6 +71,42 @@ export interface LocalAchievement {
   requirement: string;
 }
 
+/** Learning content resource (note, pdf, link, video, slides) */
+export interface ContentResource {
+  id: string;
+  title: string;
+  subject: string;
+  type: 'note' | 'pdf' | 'link' | 'video' | 'slides';
+  url?: string;
+  description?: string;
+  tags: string[];
+  createdBy: string;
+  createdByEmail: string;
+  createdAt: number;
+  tenantId?: string;
+}
+
+/** Course syllabus module */
+export interface SyllabusModule {
+  id: string;
+  title: string;
+  topics: string[];
+  resources: string[]; // contentResource ids
+}
+
+/** Course syllabus */
+export interface Syllabus {
+  id: string;
+  course: string;
+  title: string;
+  subject: string;
+  instructor: string;
+  instructorEmail: string;
+  objectives: string[];
+  modules: SyllabusModule[];
+  createdAt: number;
+}
+
 export interface ChatMessage {
   id: string;
   role: 'user' | 'model';

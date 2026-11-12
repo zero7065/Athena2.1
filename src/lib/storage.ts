@@ -1,6 +1,6 @@
 /* localStorage persistence layer with namespace prefix, corruption handling, and defaults */
 
-import type { AuthUser, UserProfile } from '../types';
+import type { AuthUser, UserProfile, ContentResource, Syllabus } from '../types';
 
 const PREFIX = 'campusiq_';
 
@@ -672,4 +672,55 @@ export function seedActivityLog() {
     { id: 'a8', timestamp: Date.now() - 7200000, userEmail: 'lecturer2@campusiq.io', userName: 'Prof. Fatima Ali', action: 'graded submissions', details: 'MTH201 - 12 assignments graded', icon: 'CheckCircle2' },
   ];
   localStorage.setItem(ACTIVITY_KEY, JSON.stringify(entries));
+}
+
+
+/* ========================================
+ * Content Library — Learning Resources
+ * ======================================== */
+
+export function getContentResources(): ContentResource[] {
+  try {
+    const raw = localStorage.getItem(PREFIX + 'content_resources');
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+
+export function saveContentResource(resource: ContentResource): ContentResource[] {
+  const all = getContentResources();
+  const idx = all.findIndex(x => x.id === resource.id);
+  if (idx >= 0) all[idx] = resource; else all.push(resource);
+  localStorage.setItem(PREFIX + 'content_resources', JSON.stringify(all));
+  return all;
+}
+
+export function deleteContentResource(id: string): ContentResource[] {
+  const all = getContentResources().filter(x => x.id !== id);
+  localStorage.setItem(PREFIX + 'content_resources', JSON.stringify(all));
+  return all;
+}
+
+/* ========================================
+ * Course Syllabi
+ * ======================================== */
+
+export function getSyllabi(): Syllabus[] {
+  try {
+    const raw = localStorage.getItem(PREFIX + 'syllabi');
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+
+export function saveSyllabus(syllabus: Syllabus): Syllabus[] {
+  const all = getSyllabi();
+  const idx = all.findIndex(x => x.id === syllabus.id);
+  if (idx >= 0) all[idx] = syllabus; else all.push(syllabus);
+  localStorage.setItem(PREFIX + 'syllabi', JSON.stringify(all));
+  return all;
+}
+
+export function deleteSyllabus(id: string): Syllabus[] {
+  const all = getSyllabi().filter(x => x.id !== id);
+  localStorage.setItem(PREFIX + 'syllabi', JSON.stringify(all));
+  return all;
 }
