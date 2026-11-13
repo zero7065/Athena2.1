@@ -111,27 +111,30 @@ const testimonials = [
     name: "Amina Okafor",
     role: "Computer Science, Year 3",
     avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=face",
+    bg: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=1200&h=800&fit=crop",
   },
   {
     quote: "The AI tutor is a game-changer. I can ask questions anytime and get instant explanations. My GPA improved significantly.",
     name: "David Adewale",
     role: "Mathematics, Year 2",
     avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
+    bg: "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?w=1200&h=800&fit=crop",
   },
   {
     quote: "Study rooms with friends kept me accountable. We compete on leaderboards and share materials. Best study tool I've ever used.",
     name: "Grace Nnamdi",
     role: "Biology, Year 4",
     avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
+    bg: "https://images.unsplash.com/photo-1529156069898-430993e8f31e?w=1200&h=800&fit=crop",
   },
 ];
 
 // Events data
 const events = [
-  { title: "Semester Exams Start", date: "June 15, 2025", type: "academic", color: "from-red-500 to-orange-500" },
-  { title: "AI Study Workshop", date: "May 28, 2025", type: "workshop", color: "from-blue-500 to-cyan-500" },
-  { title: "Project Submission Deadline", date: "July 1, 2025", type: "deadline", color: "from-purple-500 to-pink-500" },
-  { title: "Matriculation Ceremony", date: "August 10, 2025", type: "event", color: "from-emerald-500 to-green-500" },
+  { title: "Semester Exams Start", date: "June 15, 2025", type: "academic", color: "from-red-500 to-orange-500", img: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=200&h=200&fit=crop" },
+  { title: "AI Study Workshop", date: "May 28, 2025", type: "workshop", color: "from-blue-500 to-cyan-500", img: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=200&h=200&fit=crop" },
+  { title: "Project Submission Deadline", date: "July 1, 2025", type: "deadline", color: "from-purple-500 to-pink-500", img: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=200&h=200&fit=crop" },
+  { title: "Matriculation Ceremony", date: "August 10, 2025", type: "event", color: "from-emerald-500 to-green-500", img: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=200&h=200&fit=crop" },
 ];
 
 interface HomepageProps {
@@ -470,7 +473,7 @@ export default function Homepage({ onSignUp, onLecturer, theme = 'dark', onToggl
       </section>
 
       {/* ===== STATS SECTION ===== */}
-      <section ref={students.ref} className={`relative z-10 py-16 sm:py-20 ${isLight ? 'bg-emerald-50/50' : 'bg-slate-900/30'}`}>
+      <section ref={students.ref} className={`relative z-10 py-16 sm:py-20 ${isLight ? 'bg-emerald-50/50' : 'bg-slate-900/30'}`} style={{ backgroundImage: `url(https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1600&h=900&fit=crop)`, backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.12 }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8">
             {[
@@ -508,12 +511,12 @@ export default function Homepage({ onSignUp, onLecturer, theme = 'dark', onToggl
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {[
-              { icon: BookOpen, title: 'Smart Task Board', desc: 'Drag-and-drop kanban. Organize by subject. Never miss a deadline.', color: 'from-emerald-500 to-green-500' },
-              { icon: Clock, title: 'Focus Timer', desc: 'Pomodoro technique optimized for academic sessions. 25 min work, 5 min break.', color: 'from-blue-500 to-cyan-500' },
-              { icon: Brain, title: 'AI Study Assistant', desc: 'Ask anything. Get instant answers powered by Groq AI. Available 24/7.', color: 'from-purple-500 to-pink-500' },
-              { icon: Trophy, title: 'Gamified Learning', desc: 'Earn XP. Unlock achievements. Compete on leaderboards. Stay motivated.', color: 'from-amber-500 to-orange-500' },
-              { icon: Users, title: 'Study Together', desc: 'Connect with classmates. Create study rooms. Share materials in real-time.', color: 'from-rose-500 to-red-500' },
-              { icon: BarChart3, title: 'Progress Analytics', desc: 'Track your growth. View study streaks. Monitor your academic performance.', color: 'from-indigo-500 to-violet-500' },
+              { icon: BookOpen, title: 'Smart Task Board', desc: 'Drag-and-drop kanban. Organize by subject. Never miss a deadline.', color: 'from-emerald-500 to-green-500', img: 'https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=800&h=600&fit=crop' },
+              { icon: Clock, title: 'Focus Timer', desc: 'Pomodoro technique optimized for academic sessions. 25 min work, 5 min break.', color: 'from-blue-500 to-cyan-500', img: 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=800&h=600&fit=crop' },
+              { icon: Brain, title: 'AI Study Assistant', desc: 'Ask anything. Get instant answers powered by Groq AI. Available 24/7.', color: 'from-purple-500 to-pink-500', img: 'https://images.unsplash.com/photo-1526379095098-d400fd0bf935?w=800&h=600&fit=crop' },
+              { icon: Trophy, title: 'Gamified Learning', desc: 'Earn XP. Unlock achievements. Compete on leaderboards. Stay motivated.', color: 'from-amber-500 to-orange-500', img: 'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?w=800&h=600&fit=crop' },
+              { icon: Users, title: 'Study Together', desc: 'Connect with classmates. Create study rooms. Share materials in real-time.', color: 'from-rose-500 to-red-500', img: 'https://images.unsplash.com/photo-1529156069898-430993e8f31e?w=800&h=600&fit=crop' },
+              { icon: BarChart3, title: 'Progress Analytics', desc: 'Track your growth. View study streaks. Monitor your academic performance.', color: 'from-indigo-500 to-violet-500', img: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop' },
             ].map((f, i) => (
               <div
                 key={i}
@@ -524,11 +527,12 @@ export default function Homepage({ onSignUp, onLecturer, theme = 'dark', onToggl
                 }`}
               >
                 <div className={`absolute top-0 right-0 w-32 h-32 rounded-full bg-gradient-to-br ${f.color} opacity-5 group-hover:opacity-10 transition-opacity`} />
-                <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${f.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+                <img src={f.img} alt={f.title} className="absolute inset-0 w-full h-full object-cover rounded-2xl opacity-20 group-hover:opacity-30 transition-opacity duration-500 pointer-events-none" />
+                <div className={`relative z-10 w-12 h-12 rounded-2xl bg-gradient-to-br ${f.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
                   <f.icon size={24} className="text-white" />
                 </div>
-                <h3 className={`text-lg sm:text-xl font-bold mb-2 ${isLight ? 'text-slate-900' : 'text-white'}`}>{f.title}</h3>
-                <p className={`text-sm leading-relaxed ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>{f.desc}</p>
+                <h3 className={`relative z-10 text-lg sm:text-xl font-bold mb-2 ${isLight ? 'text-slate-900' : 'text-white'}`}>{f.title}</h3>
+                <p className={`relative z-10 text-sm leading-relaxed ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>{f.desc}</p>
               </div>
             ))}
           </div>
@@ -542,7 +546,7 @@ export default function Homepage({ onSignUp, onLecturer, theme = 'dark', onToggl
             {/* University info */}
             <div className={`lg:col-span-2 rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10 relative overflow-hidden ${
               isLight ? 'bg-white border border-emerald-100' : 'bg-slate-900/50 border border-slate-800'
-            }`}>
+            }`} style={{ backgroundImage: `url(https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1600&h=900&fit=crop)`, backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.12 }}>
               <div className={`absolute top-0 right-0 p-6 sm:p-8 opacity-5`}>
                 <GraduationCap size={120} className={isLight ? 'text-emerald-600' : 'text-emerald-400'} />
               </div>
@@ -584,16 +588,21 @@ export default function Homepage({ onSignUp, onLecturer, theme = 'dark', onToggl
               </div>
               <div className="space-y-4">
                 {events.map((event, i) => (
-                  <div key={i} className="flex gap-3 group cursor-pointer">
+<div key={i} className="flex gap-3 group cursor-pointer">
+                <div className="relative shrink-0 w-11 h-11 rounded-xl overflow-hidden">
+                  <img src={event.img} alt={event.title} className="w-full h-full object-cover" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
                     <div className={`w-1.5 rounded-full bg-gradient-to-b ${event.color} shrink-0`} />
-                    <div className="flex-1 min-w-0">
-                      <p className={`text-sm font-bold group-hover:${isLight ? 'text-emerald-600' : 'text-emerald-400'} transition-colors ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
-                        {event.title}
-                      </p>
-                      <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>{event.date}</p>
-                    </div>
-                    <ChevronRight size={16} className={`${isLight ? 'text-slate-400' : 'text-slate-600'} group-hover:translate-x-1 transition-transform`} />
+                    <p className={`text-sm font-bold group-hover:${isLight ? 'text-emerald-600' : 'text-emerald-400'} transition-colors ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
+                      {event.title}
+                    </p>
                   </div>
+                  <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>{event.date}</p>
+                </div>
+                <ChevronRight size={16} className={`${isLight ? 'text-slate-400' : 'text-slate-600'} group-hover:translate-x-1 transition-transform`} />
+              </div>
                 ))}
               </div>
               <button className={`mt-6 text-xs font-bold flex items-center gap-1 transition-colors ${
@@ -619,7 +628,7 @@ export default function Homepage({ onSignUp, onLecturer, theme = 'dark', onToggl
           </h2>
 
           <div className="relative">
-            <div className={`rounded-2xl sm:rounded-3xl p-6 sm:p-10 md:p-12 ${isLight ? 'bg-emerald-50 border border-emerald-100' : 'bg-slate-900/50 border border-slate-800'}`}>
+            <div className={`rounded-2xl sm:rounded-3xl p-6 sm:p-10 md:p-12 ${isLight ? 'bg-emerald-50 border border-emerald-100' : 'bg-slate-900/50 border border-slate-800'}`} style={{ backgroundImage: `url(${testimonials[activeTestimonial].bg})`, backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.12 }}>
               <div className="flex items-center justify-center gap-1 mb-6">
                 {[...Array(5)].map((_, i) => (
                   <Star key={i} size={18} className="text-amber-400 fill-amber-400" />
@@ -680,7 +689,7 @@ export default function Homepage({ onSignUp, onLecturer, theme = 'dark', onToggl
       </section>
 
       {/* ===== CTA FOOTER ===== */}
-      <footer className={`relative z-10 ${isLight ? 'bg-emerald-900 text-white' : 'bg-slate-950 border-t border-slate-800'}`}>
+      <footer className={`relative z-10 ${isLight ? 'bg-emerald-900 text-white' : 'bg-slate-950 border-t border-slate-800'}`} style={{ backgroundImage: `url(https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=1600&h=900&fit=crop)`, backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.15 }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Main CTA */}
           <div className={`py-16 sm:py-20 text-center border-b ${isLight ? 'border-emerald-800' : 'border-slate-800'}`}>
