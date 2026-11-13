@@ -69,7 +69,7 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
               <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-bold uppercase", t.priority === 'high' ? "bg-red-100 text-red-600" : t.priority === 'medium' ? "bg-blue-100 text-blue-600" : "bg-slate-100 text-slate-500")}>{t.priority}</span>
             </div>
           ))}
-          {tasks.filter(t => t.status !== 'done').length === 0 && <p className="text-xs text-slate-400 italic py-4 text-center">No pending tasks.</p>}
+          {tasks.filter(t => t.status !== 'done').length === 0 && <p className="text-xs text-slate-500 dark:text-slate-400 italic py-4 text-center">No pending tasks.</p>}
           <button onClick={() => setActiveTab?.('tasks')} className="w-full text-center text-[10px] font-bold text-primary hover:underline pt-1">View All Tasks</button>
         </div>
       )
@@ -125,7 +125,7 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
               </div>
             ))}
             {Array.from({ length: Math.max(0, 8 - unlockedAchievements) }).map((_, i) => (
-              <div key={`locked-${i}`} className="w-full aspect-square rounded-xl bg-slate-50 dark:bg-slate-800/50 flex items-center justify-center text-slate-300 dark:text-slate-600 text-lg border border-slate-100 dark:border-slate-700">
+              <div key={`locked-${i}`} className="w-full aspect-square rounded-xl bg-slate-100 dark:bg-slate-800/50 flex items-center justify-center text-slate-500 dark:text-slate-600 text-lg border border-slate-200 dark:border-slate-700">
                 ?
               </div>
             ))}

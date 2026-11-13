@@ -24,6 +24,7 @@ const ChessGame: React.FC = () => {
   const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
   const [legalMoves, setLegalMoves] = useState<Square[]>([]);
   const [playMode, setPlayMode] = useState<'ai' | 'friend'>('ai');
+  const [aiDifficulty, setAiDifficulty] = useState<'beginner' | 'intermediate' | 'advanced'>('beginner');
   const [gameOver, setGameOver] = useState<string | null>(null);
   const [showShare, setShowShare] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -54,7 +55,7 @@ const ChessGame: React.FC = () => {
     }));
   }, [game, pieceStyle]);
 
-  const findBestMove = useCallback((g: Chess) => {
+  const findBestMove = useCallback((g: Chess, difficulty: 'beginner' | 'intermediate' | 'advanced' = 'beginner') => {
     const moves = g.moves({ verbose: true });
     if (moves.length === 0) return null;
     const capVal: Record<string, number> = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };
@@ -77,6 +78,11 @@ const ChessGame: React.FC = () => {
         if (sq.color === 'b') score += val + (sq.type === 'p' ? [0,50,20,10,5,0,-5,0][r] : 0);
         else score -= val + (sq.type === 'p' ? -[0,50,20,10,5,0,-5,0][7-r] : 0);
       }
+      // Beginner: sometimes make suboptimal moves
+      if (difficulty === 'beginner' && Math.random() < 0.3) score += (Math.random() - 0.5) * 200;
+      // Intermediate: slight randomness
+      if (difficulty === 'intermediate' && Math.random() < 0.15) score += (Math.random() - 0.5) * 100;
+      // Advanced: no randomness
       if (score > bestScore) { bestScore = score; bestMove = m; }
     }
     return bestMove;
@@ -113,7 +119,7 @@ const ChessGame: React.FC = () => {
       const timer = setTimeout(() => {
         try {
           const g = new Chess(game.fen());
-          const move = findBestMove(g);
+          const move = findBestMove(g, aiDifficulty);
           if (move) makeAMove(move.from, move.to);
           else {
             const legal = game.moves();
@@ -126,7 +132,7 @@ const ChessGame: React.FC = () => {
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [game, playMode, findBestMove, makeAMove]);
+  }, [game, playMode, aiDifficulty, findBestMove, makeAMove]);
   /* If AI mode and it's black's turn, also try on next idle */
   useEffect(() => {
     if (playMode === 'ai' && game.turn() === 'b' && !game.isGameOver()) {
@@ -185,6 +191,16 @@ const ChessGame: React.FC = () => {
           className={cn("px-4 sm:px-5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap min-h-[44px]", playMode === 'ai' ? "bg-primary text-white shadow-md" : "text-slate-500 hover:bg-slate-100")}> {'\u{1F916}'} AI</button>
         <button onClick={() => { setPlayMode('friend'); newGame(); }}
           className={cn("px-4 sm:px-5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap min-h-[44px]", playMode === 'friend' ? "bg-primary text-white shadow-md" : "text-slate-500 hover:bg-slate-100")}> {'\u{1F465}'} Friend</button>
+        <div className="w-px h-8 bg-slate-200 dark:bg-slate-700 self-center mx-1" />
+        <div className="flex gap-1">
+          {(['beginner', 'intermediate', 'advanced'] as const).map(d => (
+            <button key={d} onClick={() => { setAiDifficulty(d); newGame(); }}
+              className={cn("px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap min-h-[40px]",
+                aiDifficulty === d ? "bg-slate-700 text-white shadow-md" : "text-slate-500 hover:bg-slate-100")}>
+              {d.charAt(0).toUpperCase() + d.slice(1)}
+            </button>
+          ))}
+        </div>
         <div className="w-px h-8 bg-slate-200 dark:bg-slate-700 self-center mx-1" />
         {(['green', 'blue', 'brown'] as const).map(t => (
           <button key={t} onClick={() => setBoardTheme(t)}
