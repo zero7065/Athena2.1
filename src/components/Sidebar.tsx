@@ -18,7 +18,8 @@ import {
   Home,
   ArrowLeft,
   GraduationCap,
-  MapPin
+  MapPin,
+  Rss
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAuth } from '../context/AuthContext';
@@ -55,6 +56,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     { id: 'achievements', label: 'Achievements', icon: Trophy },
     { id: 'social', label: 'Friends & Rooms', icon: Users },
     { id: 'find-fellow', label: 'Find Fellow Students', icon: MapPin },
+    { id: 'rss', label: 'Education RSS', icon: Rss },
     { id: 'students', label: 'Student Profiles', icon: Users2 },
     { id: 'profile', label: 'Profile', icon: UserCircle },
     { id: 'content', label: 'Content Library', icon: BookOpen },

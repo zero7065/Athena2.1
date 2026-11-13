@@ -20,6 +20,9 @@ import ContentLibrary from './components/ContentLibrary';
 import SyllabusManager from './components/SyllabusManager';
 import StudyPlan from './components/StudyPlan';
 import StudentProfiles from './components/StudentProfiles';
+import StudentDashboard from './components/StudentDashboard';
+import LecturerDashboard from './components/LecturerDashboard';
+import EduRSS from './components/EduRSS';
 import FindFellowStudents from './components/FindFellowStudents';
 import Terminal from './components/Terminal';
 import FloatingSupport from './components/FloatingSupport';
@@ -30,7 +33,7 @@ import { cn } from './lib/utils';
 import { useKeyboardShortcuts } from './lib/useKeyboard';
 import { useCurrentUser } from './hooks/useCurrentUser';
 import { useTheme } from './context/ThemeContext';
-import { LayoutDashboard, CheckSquare, Timer, Gamepad2, Trophy, Users, UserCircle, Sparkles, Menu, X, BookOpen, ShieldCheck, GraduationCap } from 'lucide-react';
+import { LayoutDashboard, CheckSquare, Timer, Gamepad2, Trophy, Users, UserCircle, Sparkles, Menu, X, BookOpen, ShieldCheck, GraduationCap, Rss } from 'lucide-react';
 
 /**
  * Main App Content Component
@@ -146,6 +149,7 @@ const AppContent: React.FC = () => {
       { id: 'study', icon: Timer, label: 'Focus' },
       { id: 'games', icon: Gamepad2, label: 'Games' },
       { id: 'social', icon: Users, label: 'Social' },
+      { id: 'rss', icon: Rss, label: 'RSS' },
       { id: 'achievements', icon: Trophy, label: 'Awards' },
       { id: 'profile', icon: UserCircle, label: 'Profile' },
       { id: 'content', icon: BookOpen, label: 'Content' },
@@ -237,7 +241,9 @@ const AppContent: React.FC = () => {
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
-        return <Dashboard setActiveTab={handleTabChange} />;
+        return user.role === 'student' ? <StudentDashboard setActiveTab={handleTabChange} />
+          : user.role === 'lecturer' || user.role === 'admin' || user.role === 'management' ? <LecturerDashboard />
+          : <Dashboard setActiveTab={handleTabChange} />;
       case 'ai':
         return <AIChatbot />;
       case 'tasks':
@@ -254,6 +260,8 @@ const AppContent: React.FC = () => {
         return <FindFellowStudents />;
       case 'students':
         return <StudentProfiles />;
+      case 'rss':
+        return <EduRSS />;
       case 'profile':
         return <Profile />;
       case 'content':
@@ -263,9 +271,9 @@ const AppContent: React.FC = () => {
       case 'studyplan':
         return <StudyPlan />;
       case 'lecturer':
-        return user.role === 'lecturer' ? <LecturerPortal /> : <Dashboard setActiveTab={handleTabChange} />;
+        return user.role === 'lecturer' || user.role === 'admin' || user.role === 'management' ? <LecturerDashboard /> : <Dashboard setActiveTab={handleTabChange} />;
       case 'admin':
-        return user.role === 'admin' ? <AdminPanel /> : <Dashboard setActiveTab={handleTabChange} />;
+        return user.role === 'admin' || user.role === 'management' ? <AdminPanel /> : <Dashboard setActiveTab={handleTabChange} />;
       default:
         return <Dashboard setActiveTab={handleTabChange} />;
     }
