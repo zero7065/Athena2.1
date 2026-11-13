@@ -10,11 +10,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   ArrowRight, BookOpen, Clock, Users, BarChart3, Brain, GraduationCap,
   Star, MapPin, Quote, Award, ChevronRight, Sun, Moon,
-  Calendar, ChevronLeft, Sparkles, Zap, Trophy, ExternalLink, ChevronLeftCircle, ChevronRightCircle
+  Calendar, ChevronLeft, Sparkles, Zap, Trophy, ExternalLink, ChevronLeftCircle, ChevronRightCircle,
+  ShieldCheck
 } from 'lucide-react';
 
 const carouselImages = [
-  { src: 'https://images.unsplash.com/photo-1523050854058-8df90110c7f1?w=800&h=600&fit=crop', caption: 'UniPulse Campus — Main Gate' },
+  { src: 'https://images.unsplash.com/photo-1523050854058-8df90110c7f1?w=800&h=600&fit=crop', caption: 'CampusIQ Campus — Main Gate' },
   { src: 'https://images.unsplash.com/photo-1562774053-701939374585?w=800&h=600&fit=crop', caption: 'University Library' },
   { src: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=800&h=600&fit=crop', caption: 'Graduation Ceremony' },
   { src: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&h=600&fit=crop', caption: 'Students Studying Together' },
@@ -30,6 +31,10 @@ const carouselImages = [
   { src: 'https://images.unsplash.com/photo-1529390079861-591de354faf5?w=800&h=600&fit=crop', caption: 'Collaborative Learning' },
   { src: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=800&h=600&fit=crop', caption: 'Campus Life' },
   { src: 'https://images.unsplash.com/photo-1526603426857-2da4c34c34ae?w=800&h=600&fit=crop', caption: 'Research & Innovation' },
+  { src: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=800&h=600&fit=crop', caption: 'Student Orientation' },
+  { src: 'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?w=800&h=600&fit=crop', caption: 'Innovation Hub' },
+  { src: 'https://images.unsplash.com/photo-1529156069898-430993e8f31e?w=800&h=600&fit=crop', caption: 'Study Group Session' },
+  { src: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop', caption: 'Data Analytics Lab' },
 ];
 
 // Animated counter hook
@@ -492,6 +497,41 @@ export default function Homepage({ onSignUp, onLecturer, theme = 'dark', onToggl
         </div>
       </section>
 
+      {/* ===== WHY CHOOSE SECTION ===== */}
+      <section className={`relative z-10 py-16 sm:py-24 ${isLight ? 'bg-white' : 'bg-slate-950'}`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-3 gap-6 sm:gap-8">
+            <div className={`rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10 ${isLight ? 'bg-emerald-50 border border-emerald-100' : 'bg-slate-900/50 border border-slate-800'} flex flex-col gap-4 min-h-[300px] justify-center transition-all hover:shadow-xl hover:shadow-emerald-500/10`}>
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white text-2xl shrink-0">
+                <GraduationCap size={24} />
+              </div>
+              <h3 className="font-bold text-lg sm:text-xl text-slate-800 dark:text-white">Smart Learning</h3>
+              <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 leading-relaxed">
+                AI-powered study plans, task management, and progress tracking — all in one place.
+              </p>
+            </div>
+            <div className={`rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10 ${isLight ? 'bg-emerald-50 border border-emerald-100' : 'bg-slate-900/50 border border-slate-800'} flex flex-col gap-4 min-h-[300px] justify-center transition-all hover:shadow-xl hover:shadow-emerald-500/10`}>
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-2xl shrink-0">
+                <Clock size={24} />
+              </div>
+              <h3 className="font-bold text-lg sm:text-xl text-slate-800 dark:text-white">Stay Focused</h3>
+              <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 leading-relaxed">
+                Pomodoro timer with focus stats, session logging, and study break reminders.
+              </p>
+            </div>
+            <div className={`rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10 ${isLight ? 'bg-emerald-50 border border-emerald-100' : 'bg-slate-900/50 border border-slate-800'} flex flex-col gap-4 min-h-[300px] justify-center transition-all hover:shadow-xl hover:shadow-emerald-500/10`}>
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center text-white text-2xl shrink-0">
+                <Trophy size={24} />
+              </div>
+              <h3 className="font-bold text-lg sm:text-xl text-slate-800 dark:text-white">Level Up</h3>
+              <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 leading-relaxed">
+                Gamified learning — earn XP, unlock achievements, and compete on leaderboards.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ===== FEATURES SECTION ===== */}
       <section id="features" className={`relative z-10 py-16 sm:py-24 ${isLight ? 'bg-white' : 'bg-slate-950'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -509,7 +549,7 @@ export default function Homepage({ onSignUp, onLecturer, theme = 'dark', onToggl
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+<div className="grid sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
             {[
               { icon: BookOpen, title: 'Smart Task Board', desc: 'Drag-and-drop kanban. Organize by subject. Never miss a deadline.', color: 'from-emerald-500 to-green-500', img: 'https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=800&h=600&fit=crop' },
               { icon: Clock, title: 'Focus Timer', desc: 'Pomodoro technique optimized for academic sessions. 25 min work, 5 min break.', color: 'from-blue-500 to-cyan-500', img: 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=800&h=600&fit=crop' },
@@ -517,6 +557,8 @@ export default function Homepage({ onSignUp, onLecturer, theme = 'dark', onToggl
               { icon: Trophy, title: 'Gamified Learning', desc: 'Earn XP. Unlock achievements. Compete on leaderboards. Stay motivated.', color: 'from-amber-500 to-orange-500', img: 'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?w=800&h=600&fit=crop' },
               { icon: Users, title: 'Study Together', desc: 'Connect with classmates. Create study rooms. Share materials in real-time.', color: 'from-rose-500 to-red-500', img: 'https://images.unsplash.com/photo-1529156069898-430993e8f31e?w=800&h=600&fit=crop' },
               { icon: BarChart3, title: 'Progress Analytics', desc: 'Track your growth. View study streaks. Monitor your academic performance.', color: 'from-indigo-500 to-violet-500', img: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop' },
+              { icon: ShieldCheck, title: 'Secure & Private', desc: 'Your data stays private. End-to-end encryption. No ads. Trusted by universities.', color: 'from-emerald-600 to-emerald-700', img: 'https://images.unsplash.com/photo-1516035069532-8c78c1d616dd?w=800&h=600&fit=crop' },
+              { icon: MapPin, title: 'Campus Locator', desc: 'Find your classes, buildings, and campus resources with interactive maps.', color: 'from-indigo-500 to-violet-500', img: 'https://images.unsplash.com/photo-1486406146926-c624f15f6d1f?w=800&h=600&fit=crop' },
             ].map((f, i) => (
               <div
                 key={i}
@@ -588,21 +630,21 @@ export default function Homepage({ onSignUp, onLecturer, theme = 'dark', onToggl
               </div>
               <div className="space-y-4">
                 {events.map((event, i) => (
-<div key={i} className="flex gap-3 group cursor-pointer">
-                <div className="relative shrink-0 w-11 h-11 rounded-xl overflow-hidden">
-                  <img src={event.img} alt={event.title} className="w-full h-full object-cover" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <div className={`w-1.5 rounded-full bg-gradient-to-b ${event.color} shrink-0`} />
-                    <p className={`text-sm font-bold group-hover:${isLight ? 'text-emerald-600' : 'text-emerald-400'} transition-colors ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
-                      {event.title}
-                    </p>
+                  <div key={i} className="flex gap-3 group cursor-pointer">
+                    <div className="relative shrink-0 w-11 h-11 rounded-xl overflow-hidden">
+                      <img src={event.img} alt={event.title} className="w-full h-full object-cover" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <div className={`w-1.5 rounded-full bg-gradient-to-b ${event.color} shrink-0`} />
+                        <p className={`text-sm font-bold group-hover:${isLight ? 'text-emerald-600' : 'text-emerald-400'} transition-colors ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
+                          {event.title}
+                        </p>
+                      </div>
+                      <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>{event.date}</p>
+                    </div>
+                    <ChevronRight size={16} className={`${isLight ? 'text-slate-400' : 'text-slate-600'} group-hover:translate-x-1 transition-transform`} />
                   </div>
-                  <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>{event.date}</p>
-                </div>
-                <ChevronRight size={16} className={`${isLight ? 'text-slate-400' : 'text-slate-600'} group-hover:translate-x-1 transition-transform`} />
-              </div>
                 ))}
               </div>
               <button className={`mt-6 text-xs font-bold flex items-center gap-1 transition-colors ${
