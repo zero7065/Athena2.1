@@ -1,5 +1,5 @@
 /**
- * UniPulse — Groq API Proxy
+ * CampusIQ — Groq API Proxy
  *
  * Security:
  * - GROQ_API_KEY is server-side only (never exposed to client)

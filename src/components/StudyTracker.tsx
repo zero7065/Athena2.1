@@ -1,5 +1,5 @@
 /*
- * UniPulse - Student Success Platform
+ * CampusIQ - Student Success Platform
  * Section: POMODORO TIMER (StudyTracker)
  *
  * Changes made:
@@ -52,7 +52,7 @@ const StudyTracker: React.FC = () => {
     }
   }, []);
 
-  useEffect(() => { if ('Notification' in window && Notification.permission === 'granted') new Notification('UniPulse Ready', { body: 'Start your study session!', icon: '/favicon.ico' }); }, []);
+  useEffect(() => { if ('Notification' in window && Notification.permission === 'granted') new Notification('CampusIQ Ready', { body: 'Start your study session!', icon: '/favicon.ico' }); }, []);
 
   const getDuration = useCallback(() => {
     switch (mode) {

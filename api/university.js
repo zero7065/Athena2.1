@@ -1,5 +1,5 @@
 /**
- * UniPulse — University Curriculum API
+ * CampusIQ — University Curriculum API
  *
  * Backend integration endpoint. Connects the app to an external university
  * database via a proxy URL. On the client side (browser-only app) this API

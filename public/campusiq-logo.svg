@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="200" height="200">
+  <!-- CampusIQ Logo - Campus building design -->
+  <defs>
+    <linearGradient id="campusGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00843D;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#006B31;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFC107;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle (campus ring) -->
+  <circle cx="256" cy="256" r="250" fill="url(#campusGradient)" stroke="#FFFFFF" stroke-width="8" />
+  
+  <!-- Campus building - base -->
+  <rect x="96" y="220" width="320" height="160" fill="#FFFFFF" rx="6" />
+  
+  <!-- Building columns -->
+  <rect x="140" y="240" width="28" height="140" fill="#1F5B2D" />
+  <rect x="212" y="240" width="28" height="140" fill="#1F5B2D" />
+  <rect x="284" y="240" width="28" height="140" fill="#1F5B2D" />
+  <rect x="356" y="240" width="28" height="140" fill="#1F5B2D" />
+  
+  <!-- Pedestal base under columns -->
+  <rect x="124" y="372" width="264" height="16" fill="#1F5B2D" />
+  
+  <!-- Building roof triangles (pediment) -->
+  <polygon points="96,220 160,150 352,150 416,220" fill="#1F5B2D" />
+  <polygon points="104,230 160,170 352,170 408,230" fill="#FFFFFF" />
+  
+  <!-- Campus bell tower dome -->
+  <circle cx="256" cy="142" r="24" fill="url(#goldGradient)" stroke="#B8860B" stroke-width="4" />
+  <circle cx="256" cy="126" r="8" fill="#8B5E00" />
+  <rect x="253" y="88" width="6" height="22" fill="#B8860B" />
+  <rect x="256" y="74" width="24" height="8" fill="#B8860B" />
+  
+  <!-- Building windows (IQ pattern) -->
+  <rect x="134" y="250" width="32" height="24" rx="3" fill="#D9E8DD" />
+  <rect x="206" y="250" width="32" height="24" rx="3" fill="#D9E8DD" />
+  <rect x="278" y="250" width="32" height="24" rx="3" fill="#D9E8DD" />
+  <rect x="350" y="250" width="32" height="24" rx="3" fill="#D9E8DD" />
+  <rect x="134" y="290" width="32" height="24" rx="3" fill="#D9E8DD" />
+  <rect x="206" y="290" width="32" height="24" rx="3" fill="#D9E8DD" />
+  <rect x="278" y="290" width="32" height="24" rx="3" fill="#D9E8DD" />
+  <rect x="350" y="290" width="32" height="24" rx="3" fill="#D9E8DD" />
+  
+  <!-- IQ letters centered in building -->
+  <text x="256" y="380" text-anchor="middle" font-family="Arial, sans-serif" font-size="70" font-weight="bold" fill="#00843D">
+    IQ
+  </text>
+  <path d="M210,340 L210,420" stroke="#00843D" stroke-width="8" stroke-linecap="round" />
+  <path d="M298,340 L298,420" stroke="#00843D" stroke-width="8" stroke-linecap="round" />
+  <circle cx="210" cy="340" r="14" fill="#00843D" />
+  <circle cx="298" cy="340" r="14" fill="#00843D" />
+  
+  <!-- Graduation tassel on IQ i dot -->
+  <path d="M210,326 L210,310 L230,316 L226,328 Z" fill="#FFD700" stroke="#B8860B" stroke-width="2" />
+  
+  <!-- Campus steps -->
+  <rect x="190" y="388" width="132" height="8" fill="#1F5B2D" />
+  <rect x="178" y="398" width="156" height="8" fill="#1F5B2D" />
+  <rect x="166" y="408" width="180" height="8" fill="#1F5B2D" />
+  <rect x="154" y="418" width="204" height="8" fill="#1F5B2D" />
+</svg>

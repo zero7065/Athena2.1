@@ -116,8 +116,8 @@ const Sidebar: React.FC<SidebarProps> = ({
             <Star size={20} />
           </div>
           <div className="flex flex-col">
-            <span className="text-base font-black tracking-tighter text-slate-800 dark:text-white leading-none">UniPulse</span>
-            <span className="text-[8px] text-[#00843D] font-bold uppercase tracking-widest leading-none mt-0.5">UniPulse Edition</span>
+            <span className="text-base font-black tracking-tighter text-slate-800 dark:text-white leading-none">CampusIQ</span>
+            <span className="text-[8px] text-[#00843D] font-bold uppercase tracking-widest leading-none mt-0.5">CampusIQ Edition</span>
           </div>
         </div>
 
@@ -178,8 +178,8 @@ const Sidebar: React.FC<SidebarProps> = ({
               <Star size={20} />
             </div>
             <div className="flex flex-col">
-              <span className="text-lg font-black tracking-tighter text-slate-800 dark:text-white leading-none">UniPulse</span>
-              <span className="text-[7px] text-[#00843D] font-bold uppercase tracking-widest leading-none mt-0.5">UniPulse Edition</span>
+              <span className="text-lg font-black tracking-tighter text-slate-800 dark:text-white leading-none">CampusIQ</span>
+              <span className="text-[7px] text-[#00843D] font-bold uppercase tracking-widest leading-none mt-0.5">CampusIQ Edition</span>
             </div>
           </div>
         )}
@@ -283,7 +283,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               <div className="w-5 h-5 rounded-md bg-gradient-to-br from-[#00843D] to-emerald-500 flex items-center justify-center text-white text-[8px] font-bold shadow-sm">J</div>
               <div className="flex flex-col">
                 <span onClick={handleJadaiClick} className="text-[8px] font-black tracking-tighter text-slate-500 dark:text-slate-400 leading-none cursor-pointer select-none">JADAI STUDIOS</span>
-                <span className="text-[6px] text-slate-400 dark:text-slate-500 leading-none mt-0.5">UniPulse Edition</span>
+                <span className="text-[6px] text-slate-400 dark:text-slate-500 leading-none mt-0.5">CampusIQ Edition</span>
               </div>
             </div>
           </div>

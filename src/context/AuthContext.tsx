@@ -1,5 +1,5 @@
 /*
- * UniPulse - Student Success Platform
+ * CampusIQ - Student Success Platform
  * Section: AUTH - LOGIN & SIGNUP
  */
 

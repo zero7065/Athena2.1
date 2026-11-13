@@ -1,8 +1,8 @@
 export const UNIPULSE_BRANDING = {
-  platformName: 'UniPulse',
-  shortName: 'UniPulse',
+  platformName: 'CampusIQ',
+  shortName: 'CampusIQ',
   motto: 'Intelligence. Integrity. Innovation.',
-  emblemUrl: '/unipulse-logo.svg',
+  emblemUrl: '/campusiq-logo.svg',
   established: 2025,
   colors: {
     primary: '#00843D',

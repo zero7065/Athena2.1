@@ -1,5 +1,5 @@
 /*
- * UniPulse - Student Success Platform
+ * CampusIQ - Student Success Platform
  * Section: SECRET ADMIN ACCESS
  *
  * Hidden admin login: only accessible via /admin-secret path.

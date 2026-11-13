@@ -211,7 +211,7 @@ const AppContent: React.FC = () => {
         <div className="flex flex-col items-center gap-4">
           <div className="w-16 h-16 border-4 border-[#00843D] border-t-transparent rounded-full animate-spin" />
           <p className="text-[#00843D] font-bold animate-pulse uppercase tracking-widest text-xs">
-            Initializing UniPulse...
+            Initializing CampusIQ...
           </p>
         </div>
       </div>
@@ -301,7 +301,7 @@ const AppContent: React.FC = () => {
                 <div className="w-7 h-7 bg-[#00843D] rounded-lg flex items-center justify-center text-white">
                   <Sparkles size={16} />
                 </div>
-                <span className="font-bold text-sm">UniPulse</span>
+                <span className="font-bold text-sm">CampusIQ</span>
                 <span onClick={handleJadaiClick} className="text-[7px] text-[#00843D] font-bold uppercase tracking-wider hidden xs:inline cursor-pointer select-none">by JADAI</span>
               </div>
               <div className="w-8 h-8 rounded-lg bg-[#00843D]/10 flex items-center justify-center text-[#00843D] font-bold text-xs">

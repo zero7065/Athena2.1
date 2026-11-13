@@ -1,7 +1,7 @@
-# UniPulse — AI-Powered Student Success Platform
-## UniPulse — Multi-Tenant Student Success Platform
+# CampusIQ — AI-Powered Student Success Platform
+## CampusIQ — Multi-Tenant Student Success Platform
 
-UniPulse is a comprehensive student success platform for universities. It combines task management, Pomodoro study tracking, gamified achievements, cognitive games, and AI assistance to help students achieve their academic goals. Fully offline-capable with localStorage persistence — no backend required.
+CampusIQ is a comprehensive student success platform for universities. It combines task management, Pomodoro study tracking, gamified achievements, cognitive games, and AI assistance to help students achieve their academic goals. Fully offline-capable with localStorage persistence — no backend required.
 
 ### Features
 
@@ -10,7 +10,7 @@ UniPulse is a comprehensive student success platform for universities. It combin
 - **4 Cognitive Games** — Chess (legal-move AI with alpha-beta pruning), Memory Match, Sudoku (unique-solution guaranteed), AI Art Guesser (Groq-powered dynamic challenges)
 - **CBT Exam Simulator** — 15 JAMB-style questions across 5 subjects with auto-grading, timer, XP rewards
 - **Achievement / XP System** — 14 achievements, level progression, toast notifications on unlock
-- **AI Academic Assistant** — Groq-powered (llama-3.3-70b) chat with UniPulse context and personality preferences
+- **AI Academic Assistant** — Groq-powered (llama-3.3-70b) chat with CampusIQ context and personality preferences
 - **Friends & Study Rooms** — Add friends, see online status, shared study spaces
 - **Admin Analytics Panel** — Multi-user overview, tasks by status, CSV export, date range filtering
 - **Full Role-Based Access** — Student, Lecturer, and Admin roles with respective portals

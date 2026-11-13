@@ -607,7 +607,7 @@ export function getSupportSettings(): SupportSettings {
     whatsappNumber: '+2348000000000',
     whatsappMessage: 'Hello%20UniPulse%20Support%2C%20I%20need%20help%20with...',
     email: 'support@unipulse.io',
-    phone: '+234-800-UniPulse',
+    phone: '+234-800-CampusIQ',
     enabled: true,
   };
 }

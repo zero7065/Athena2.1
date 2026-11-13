@@ -152,12 +152,12 @@ const Auth: React.FC<AuthProps> = ({ mode, setMode, onClose, knownAccounts }) =>
               <GraduationCap size={24} />
             </div>
             <div className="flex flex-col items-start">
-              <span className="text-xl font-black tracking-tighter text-slate-900 dark:text-white leading-none">UniPulse</span>
+              <span className="text-xl font-black tracking-tighter text-slate-900 dark:text-white leading-none">CampusIQ</span>
               <span className="text-[8px] text-[#00843D] font-bold uppercase tracking-[0.2em] leading-none mt-0.5">by Jadai Studios</span>
             </div>
           </div>
           <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight text-center">
-            {mode === 'login' ? 'Welcome Back' : 'Join UniPulse'}
+            {mode === 'login' ? 'Welcome Back' : 'Join CampusIQ'}
           </h2>
           <p className="text-xs text-slate-500 mt-2 font-medium text-center">
             {mode === 'login' ? 'Sign in to your account' : 'Create your account to get started'}

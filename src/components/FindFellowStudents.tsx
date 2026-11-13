@@ -1,5 +1,5 @@
 /*
- * UniPulse — Find Fellow Students Page
+ * CampusIQ — Find Fellow Students Page
  *
  * Lets logged-in students discover other students who share location, interests,
  * or subjects. Uses registered users stored locally.

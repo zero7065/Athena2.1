@@ -1,5 +1,5 @@
 /*
- * UniPulse - Student Success Platform
+ * CampusIQ - Student Success Platform
  * Section: LECTURER PORTAL
  *
  * - Students list with progress tracking

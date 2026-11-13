@@ -1,8 +1,8 @@
 /*
- * UniPulse - Student Success Platform
+ * CampusIQ - Student Success Platform
  * Section: HOMEPAGE
  *
- * UniPulse branded landing page.
+ * CampusIQ branded landing page.
  * Features: university imagery, student interaction, events, dark/light toggle
  */
 
@@ -112,7 +112,7 @@ function useTypewriter(texts: string[], speed: number = 60, deleteSpeed: number 
 // Testimonial carousel
 const testimonials = [
   {
-    quote: "UniPulse's gamified approach kept me consistent. I went from struggling to stay organized to having a perfect study routine.",
+    quote: "CampusIQ's gamified approach kept me consistent. I went from struggling to stay organized to having a perfect study routine.",
     name: "Amina Okafor",
     role: "Computer Science, Year 3",
     avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=face",
@@ -263,8 +263,8 @@ export default function Homepage({ onSignUp, onLecturer, theme = 'dark', onToggl
                 <GraduationCap size={22} className="text-white" />
               </div>
               <div className="flex flex-col">
-                <span className={`text-lg sm:text-xl font-black tracking-tight leading-none ${isLight ? 'text-emerald-800' : 'text-white'}`}>UniPulse</span>
-                <span className={`text-[8px] font-bold uppercase tracking-[0.2em] leading-none mt-0.5 ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`}>UniPulse Edition</span>
+                <span className={`text-lg sm:text-xl font-black tracking-tight leading-none ${isLight ? 'text-emerald-800' : 'text-white'}`}>CampusIQ</span>
+                <span className={`text-[8px] font-bold uppercase tracking-[0.2em] leading-none mt-0.5 ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`}>CampusIQ Edition</span>
               </div>
             </div>
 
@@ -310,7 +310,7 @@ export default function Homepage({ onSignUp, onLecturer, theme = 'dark', onToggl
               <div className={`inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider ${
                 isLight ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/30'
               }`}>
-                <Zap size={14} /> Powered by AI for UniPulse Students
+                <Zap size={14} /> Powered by AI for CampusIQ Students
               </div>
 
               <h1 className={`text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black leading-[1.1] tracking-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>
@@ -330,7 +330,7 @@ export default function Homepage({ onSignUp, onLecturer, theme = 'dark', onToggl
               </div>
 
               <p className={`text-base sm:text-lg leading-relaxed max-w-lg ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
-                UniPulse helps you master your studies, track your progress, and collaborate with peers using advanced AI-driven insights — built specifically for UniPulse.
+                CampusIQ helps you master your studies, track your progress, and collaborate with peers using advanced AI-driven insights — built specifically for CampusIQ.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2">
@@ -367,7 +367,7 @@ export default function Homepage({ onSignUp, onLecturer, theme = 'dark', onToggl
               </div>
 
               <div className={`flex flex-wrap gap-4 sm:gap-6 text-xs sm:text-sm ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
-                <span className="flex items-center gap-1.5">✓ 8,000+ UniPulse Students</span>
+                <span className="flex items-center gap-1.5">✓ 8,000+ CampusIQ Students</span>
                 <span className="flex items-center gap-1.5">✓ Free & Offline-First</span>
                 <span className="flex items-center gap-1.5">✓ No Credit Card</span>
               </div>
@@ -482,7 +482,7 @@ export default function Homepage({ onSignUp, onLecturer, theme = 'dark', onToggl
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8">
             {[
-              { icon: Users, value: `${students.count.toLocaleString()}+`, label: 'UniPulse Students', color: 'text-emerald-500' },
+              { icon: Users, value: `${students.count.toLocaleString()}+`, label: 'CampusIQ Students', color: 'text-emerald-500' },
               { icon: BookOpen, value: `${features.count}+`, label: 'Academic Programs', color: 'text-blue-500' },
               { icon: Clock, value: `${studyHours.count.toLocaleString()}+`, label: 'Study Hours Tracked', color: 'text-amber-500' },
               { icon: Star, value: `${(xpEarned.count / 1000).toFixed(0)}K+`, label: 'XP Earned', color: 'text-purple-500' },
@@ -542,7 +542,7 @@ export default function Homepage({ onSignUp, onLecturer, theme = 'dark', onToggl
               <Sparkles size={14} /> Everything You Need
             </div>
             <h2 className={`text-3xl sm:text-4xl lg:text-5xl font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>
-              Built for <span className={isLight ? 'text-emerald-600' : 'text-emerald-400'}>UniPulse Students</span>
+              Built for <span className={isLight ? 'text-emerald-600' : 'text-emerald-400'}>CampusIQ Students</span>
             </h2>
             <p className={`text-base sm:text-lg mt-3 max-w-2xl mx-auto ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
               Real tools that fit your study rhythm. Track tasks, stay focused, compete with friends, and get AI-powered tutoring.
@@ -596,7 +596,7 @@ export default function Homepage({ onSignUp, onLecturer, theme = 'dark', onToggl
                 <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider ${
                   isLight ? 'bg-emerald-100 text-emerald-700' : 'bg-emerald-500/10 text-emerald-300'
                 }`}>
-                  <BookOpen size={14} /> About UniPulse
+                  <BookOpen size={14} /> About CampusIQ
                 </div>
                 <h2 className={`text-xl sm:text-2xl md:text-3xl font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>
                   University · Global
@@ -666,7 +666,7 @@ export default function Homepage({ onSignUp, onLecturer, theme = 'dark', onToggl
             <Quote size={14} /> Student Voices
           </div>
           <h2 className={`text-3xl sm:text-4xl font-black mb-8 sm:mb-12 ${isLight ? 'text-slate-900' : 'text-white'}`}>
-            Trusted by <span className={isLight ? 'text-emerald-600' : 'text-emerald-400'}>UniPulse Students</span>
+            Trusted by <span className={isLight ? 'text-emerald-600' : 'text-emerald-400'}>CampusIQ Students</span>
           </h2>
 
           <div className="relative">
@@ -743,7 +743,7 @@ export default function Homepage({ onSignUp, onLecturer, theme = 'dark', onToggl
                 Ready to Transform Your <span className="text-emerald-400">Academic Life</span>?
               </h2>
               <p className={`text-base sm:text-lg ${isLight ? 'text-emerald-200' : 'text-slate-400'} max-w-xl mx-auto`}>
-                Join thousands of UniPulse students already using UniPulse to organize, focus, and excel. Free to start.
+                Join thousands of CampusIQ students already using CampusIQ to organize, focus, and excel. Free to start.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
                 <button
@@ -786,7 +786,7 @@ export default function Homepage({ onSignUp, onLecturer, theme = 'dark', onToggl
               <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center">
                 <GraduationCap size={18} className="text-white" />
               </div>
-              <span className={`font-bold text-sm ${isLight ? 'text-emerald-200' : 'text-white'}`}>UniPulse — UniPulse Edition</span>
+              <span className={`font-bold text-sm ${isLight ? 'text-emerald-200' : 'text-white'}`}>CampusIQ — CampusIQ Edition</span>
             </div>
             <div className="flex flex-col items-center gap-1">
               <div className="flex items-center gap-1.5">
@@ -794,12 +794,12 @@ export default function Homepage({ onSignUp, onLecturer, theme = 'dark', onToggl
                 <span className="text-[9px] font-bold tracking-wider text-emerald-400">JADAI STUDIOS</span>
               </div>
               <p className={`text-xs text-center ${isLight ? 'text-emerald-300' : 'text-slate-500'}`}>
-                &copy; 2025 UniPulse — Designed to empower every student at University · Global.
+                &copy; 2025 CampusIQ — Designed to empower every student at University · Global.
               </p>
             </div>
             <div className="flex gap-4 sm:gap-6 text-xs sm:text-sm font-medium">
               <a href="https://unipulse.io" target="_blank" rel="noopener noreferrer" className={`transition-colors ${isLight ? 'text-emerald-300 hover:text-white' : 'text-slate-400 hover:text-emerald-400'}`}>
-                UniPulse Website
+                CampusIQ Website
               </a>
               <a href="#" className={`transition-colors ${isLight ? 'text-emerald-300 hover:text-white' : 'text-slate-400 hover:text-emerald-400'}`}>
                 Privacy
