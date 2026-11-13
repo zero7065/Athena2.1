@@ -1,6 +1,6 @@
 /* localStorage persistence layer with namespace prefix, corruption handling, and defaults */
 
-import type { AuthUser, UserProfile, ContentResource, Syllabus } from '../types';
+import type { AuthUser, UserProfile, ContentResource, Syllabus, Course } from '../types';
 
 const PREFIX = 'unipulse_';
 
@@ -723,4 +723,67 @@ export function deleteSyllabus(id: string): Syllabus[] {
   const all = getSyllabi().filter(x => x.id !== id);
   localStorage.setItem(PREFIX + 'syllabi', JSON.stringify(all));
   return all;
+}
+
+/* ===== Course / Curriculum storage ===== */
+export function getAllCourses(): Course[] {
+  try {
+    const raw = localStorage.getItem(PREFIX + 'courses');
+    if (!raw) return [];
+    return JSON.parse(raw) as Course[];
+  } catch { return []; }
+}
+
+export function saveCourses(courses: Course[]): Course[] {
+  try {
+    localStorage.setItem(PREFIX + 'courses', JSON.stringify(courses));
+    return courses;
+  } catch { return courses; }
+}
+
+export function addCourse(course: Course): Course[] {
+  const all = getAllCourses();
+  const idx = all.findIndex(x => x.id === course.id);
+  if (idx >= 0) all[idx] = course; else all.push(course);
+  saveCourses(all);
+  return all;
+}
+
+export function deleteCourse(id: string): Course[] {
+  const all = getAllCourses().filter(x => x.id !== id);
+  saveCourses(all);
+  return all;
+}
+
+export interface StudentEnrollment {
+  courseId: string;
+  studentEmail: string;
+  enrolledAt: number;
+}
+
+export function getStudentEnrollments(studentEmail: string): StudentEnrollment[] {
+  try {
+    const raw = localStorage.getItem(PREFIX + 'enrollments');
+    if (!raw) return [];
+    return JSON.parse(raw) as StudentEnrollment[];
+  } catch { return []; }
+}
+
+export function saveStudentEnrollments(enrollments: StudentEnrollment[]): boolean {
+  try {
+    localStorage.setItem(PREFIX + 'enrollments', JSON.stringify(enrollments));
+    return true;
+  } catch { return false; }
+}
+
+export function enrollStudent(courseId: string, studentEmail: string): boolean {
+  const all = getStudentEnrollments(studentEmail);
+  if (all.some(e => e.courseId === courseId)) return false;
+  const next = [...all, { courseId, studentEmail, enrolledAt: Date.now() }];
+  return saveStudentEnrollments(next);
+}
+
+export function unenrollStudent(courseId: string, studentEmail: string): boolean {
+  const all = getStudentEnrollments(studentEmail).filter(e => e.courseId !== courseId);
+  return saveStudentEnrollments(all);
 }

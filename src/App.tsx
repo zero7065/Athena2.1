@@ -24,6 +24,7 @@ import StudentDashboard from './components/StudentDashboard';
 import LecturerDashboard from './components/LecturerDashboard';
 import EduRSS from './components/EduRSS';
 import FindFellowStudents from './components/FindFellowStudents';
+import CourseList from './components/CourseList';
 import Terminal from './components/Terminal';
 import FloatingSupport from './components/FloatingSupport';
 import FeedbackModal from './components/FeedbackModal';
@@ -154,6 +155,7 @@ const AppContent: React.FC = () => {
       { id: 'profile', icon: UserCircle, label: 'Profile' },
       { id: 'content', icon: BookOpen, label: 'Content' },
       { id: 'syllabus', icon: GraduationCap, label: 'Syllabus' },
+      { id: 'courses', icon: BookOpen, label: 'Courses' },
     ];
     if (user?.role === 'lecturer') {
       tabs.splice(5, 0, { id: 'lecturer', icon: BookOpen, label: 'Lecturer' });
@@ -270,6 +272,8 @@ const AppContent: React.FC = () => {
         return <SyllabusManager />;
       case 'studyplan':
         return <StudyPlan />;
+      case 'courses':
+        return <CourseList />;
       case 'lecturer':
         return user.role === 'lecturer' || user.role === 'admin' || user.role === 'management' ? <LecturerDashboard /> : <Dashboard setActiveTab={handleTabChange} />;
       case 'admin':

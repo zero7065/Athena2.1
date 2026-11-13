@@ -107,6 +107,29 @@ export interface Syllabus {
   createdAt: number;
 }
 
+/** Course / syllabus entry for the curriculum */
+export interface Course {
+  id: string;
+  code: string;
+  title: string;
+  department: string;
+  credits: number;
+  yearOfStudy: number;
+  level: number;
+  program: string;
+  bio?: string;
+  location: { campus: string; city: string; country: string };
+  interests: string[];
+  subjects: string[];
+  skills: string[];
+  socialLinks?: Record<string, string>;
+  preferences?: { darkMode: boolean; notifications: boolean; studyStyle: 'visual' | 'auditory' | 'kinesthetic' | 'reading'; privacy: 'public' | 'friends' | 'private' };
+  stats?: { streak: number; tasksCompleted: number; studyHours: number; gpa?: number; achievements: number };
+  joinDate: number;
+  isOnline?: boolean;
+  lastSeen?: number;
+}
+
 export interface ChatMessage {
   id: string;
   role: 'user' | 'model';
