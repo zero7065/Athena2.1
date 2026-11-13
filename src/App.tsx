@@ -25,6 +25,7 @@ import LecturerDashboard from './components/LecturerDashboard';
 import EduRSS from './components/EduRSS';
 import FindFellowStudents from './components/FindFellowStudents';
 import CourseList from './components/CourseList';
+import HowToGuide from './components/HowToGuide';
 import Terminal from './components/Terminal';
 import FloatingSupport from './components/FloatingSupport';
 import FeedbackModal from './components/FeedbackModal';
@@ -402,6 +403,8 @@ const AppContent: React.FC = () => {
       {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} onUnlockAchievement={(a) => setShowAchievement(a)} />}
       {showTerminal && <Terminal onClose={() => { setShowTerminal(false); setAdminClickCount(0); }} />}
       <Confetti active={confettiActive} onDone={() => setConfettiActive(false)} />
+      {/* How To Guide */}
+      {user && <HowToGuide />}
     </>
   );
 };
