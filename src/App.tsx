@@ -1,18 +1,16 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, Suspense, lazy } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { AIProvider } from './context/AIContext';
 import Auth from './components/Auth';
 import LecturerAuth from './components/LecturerAuth';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import TaskBoard from './components/TaskBoard';
 import StudyTracker from './components/StudyTracker';
-import Games from './components/Games';
 import Achievements from './components/Achievements';
 import Social from './components/Social';
 import Profile from './components/Profile';
-import AdminPanel from './components/AdminPanel';
-import LecturerPortal from './components/LecturerPortal';
 import AIChatbot from './components/AIChatbot';
 import Homepage from './components/Homepage';
 import SecretAdmin from './components/SecretAdmin';
@@ -32,11 +30,18 @@ import FloatingSupport from './components/FloatingSupport';
 import FeedbackModal from './components/FeedbackModal';
 import Confetti from './components/Confetti';
 import InstallPrompt from './components/InstallPrompt';
+import AIFloatingButton from './components/AIFloatingButton';
+import AIChatSidebar from './components/AIChatSidebar';
 import { cn } from './lib/utils';
 import { useKeyboardShortcuts } from './lib/useKeyboard';
 import { useCurrentUser } from './hooks/useCurrentUser';
 import { useTheme } from './context/ThemeContext';
 import { LayoutDashboard, CheckSquare, Timer, Gamepad2, Trophy, Users, UserCircle, Sparkles, Menu, X, BookOpen, ShieldCheck, GraduationCap, Rss } from 'lucide-react';
+
+const Games = lazy(() => import('./components/Games'));
+const AdminPanel = lazy(() => import('./components/AdminPanel'));
+const LecturerPortal = lazy(() => import('./components/LecturerPortal'));
+const CBTExam = lazy(() => import('./components/CBTExam'));
 
 /**
  * Main App Content Component
@@ -256,7 +261,9 @@ const AppContent: React.FC = () => {
       case 'study':
         return <StudyTracker />;
       case 'games':
-        return <Games />;
+        return <Suspense fallback={<div className="flex items-center justify-center min-h-[400px] text-slate-500">Loading games…</div>}><Games /></Suspense>;
+      case 'cbt':
+        return <Suspense fallback={<div className="flex items-center justify-center min-h-[400px] text-slate-500">Loading exam…</div>}><CBTExam /></Suspense>;
       case 'achievements':
         return <Achievements />;
       case 'social':
@@ -280,9 +287,9 @@ const AppContent: React.FC = () => {
       case 'courses':
         return <CourseList />;
       case 'lecturer':
-        return user.role === 'lecturer' || user.role === 'admin' || user.role === 'management' ? <LecturerDashboard /> : <Dashboard setActiveTab={handleTabChange} />;
+        return <Suspense fallback={<div className="flex items-center justify-center min-h-[400px] text-slate-500">Loading lecturer portal…</div>}><LecturerPortal /></Suspense>;
       case 'admin':
-        return user.role === 'admin' || user.role === 'management' ? <AdminPanel /> : <Dashboard setActiveTab={handleTabChange} />;
+        return <Suspense fallback={<div className="flex items-center justify-center min-h-[400px] text-slate-500">Loading admin panel…</div>}><AdminPanel /></Suspense>;
       default:
         return <Dashboard setActiveTab={handleTabChange} />;
     }
@@ -409,6 +416,12 @@ const AppContent: React.FC = () => {
       <Confetti active={confettiActive} onDone={() => setConfettiActive(false)} />
       {/* How To Guide */}
       {user && <HowToGuide />}
+
+      {/* Floating AI Assistant Button */}
+      <AIFloatingButton />
+
+      {/* AI Chat Sidebar */}
+      <AIChatSidebar />
     </>
   );
 };
@@ -421,7 +434,9 @@ export default function App() {
   return (
     <AuthProvider>
       <ThemeProvider>
-        <AppContent />
+        <AIProvider>
+          <AppContent />
+        </AIProvider>
       </ThemeProvider>
     </AuthProvider>
   );

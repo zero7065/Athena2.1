@@ -1,16 +1,41 @@
 {
-  "name": "AcademiaIQ — AcademiaIQ Student Academic Platform",
+  "name": "AcademiaIQ — AI-Powered Student Success Platform",
   "short_name": "AcademiaIQ",
-  "description": "AI-powered academic platform for universities. Track tasks, study with AI, collaborate in rooms, earn XP and achievements.",
+  "description": "AI-powered academic platform for universities. Track tasks, study with AI, collaborate in rooms, earn XP and achievements. Offline-first PWA.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#00843D",
   "scope": "/",
   "orientation": "portrait",
-  "categories": ["education", "productivity"],
-  "lang": "en-NG",
+  "categories": ["education", "productivity", "student"],
+  "lang": "en",
+  "dir": "ltr",
   "icons": [
+    {
+      "src": "/academiaiq-logo.svg",
+      "sizes": "48x48",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/academiaiq-logo.svg",
+      "sizes": "72x72",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/academiaiq-logo.svg",
+      "sizes": "96x96",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/academiaiq-logo.svg",
+      "sizes": "144x144",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
     {
       "src": "/academiaiq-logo.svg",
       "sizes": "192x192",
@@ -28,14 +53,52 @@
     {
       "name": "Dashboard",
       "short_name": "Home",
+      "description": "Open your academic dashboard",
       "url": "/",
       "icons": [{ "src": "/academiaiq-logo.svg", "sizes": "192x192" }]
     },
     {
       "name": "AI Chat",
       "short_name": "AI",
+      "description": "Open AcademiaIQ AI assistant",
       "url": "/?tab=ai",
       "icons": [{ "src": "/academiaiq-logo.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Study Tracker",
+      "short_name": "Study",
+      "description": "Start a Pomodoro study session",
+      "url": "/?tab=study",
+      "icons": [{ "src": "/academiaiq-logo.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Tasks",
+      "short_name": "Tasks",
+      "description": "Manage your academic tasks",
+      "url": "/?tab=tasks",
+      "icons": [{ "src": "/academiaiq-logo.svg", "sizes": "192x192" }]
     }
-  ]
+  ],
+  "screenshots": [
+    {
+      "src": "/academiaiq-logo.svg",
+      "sizes": "750x1334",
+      "type": "image/svg+xml",
+      "form_factor": "narrow",
+      "label": "AcademiaIQ Dashboard"
+    },
+    {
+      "src": "/academiaiq-logo.svg",
+      "sizes": "1280x720",
+      "type": "image/svg+xml",
+      "form_factor": "wide",
+      "label": "AcademiaIQ AI Assistant"
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "edge_side_panel": {
+    "match": ["/*"],
+    "default_width": 300
+  }
 }
