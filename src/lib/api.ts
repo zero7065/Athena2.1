@@ -1,113 +1,92 @@
-import type { Course } from '../types';
-import { StudentEnrollment } from './storage';
-import { getAllCourses, saveCourses, addCourse, deleteCourse } from './storage';
-
-/* ===== Local storage-backed course API (works offline, persists) ===== */
-
-export const courseApi = {
-  getAll: getAllCourses,
-  saveAll: saveCourses,
-  add: addCourse,
-  delete: deleteCourse,
-};
-
-/* ===== Student enrollment API ===== */
-
-export const enrollmentApi = {
-  getForStudent: () => {
-    const raw = localStorage.getItem('unipulse_enrollments');
-    if (!raw) return [];
-    return JSON.parse(raw) as StudentEnrollment[];
-  },
-  saveAll: (enrollments: StudentEnrollment[]) => {
-    try { localStorage.setItem('unipulse_enrollments', JSON.stringify(enrollments)); return true; } catch { return false; }
-  },
-  enroll: (courseId: string, email: string) => {
-    const all = enrollmentApi.getForStudent();
-    if (all.some(e => e.courseId === courseId)) return false;
-    return enrollmentApi.saveAll([...all, { courseId, studentEmail: email, enrolledAt: Date.now() }]);
-  },
-  unenroll: (courseId: string, _email: string) => {
-    const all = enrollmentApi.getForStudent().filter(e => e.courseId !== courseId);
-    return enrollmentApi.saveAll(all);
-  },
-};
-
-/* ===== External university data fetch hooks ===== */
-
-export interface ExternalCourse {
-  code: string;
-  title: string;
-  department: string;
-  credits: number;
-  yearOfStudy: number;
-  level: number;
-  program: string;
-  bio?: string;
-  location: { campus: string; city: string; country: string };
-  interests: string[];
-  subjects: string[];
-  skills: string[];
-}
-
 /**
- * Fetch curriculum data from an external university API endpoint.
- * Falls back to an empty array on failure so the app stays usable offline.
+ * AcademiaIQ API Client
+ * Centralized API calls with JWT auth and error handling
  */
-export async function fetchExternalCurriculum(
-  endpoint: string,
-  token?: string
-): Promise<ExternalCourse[]> {
-  try {
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-    const res = await fetch(endpoint, { headers });
-    if (!res.ok) return [];
-    const data = await res.json();
-    return Array.isArray(data) ? data : (data.courses || []);
-  } catch {
-    return [];
-  }
-}
 
-/**
- * Convert an external course record into the internal Course shape.
- */
-export function toInternalCourse(ext: ExternalCourse, id?: string): Course {
-  return {
-    id: id || `course_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-    code: ext.code,
-    title: ext.title,
-    department: ext.department,
-    credits: ext.credits,
-    yearOfStudy: ext.yearOfStudy,
-    level: ext.level,
-    program: ext.program,
-    bio: ext.bio,
-    location: ext.location,
-    interests: ext.interests,
-    subjects: ext.subjects,
-    skills: ext.skills,
-    joinDate: Date.now(),
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3001/api';
+
+async function apiRequest(endpoint: string, options: RequestInit = {}): Promise<any> {
+  const token = localStorage.getItem('token');
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
   };
+
+  if (options.headers) {
+    if (options.headers instanceof Headers) {
+      options.headers.forEach((value, key) => {
+        headers[key] = value;
+      });
+    } else {
+      Object.assign(headers, options.headers);
+    }
+  }
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const res = await fetch(`${API_BASE}${endpoint}`, {
+    ...options,
+    headers,
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.error || `API error: ${res.status}`);
+  }
+
+  if (res.status === 204) return null;
+  return res.json();
 }
 
-/**
- * Pull curriculum from an external university DB and merge into local storage.
- * Returns the merged course list.
- */
-export async function syncCurriculumFromExternal(
-  endpoint: string,
-  token?: string
-): Promise<{ courses: Course[]; added: number }> {
-  const external = await fetchExternalCurriculum(endpoint, token);
-  const existing = getAllCourses();
-  const existingCodes = new Set(existing.map(c => c.code));
-  let added = 0;
-  for (const ext of external) {
-    if (existingCodes.has(ext.code)) continue;
-    addCourse(toInternalCourse(ext));
-    added++;
-  }
-  return { courses: getAllCourses(), added };
-}
+export const api = {
+  // Auth
+  authRegister: (data: { email: string; password: string; name: string; role?: string; department?: string; student_id?: string }) =>
+    apiRequest('/auth/register', { method: 'POST', body: JSON.stringify(data) }),
+
+  authLogin: (data: { email: string; password: string }) =>
+    apiRequest('/auth/login', { method: 'POST', body: JSON.stringify(data) }),
+
+  authProfile: () => apiRequest('/auth/profile', { method: 'GET' }),
+  authUpdateProfile: (data: any) =>
+    apiRequest('/auth/profile', { method: 'PUT', body: JSON.stringify(data) }),
+
+  // Tasks
+  tasksList: (params?: { status?: string; priority?: string }) => {
+    const qs = params ? new URLSearchParams(params as Record<string, string>).toString() : '';
+    return apiRequest(`/tasks${qs ? '?' + qs : ''}`, { method: 'GET' });
+  },
+  tasksCreate: (data: any) =>
+    apiRequest('/tasks', { method: 'POST', body: JSON.stringify(data) }),
+  tasksUpdate: (id: string, data: any) =>
+    apiRequest(`/tasks/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  tasksDelete: (id: string) =>
+    apiRequest(`/tasks/${id}`, { method: 'DELETE' }),
+  tasksStats: () => apiRequest('/tasks/stats', { method: 'GET' }),
+
+  // Skills
+  skillsList: () => apiRequest('/skills', { method: 'GET' }),
+  skillsUpdateXP: (id: string, xpGain: number) =>
+    apiRequest(`/skills/${id}/xp`, { method: 'POST', body: JSON.stringify({ xp_gain: xpGain }) }),
+  skillsSeed: () => apiRequest('/skills/seed', { method: 'POST' }),
+
+  // Submissions
+  submissionsStudent: () => apiRequest('/submissions/student', { method: 'GET' }),
+  submissionsLecturer: () => apiRequest('/submissions/lecturer', { method: 'GET' }),
+  submissionsCreate: (data: any) =>
+    apiRequest('/submissions', { method: 'POST', body: JSON.stringify(data) }),
+  submissionsGrade: (id: string, data: { score: number; feedback?: string }) =>
+    apiRequest(`/submissions/${id}/grade`, { method: 'POST', body: JSON.stringify(data) }),
+  submissionsStats: () => apiRequest('/submissions/stats', { method: 'GET' }),
+
+  // Courses
+  coursesList: () => apiRequest('/courses', { method: 'GET' }),
+  coursesCreate: (data: any) =>
+    apiRequest('/courses', { method: 'POST', body: JSON.stringify(data) }),
+
+  // RSS
+  rssFetch: (url?: string) => apiRequest(`/rss${url ? '?url=' + encodeURIComponent(url) : ''}`, { method: 'GET' }),
+};
+
+export default api;
+export { API_BASE };

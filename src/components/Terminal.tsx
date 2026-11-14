@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Terminal as TerminalIcon, Shield } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { api } from '../lib/api';
 
 const ADMIN_PASSWORD = '0000';
 
@@ -10,14 +11,19 @@ const Terminal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [error, setError] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password === ADMIN_PASSWORD) {
-      setIsAuthenticated(true);
-      login({ name: 'Admin User', email: 'admin@unipulse.io', studentId: 'ADM001', role: 'admin', department: 'Administration' });
-      setShowTerminal(false);
-      setAdminClickCount(0);
-      onClose();
+      try {
+        const result = await api.authLogin({ email: 'admin@unipulse.io', password: 'admin123' });
+        login(result.user, result.token);
+        setIsAuthenticated(true);
+        setShowTerminal(false);
+        setAdminClickCount(0);
+        onClose();
+      } catch (err: any) {
+        setError(err.message || 'Admin login failed');
+      }
     } else {
       setError('Invalid admin password');
       setPassword('');

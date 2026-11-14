@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, Mail, Lock, User, GraduationCap, Eye, EyeOff, AlertCircle, BookOpen, RefreshCw, Sparkles } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import type { AuthUser } from '../types';
+import { api } from '../lib/api';
 
 interface AuthProps {
   mode: 'login' | 'register';
@@ -10,32 +11,10 @@ interface AuthProps {
   knownAccounts?: AuthUser[];
 }
 
-const USERS_KEY = 'unipulse_users';
-
-interface StoredUser {
-  email: string;
-  password: string;
-  name: string;
-  studentId: string;
-  department: string;
-  role: 'student' | 'lecturer' | 'admin';
-}
-
 const DEMO_ACCOUNTS = [
   { name: 'Student Demo', email: 'student@unipulse.io', password: 'student123', role: 'student' as const, color: 'text-emerald-600', bg: 'bg-emerald-50 dark:bg-emerald-900/20', icon: GraduationCap },
   { name: 'Lecturer Demo', email: 'lecturer@unipulse.io', password: 'lecturer123', role: 'lecturer' as const, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/20', icon: BookOpen },
 ];
-
-function getStoredUsers(): StoredUser[] {
-  try {
-    const stored = localStorage.getItem(USERS_KEY);
-    return stored ? JSON.parse(stored) : [];
-  } catch { return []; }
-}
-
-function saveUsers(users: StoredUser[]): void {
-  localStorage.setItem(USERS_KEY, JSON.stringify(users));
-}
 
 function validatePassword(password: string): { valid: boolean; errors: string[] } {
   const errors: string[] = [];
@@ -46,7 +25,7 @@ function validatePassword(password: string): { valid: boolean; errors: string[] 
 }
 
 const Auth: React.FC<AuthProps> = ({ mode, setMode, onClose, knownAccounts }) => {
-  const { login, isLoading: authLoading } = useAuth();
+  const { login, register, isLoading: authLoading } = useAuth();
 
   const [formData, setFormData] = useState({
     name: '', studentId: '', email: '', password: '', confirmPassword: '',
@@ -83,15 +62,15 @@ const Auth: React.FC<AuthProps> = ({ mode, setMode, onClose, knownAccounts }) =>
 
   const quickLogin = async (demo: typeof DEMO_ACCOUNTS[0]) => {
     setIsSubmitting(true);
-    await new Promise(r => setTimeout(r, 300));
-    const users = getStoredUsers();
-    const user = users.find(u => u.email === demo.email && u.password === demo.password);
-    if (user) {
-      const authUser: AuthUser = { name: user.name, studentId: user.studentId, email: user.email, role: user.role, department: user.department };
-      login(authUser);
+    try {
+      const result = await api.authLogin({ email: demo.email, password: demo.password });
+      login(result.user, result.token);
       onClose();
+    } catch (err: any) {
+      setGeneralError(err.message || 'Quick login failed');
+    } finally {
+      setIsSubmitting(false);
     }
-    setIsSubmitting(false);
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -100,14 +79,16 @@ const Auth: React.FC<AuthProps> = ({ mode, setMode, onClose, knownAccounts }) =>
     const emailError = validateField('email', formData.email);
     const passwordError = validateField('password', formData.password);
     if (emailError || passwordError) { setFieldErrors({ email: emailError, password: passwordError }); setIsSubmitting(false); return; }
-    await new Promise(r => setTimeout(r, 500));
-    const users = getStoredUsers();
-    const user = users.find(u => u.email === formData.email && u.password === formData.password);
-    if (!user) { setGeneralError('Invalid credentials'); setIsSubmitting(false); return; }
-    const authUser: AuthUser = { name: user.name, studentId: user.studentId, email: user.email, role: user.role, department: user.department };
-    login(authUser);
-    setIsSubmitting(false);
-    onClose();
+
+    try {
+      const result = await api.authLogin({ email: formData.email, password: formData.password });
+      login(result.user, result.token);
+      setIsSubmitting(false);
+      onClose();
+    } catch (err: any) {
+      setGeneralError(err.message || 'Login failed');
+      setIsSubmitting(false);
+    }
   };
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -119,16 +100,26 @@ const Auth: React.FC<AuthProps> = ({ mode, setMode, onClose, knownAccounts }) =>
       if (error) errors[field] = error;
     });
     if (Object.keys(errors).length > 0) { setFieldErrors(errors); setIsSubmitting(false); return; }
-    await new Promise(r => setTimeout(r, 500));
-    const users = getStoredUsers();
-    if (users.some(u => u.email === formData.email)) { setFieldErrors({ email: 'Account already exists' }); setIsSubmitting(false); return; }
-    const newUser: StoredUser = { name: formData.name, studentId: formData.studentId, email: formData.email, password: formData.password, department: formData.department, role: formData.role };
-    users.push(newUser);
-    saveUsers(users);
-    const authUser: AuthUser = { name: newUser.name, studentId: newUser.studentId, email: newUser.email, role: newUser.role, department: newUser.department };
-    login(authUser);
-    setIsSubmitting(false);
-    onClose();
+
+    try {
+      await register({
+        email: formData.email,
+        password: formData.password,
+        name: formData.name,
+        role: formData.role,
+        department: formData.department || undefined,
+        student_id: formData.studentId || undefined,
+      });
+      setIsSubmitting(false);
+      onClose();
+    } catch (err: any) {
+      if (err.message?.includes('already registered')) {
+        setFieldErrors({ email: 'Account already exists' });
+      } else {
+        setGeneralError(err.message || 'Registration failed');
+      }
+      setIsSubmitting(false);
+    }
   };
 
   const handleSubmit = mode === 'login' ? handleLogin : handleRegister;

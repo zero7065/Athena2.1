@@ -1,38 +1,16 @@
 import React, { useState } from 'react';
 import { Mail, Lock, User, BookOpen, Eye, EyeOff, AlertCircle, GraduationCap, ArrowLeft, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import type { AuthUser } from '../types';
+import { api } from '../lib/api';
 
 interface LecturerAuthProps {
   onBack: () => void;
 }
 
-const USERS_KEY = 'unipulse_users';
-
-interface StoredUser {
-  email: string;
-  password: string;
-  name: string;
-  studentId: string;
-  department: string;
-  role: 'student' | 'lecturer' | 'admin';
-}
-
 const LECTURER_SECRET_CODE = '123456lecture';
 
-function getStoredUsers(): StoredUser[] {
-  try {
-    const stored = localStorage.getItem(USERS_KEY);
-    return stored ? JSON.parse(stored) : [];
-  } catch { return []; }
-}
-
-function saveUsers(users: StoredUser[]): void {
-  localStorage.setItem(USERS_KEY, JSON.stringify(users));
-}
-
 const LecturerAuth: React.FC<LecturerAuthProps> = ({ onBack }) => {
-  const { login, isLoading: authLoading } = useAuth();
+  const { login, register, isLoading: authLoading } = useAuth();
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [formData, setFormData] = useState({
     name: '', staffId: '', email: '', password: '', confirmPassword: '',
@@ -74,13 +52,16 @@ const LecturerAuth: React.FC<LecturerAuthProps> = ({ onBack }) => {
     const emailError = validateField('email', formData.email);
     const passwordError = validateField('password', formData.password);
     if (emailError || passwordError) { setFieldErrors({ email: emailError, password: passwordError }); setIsSubmitting(false); return; }
-    await new Promise(r => setTimeout(r, 500));
-    const users = getStoredUsers();
-    const user = users.find(u => u.email === formData.email && u.password === formData.password && u.role === 'lecturer');
-    if (!user) { setGeneralError('Invalid credentials or account is not a lecturer'); setIsSubmitting(false); return; }
-    const authUser: AuthUser = { name: user.name, studentId: user.studentId, email: user.email, role: user.role, department: user.department };
-    login(authUser);
-    setIsSubmitting(false);
+
+    try {
+      const result = await api.authLogin({ email: formData.email, password: formData.password });
+      login(result.user, result.token);
+      setIsSubmitting(false);
+      onBack();
+    } catch (err: any) {
+      setGeneralError(err.message || 'Login failed');
+      setIsSubmitting(false);
+    }
   };
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -92,22 +73,26 @@ const LecturerAuth: React.FC<LecturerAuthProps> = ({ onBack }) => {
       if (error) errors[field] = error;
     });
     if (Object.keys(errors).length > 0) { setFieldErrors(errors); setIsSubmitting(false); return; }
-    await new Promise(r => setTimeout(r, 500));
-    const users = getStoredUsers();
-    if (users.some(u => u.email === formData.email)) { setFieldErrors({ email: 'Account already exists' }); setIsSubmitting(false); return; }
-    const newUser: StoredUser = {
-      name: formData.name,
-      studentId: formData.staffId,
-      email: formData.email,
-      password: formData.password,
-      department: formData.department || 'Faculty',
-      role: 'lecturer',
-    };
-    users.push(newUser);
-    saveUsers(users);
-    const authUser: AuthUser = { name: newUser.name, studentId: newUser.studentId, email: newUser.email, role: newUser.role, department: newUser.department };
-    login(authUser);
-    setIsSubmitting(false);
+
+    try {
+      await register({
+        email: formData.email,
+        password: formData.password,
+        name: formData.name,
+        role: 'lecturer',
+        department: formData.department || 'Faculty',
+        student_id: formData.staffId || undefined,
+      });
+      setIsSubmitting(false);
+      onBack();
+    } catch (err: any) {
+      if (err.message?.includes('already registered')) {
+        setFieldErrors({ email: 'Account already exists' });
+      } else {
+        setGeneralError(err.message || 'Registration failed');
+      }
+      setIsSubmitting(false);
+    }
   };
 
   const handleSubmit = mode === 'login' ? handleLogin : handleRegister;

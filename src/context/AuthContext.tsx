@@ -1,60 +1,31 @@
 /*
  * AcademiaIQ - Student Success Platform
  * Section: AUTH - LOGIN & SIGNUP
+ * Backend-integrated authentication with JWT tokens
  */
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { AuthUser, ManagementRequest } from '../types';
 import {
-  loadData,
   AppData as StorageAppData,
   addXp,
   checkAndUnlockAchievements,
   getDefaultAppData,
   mergeAppDataUser,
 } from '../lib/storage';
+import { api } from '../lib/api';
 
 export type { AuthUser, ManagementRequest };
 
-const USERS_KEY = 'unipulse_users';
-const KNOWN_ACCOUNTS_KEY = 'unipulse_known_accounts';
 const AUTH_KEY = 'unipulse_auth';
+const KNOWN_ACCOUNTS_KEY = 'unipulse_known_accounts';
 const MANAGEMENT_REQUESTS_KEY = 'unipulse_management_requests';
-
-function seedDemoUsers() {
-  if (localStorage.getItem(USERS_KEY)) return;
-  localStorage.setItem(USERS_KEY, JSON.stringify([
-    { name: 'Admin User', email: 'admin@unipulse.io', password: 'admin123', role: 'admin' as const, studentId: 'ADM001', department: 'Administration' },
-    { name: 'Lecturer User', email: 'lecturer@unipulse.io', password: 'lecturer123', role: 'lecturer' as const, studentId: 'LEC001', department: 'Computer Science' },
-    { name: 'Student User', email: 'student@unipulse.io', password: 'student123', role: 'student' as const, studentId: 'STU001', department: 'Computer Science' },
-  ]));
-}
-
-interface StoredUser {
-  email: string;
-  password: string;
-  name: string;
-  studentId: string;
-  department: string;
-  role: 'student' | 'lecturer' | 'admin' | 'management';
-}
-
-function getStoredUsers(): StoredUser[] {
-  try {
-    const stored = localStorage.getItem(USERS_KEY);
-    return stored ? JSON.parse(stored) : [];
-  } catch { return []; }
-}
-
-function saveStoredUsers(users: StoredUser[]) {
-  localStorage.setItem(USERS_KEY, JSON.stringify(users));
-}
 
 function getAppDataKey(email: string): string {
   return `app_data_${email.replace(/[@.]/g, '_')}`;
 }
 
-function loadAppDataForUser(authUser: AuthUser): StorageAppData {
+function loadAppDataLocally(authUser: AuthUser): StorageAppData {
   const dataKey = getAppDataKey(authUser.email);
   const raw = localStorage.getItem(dataKey);
   if (raw) {
@@ -67,10 +38,9 @@ function loadAppDataForUser(authUser: AuthUser): StorageAppData {
       /* fall through */
     }
   }
-  const oldData = loadData('app_data', getDefaultAppData());
   const fresh: StorageAppData = {
-    ...oldData,
-    user: mergeAppDataUser(authUser, oldData.user),
+    ...getDefaultAppData(),
+    user: mergeAppDataUser(authUser, getDefaultAppData().user),
   };
   localStorage.setItem(dataKey, JSON.stringify(fresh));
   return fresh;
@@ -79,7 +49,8 @@ function loadAppDataForUser(authUser: AuthUser): StorageAppData {
 interface AuthContextType {
   user: AuthUser | null;
   token: string | null;
-  login: (user: AuthUser) => void;
+  login: (user: AuthUser, token: string) => void;
+  register: (data: { email: string; password: string; name: string; role?: string; department?: string; student_id?: string }) => Promise<void>;
   logout: () => void;
   switchAccount: () => void;
   knownAccounts: AuthUser[];
@@ -130,29 +101,48 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   useEffect(() => {
-    seedDemoUsers();
-    const stored = localStorage.getItem(AUTH_KEY);
-    if (stored) {
+    let mounted = true;
+    const initAuth = async () => {
       try {
-        const parsed = JSON.parse(stored) as AuthUser;
-        setUser(parsed);
-        setToken('logged-in');
-        setAppDataState(loadAppDataForUser(parsed));
+        const stored = localStorage.getItem(AUTH_KEY);
+        if (stored && mounted) {
+          const parsed = JSON.parse(stored) as { token: string; user: AuthUser };
+          setToken(parsed.token);
+          setUser(parsed.user);
+          setAppDataState(loadAppDataLocally(parsed.user));
+        }
       } catch {
         localStorage.removeItem(AUTH_KEY);
+      } finally {
+        if (mounted) setIsLoading(false);
       }
-    }
-    setIsLoading(false);
+    };
+    initAuth();
+    return () => { mounted = false; };
   }, []);
 
-  const login = useCallback((userData: AuthUser) => {
-    localStorage.setItem(AUTH_KEY, JSON.stringify(userData));
+  const login = useCallback((userData: AuthUser, authToken: string) => {
+    localStorage.setItem(AUTH_KEY, JSON.stringify({ token: authToken, user: userData }));
     setUser(userData);
-    setToken('logged-in');
-    const data = loadAppDataForUser(userData);
+    setToken(authToken);
+    const data = loadAppDataLocally(userData);
     setAppDataState(data);
     saveKnownAccount(userData);
   }, [saveKnownAccount]);
+
+  const register = useCallback(async (data: {
+    email: string;
+    password: string;
+    name: string;
+    role?: string;
+    department?: string;
+    student_id?: string;
+  }) => {
+    const result = await api.authRegister(data);
+    // result contains { token, user }
+    login(result.user, result.token);
+    saveKnownAccount(result.user);
+  }, [login, saveKnownAccount]);
 
   const logout = useCallback(() => {
     if (user) {
@@ -162,6 +152,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem(AUTH_KEY);
     setUser(null);
     setToken(null);
+    setAppDataState(getDefaultAppData());
   }, [user, appData]);
 
   const switchAccount = useCallback(() => {
@@ -172,6 +163,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem(AUTH_KEY);
     setUser(null);
     setToken(null);
+    setAppDataState(getDefaultAppData());
   }, [user, appData]);
 
   const updateAppData = useCallback((updater: (prev: StorageAppData) => StorageAppData) => {
@@ -220,20 +212,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setManagementRequests(prev => {
       const idx = prev.findIndex(r => r.id === id);
       if (idx < 0) return prev;
-      const request = prev[idx];
-      const authUser: AuthUser = {
-        name: `Management - ${request.email.split('@')[0]}`,
-        email: request.email,
-        studentId: `MGMT${Date.now().toString(36).slice(0, 6)}`,
-        role: 'management' as const,
-        department: 'Management',
-      };
-      const users = getStoredUsers();
-      const alreadyExists = users.some(u => u.email === request.email);
-      if (!alreadyExists) {
-        users.push({ ...authUser, password: 'management123', department: 'Management' });
-        saveStoredUsers(users);
-      }
       const updatedRequests = prev.filter(r => r.id !== id);
       localStorage.setItem(MANAGEMENT_REQUESTS_KEY, JSON.stringify(updatedRequests));
       return updatedRequests;
@@ -249,7 +227,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const value: AuthContextType = {
-    user, token, login, logout, switchAccount, knownAccounts, isLoading,
+    user, token, login, register, logout, switchAccount, knownAccounts, isLoading,
     appData, updateAppData, addUserXp,
     showAchievement, setShowAchievement,
     adminClickCount, setAdminClickCount,
