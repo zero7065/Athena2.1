@@ -1,13 +1,12 @@
 import tailwindcss from '@tailwindcss/vite';
-import react from '@vitejs/plugin-react';
 import path from 'path';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [tailwindcss()],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, '.'),
+      '@': path.resolve(__dirname, './src'),
     },
   },
   server: {
@@ -23,7 +22,6 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: (id) => {
-          // Vendor chunks for heavy libraries
           if (id.includes('node_modules')) {
             if (id.includes('react') || id.includes('react-dom')) return 'vendor-react';
             if (id.includes('lucide-react')) return 'vendor-icons';
@@ -35,7 +33,6 @@ export default defineConfig({
             if (id.includes('framer-motion')) return 'vendor-animation';
             return 'vendor';
           }
-          // Feature chunks for lazy-loaded pages
           if (id.includes('/components/Games')) return 'feature-games';
           if (id.includes('/components/CBTExam')) return 'feature-cbt';
           if (id.includes('/components/AdminPanel')) return 'feature-admin';
@@ -51,5 +48,25 @@ export default defineConfig({
         },
       },
     },
+  },
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: ['./src/test/setup.ts'],
+    include: ['src/**/*.test.{ts,tsx}'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+      thresholds: {
+        statements: 50,
+        branches: 40,
+        functions: 50,
+        lines: 50,
+      },
+    },
+  },
+  esbuild: {
+    jsx: 'automatic',
+    jsxDev: false,
   },
 });
