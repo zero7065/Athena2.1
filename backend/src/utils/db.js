@@ -2,6 +2,9 @@
  * AcademiaIQ Database Utility
  * SQLite connection with better-sqlite3
  * Zero-config, works on Render free tier without separate DB server
+ *
+ * For PostgreSQL support, use src/utils/db-pg.js
+ * Set DATABASE_TYPE=postgres environment variable to use PostgreSQL
  */
 
 import Database from 'better-sqlite3';
