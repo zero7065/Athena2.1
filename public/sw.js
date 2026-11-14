@@ -48,6 +48,12 @@ self.addEventListener('fetch', (event) => {
   // Skip non-GET requests
   if (request.method !== 'GET') return;
 
+  // Skip non-http/https schemes (chrome-extension, chrome-devtools, etc.)
+  if (!url.protocol.startsWith('http')) return;
+
+  // Skip chrome-extension:// and other non-http schemes
+  if (!url.protocol.startsWith('http:')) return;
+
   // Handle app shell HTML -> network first, fall back to cache
   if (request.mode === 'navigate' || request.destination === 'document') {
     event.respondWith(
