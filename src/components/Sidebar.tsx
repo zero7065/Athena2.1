@@ -11,7 +11,6 @@ import {
   Star,
   LogOut,
   BookOpen,
-  ShieldCheck,
   Sun,
   Moon,
   Sparkles,
@@ -89,7 +88,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   onCloseMobile,
   onReturnHome
 }) => {
-  const { user, logout, switchAccount, adminClickCount, setAdminClickCount, showTerminal, setShowTerminal } = useAuth();
+  const { user, logout, switchAccount, adminClickCount, setAdminClickCount, setShowTerminal } = useAuth();
   const { theme, toggleTheme } = useTheme();
 
   const handleNav = (id: string) => {
@@ -191,7 +190,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   }
 
   // Desktop layout
-  const renderGroup = (group: typeof menuGroups[number], gi: number) => (
+  const renderGroup = (group: typeof menuGroups[number]) => (
     <div key={group.title} className="space-y-1">
       <div className={cn(
         "px-3 pb-2 text-[10px] font-bold uppercase tracking-widest",
@@ -265,7 +264,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Main Navigation */}
       <nav className="flex-1 px-3 space-y-4 overflow-y-auto pb-2">
-        {menuGroups.map((group, gi) => renderGroup(group, gi))}
+        {menuGroups.map((group) => renderGroup(group))}
       </nav>
 
       {/* User Profile & Actions */}

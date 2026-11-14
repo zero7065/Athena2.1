@@ -3,7 +3,6 @@ import {
   Search, UserPlus, Check, MapPin, Users,
   MessageSquare, X,
 } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
 import { useStudentProfiles, StudentProfile } from '../hooks/useStudentProfiles';
 import { cn } from '../lib/utils';
 import { LocalFriend } from '../lib/storage';
@@ -22,8 +21,7 @@ function saveFriends(friends: LocalFriend[]) {
 }
 
 const StudentProfiles: React.FC = () => {
-  const { user } = useAuth();
-  const { profiles, matchProfiles } = useStudentProfiles();
+  const { profiles } = useStudentProfiles();
   const [search, setSearch] = useState('');
   const [departmentFilter, setDepartmentFilter] = useState('All');
   const [yearFilter, setYearFilter] = useState('All');

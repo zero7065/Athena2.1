@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Chess, type Square } from 'chess.js';
-import { Trophy, RotateCcw, CheckCircle2, AlertCircle, ChevronLeft, Brain, Grid3X3, Image as ImageIcon, Gamepad2, Star, Clock, Zap, Share2, Palette, Copy, BookOpen, Loader2 } from 'lucide-react';
+import { Trophy, RotateCcw, CheckCircle2, ChevronLeft, Brain, Grid3X3, Image as ImageIcon, Clock, Share2, BookOpen, Loader2 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAuth } from '../context/AuthContext';
 import { safeGroq } from '../lib/groq';
@@ -29,8 +29,7 @@ const ChessGame: React.FC = () => {
   const [showShare, setShowShare] = useState(false);
   const [copied, setCopied] = useState(false);
   const [boardTheme, setBoardTheme] = useState<'green' | 'blue' | 'brown'>('green');
-  const [pieceStyle, setPieceStyle] = useState<'standard'>('standard');
-  const { addUserXp, appData, updateAppData, user } = useAuth();
+  const { addUserXp, updateAppData, user } = useAuth();
 
   const themeColors = {
     green: { dark: 'bg-emerald-700', light: 'bg-emerald-50' },
@@ -42,7 +41,7 @@ const ChessGame: React.FC = () => {
     const piece = game.get(square);
     if (!piece) return null;
     const key = piece.color + piece.type;
-    const p = PIECE_SET[pieceStyle][key];
+    const p = PIECE_SET['standard'][key];
     return p ? { char: p.char, label: p.label, color: piece.color } : null;
   };
 
@@ -53,7 +52,7 @@ const ChessGame: React.FC = () => {
       const sq = c + r;
       return { square: sq, piece: getPiece(sq as Square), isDark: (rows.indexOf(r) + cols.indexOf(c)) % 2 === 1 };
     }));
-  }, [game, pieceStyle]);
+  }, [game]);
 
   const findBestMove = useCallback((g: Chess, difficulty: 'beginner' | 'intermediate' | 'advanced' = 'beginner') => {
     const moves = g.moves({ verbose: true });
@@ -320,7 +319,7 @@ const ChessGame: React.FC = () => {
 const DIFFICULTIES = { easy: 30, medium: 40, hard: 50 };
 
 const SudokuGame: React.FC = () => {
-  const { addUserXp, appData, updateAppData, user } = useAuth();
+  const { addUserXp, updateAppData, user } = useAuth();
   const [board, setBoard] = useState<number[][]>([]);
   const [initial, setInitial] = useState<boolean[][]>([]);
   const [selected, setSelected] = useState<[number, number] | null>(null);
@@ -533,7 +532,7 @@ const MemoryMatch: React.FC = () => {
   const [startTime, setStartTime] = useState<number>(0);
   const [elapsed, setElapsed] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
-  const { addUserXp, appData, updateAppData, user } = useAuth();
+  const { addUserXp, updateAppData, user } = useAuth();
 
   const initGame = useCallback(() => {
     const deck = [...icons.slice(0, 8), ...icons.slice(0, 8)]
@@ -675,7 +674,7 @@ async function generateChallenge(seed: number): Promise<typeof BASE_CHALLENGES[0
 }
 
 const AIArtGuesser: React.FC = () => {
-  const { addUserXp, appData, updateAppData } = useAuth();
+  const { addUserXp, updateAppData } = useAuth();
   const [challenges, setChallenges] = useState<typeof BASE_CHALLENGES>(BASE_CHALLENGES);
   const [generating, setGenerating] = useState(false);
 
@@ -851,7 +850,6 @@ const AIArtGuesser: React.FC = () => {
 /* ===== Main Games Component ===== */
 const Games: React.FC = () => {
   const [activeGame, setActiveGame] = useState<string | null>(null);
-  const { appData } = useAuth();
 
   const games = [
     { id: 'chess', title: 'Chess AI', icon: Trophy, color: 'text-slate-800', desc: 'Challenge the AcademiaIQ engine.' },

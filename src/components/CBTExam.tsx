@@ -79,11 +79,6 @@ const CBTExam: React.FC = () => {
   const [genError, setGenError] = useState('');
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const filteredQuestions = useMemo(() =>
-    subject === 'All' ? questions : questions.filter(q => q.subject === subject),
-    [subject, questions]
-  );
-
   const handleGenerate = useCallback(async (subj?: string) => {
     setGenerating(true);
     setGenError('');

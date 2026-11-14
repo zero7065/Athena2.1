@@ -18,7 +18,7 @@ import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react'
 import { Plus, Search, Trash2, AlertCircle, Sun, ChevronDown, Loader2, Brain, User, Send, Clock, XCircle } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { useAuth } from '../context/AuthContext';
-import { LocalTask, getSubmissions, saveSubmission, getStudentSubmissions } from '../lib/storage';
+import { LocalTask, saveSubmission, getStudentSubmissions } from '../lib/storage';
 import { cn } from '../lib/utils';
 import { safeGroq } from '../lib/groq';
 import { logActivity } from './ActivityFeed';
@@ -275,14 +275,6 @@ const TaskBoard: React.FC = () => {
     });
     setMobileMoveTask(null);
   }, [updateAppData, addUserXp, isStudent, user]);
-
-  // Update assigned to field
-  const handleUpdateAssignedTo = useCallback((taskId: string, assignedTo: string) => {
-    updateAppData(prev => ({
-      ...prev,
-      tasks: prev.tasks.map(t => t.id === taskId ? { ...t, assignedTo } : t)
-    }));
-  }, [updateAppData]);
 
   const onDragEnd = useCallback((result: any) => {
     if (!result.destination) return;

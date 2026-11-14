@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { BookOpen, ChevronRight, X, HelpCircle, Gamepad2, Brain, CheckSquare, Timer, Trophy, Users, UserCircle, Sparkles, ShieldCheck, Rss, GraduationCap, LayoutDashboard } from 'lucide-react';
+import { BookOpen, X, HelpCircle, Gamepad2, Brain, CheckSquare, Timer, Trophy, Users, UserCircle, ShieldCheck, Rss, GraduationCap, LayoutDashboard } from 'lucide-react';
 
 const GUIDES = [
   {

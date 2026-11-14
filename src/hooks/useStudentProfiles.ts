@@ -1,8 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Search, Filter, UserPlus, X, MapPin, BookOpen, Calendar, Users, Check, Loader2, MessageSquare, Shield, Clock, ChevronRight, Heart, Star, Award, Briefcase, Home, GraduationCap, Users2, Camera, Upload, Edit, Trash2, Save } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
-import { cn } from '../lib/utils';
-import { saveData, loadData } from '../lib/storage';
+import { useState, useCallback } from 'react';
 
 // Types
 export interface StudentProfile {

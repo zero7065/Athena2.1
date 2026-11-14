@@ -6,9 +6,9 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import { Users, CheckSquare, Plus, GraduationCap, BookOpen, Award, TrendingUp, Clock, Edit, Trash2 } from 'lucide-react';
+import { Users, CheckSquare, Plus, GraduationCap, BookOpen, Award, Trash2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { getSubmissions, getAssignments, saveAssignment, deleteAssignment, Assignment, Submission, getAllCourses, addCourse, deleteCourse, saveCourses } from '../lib/storage';
+import { getSubmissions, getAssignments, saveAssignment, deleteAssignment, Assignment, getAllCourses, addCourse, deleteCourse } from '../lib/storage';
 import { loadData } from '../lib/storage';
 import { cn } from '../lib/utils';
 import type { Course } from '../types';
@@ -31,7 +31,7 @@ const emptyCourse: Course = {
   };
 
 const LecturerDashboard: React.FC = () => {
-  const { user, appData } = useAuth();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'overview' | 'submissions' | 'assignments' | 'rooms' | 'courses'>('overview');
   const [newCourse, setNewCourse] = useState<Course>(emptyCourse);
 

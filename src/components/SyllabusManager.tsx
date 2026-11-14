@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BookOpen, Plus, Trash2, GraduationCap } from 'lucide-react';
+import { Plus, Trash2, GraduationCap } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { getSyllabi, saveSyllabus, deleteSyllabus } from '../lib/storage';
 import type { Syllabus } from '../types';

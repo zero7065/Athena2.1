@@ -168,11 +168,6 @@ const StudyTracker: React.FC = () => {
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
-  const chartData = sessions.slice(0, 7).map(s => ({
-    day: new Date(s.date).toLocaleDateString('en', { weekday: 'short' }),
-    hours: s.duration / 60,
-  }));
-
   return (
     <div className="p-3 sm:p-5 md:p-8 space-y-4 sm:space-y-6 h-full flex flex-col max-w-full overflow-hidden">
       <header>

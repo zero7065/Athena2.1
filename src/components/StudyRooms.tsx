@@ -1,15 +1,11 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Plus, DoorOpen, Users, LogIn, Copy, Check, Megaphone, BookOpen, Hash, ArrowLeft } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAuth } from '../context/AuthContext';
 import { getRooms, saveRoom, getRoomByCode, generateRoomCode, getUserRooms, StudyRoom, RoomMember, Announcement } from '../lib/storage';
 
-interface StudyRoomsProps {
-  onBack?: () => void;
-}
-
-const StudyRooms: React.FC<StudyRoomsProps> = ({ onBack }) => {
-  const { user, appData } = useAuth();
+const StudyRooms: React.FC = () => {
+  const { user } = useAuth();
   const [rooms, setRooms] = useState<StudyRoom[]>([]);
   const [activeRoom, setActiveRoom] = useState<StudyRoom | null>(null);
   const [showCreate, setShowCreate] = useState(false);

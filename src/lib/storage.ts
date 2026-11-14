@@ -794,7 +794,7 @@ export interface StudentEnrollment {
   enrolledAt: number;
 }
 
-export function getStudentEnrollments(studentEmail: string): StudentEnrollment[] {
+export function getStudentEnrollments(_studentEmail: string): StudentEnrollment[] {
   try {
     const raw = localStorage.getItem(PREFIX + 'enrollments');
     if (!raw) return [];

@@ -9,7 +9,7 @@
  */
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Send, Bot, User, Sparkles, Trash2, Loader2, Copy, Check, Download, ThumbsUp, ThumbsDown, RotateCcw } from 'lucide-react';
+import { Send, Bot, User, Sparkles, Trash2, Copy, Check, Download, ThumbsUp, ThumbsDown, RotateCcw } from 'lucide-react';
 import { cn } from '../lib/utils';
 import Markdown from 'react-markdown';
 
@@ -61,7 +61,6 @@ const AIChatbot: React.FC = () => {
   const [messages, setMessages] = useState<ChatMsg[]>(loadHistory);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [streamingId, setStreamingId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -80,7 +79,7 @@ const AIChatbot: React.FC = () => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages, streamingId]);
+  }, [messages]);
 
   const clearChat = () => {
     if (messages.length === 0) return;
@@ -241,7 +240,7 @@ const AIChatbot: React.FC = () => {
               </div>
             </div>
           ) : (
-            messages.map((m, i) => (
+            messages.map((m) => (
               <div key={m.id} className={cn('flex gap-3 max-w-[90%] sm:max-w-[80%]', m.role === 'user' ? 'ml-auto flex-row-reverse' : 'mr-auto')}>
                 <div className={cn('w-7 h-7 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center shrink-0 shadow-sm text-sm',
                   m.role === 'user' ? 'bg-[#00843D] text-white' : 'bg-white dark:bg-slate-800 text-[#00843D] border border-slate-200 dark:border-slate-700')}>
@@ -260,16 +259,12 @@ const AIChatbot: React.FC = () => {
                         </span>
                       </div>
                     )}
-                    {m.role === 'assistant' && streamingId === m.id && !m.failed ? (
-                      <span>{m.text}<span className="inline-block w-2 h-4 bg-[#00843D] dark:bg-[#00843D] ml-0.5 animate-pulse" /></span>
-                    ) : (
-                      <div className="markdown-body"><Markdown>{m.text || (streamingId === m.id ? '' : '...')}</Markdown></div>
-                    )}
+                    <div className="markdown-body"><Markdown>{m.text}</Markdown></div>
                     <div className={cn('flex items-center justify-between mt-1.5', m.role === 'user' ? 'flex-row-reverse' : '')}>
                       <span className={cn('text-[10px] font-bold uppercase tracking-widest', m.role === 'user' ? 'text-white/60' : 'text-slate-400')}>
                         {formatTime(m.timestamp)}
                       </span>
-                      {m.role === 'assistant' && !m.failed && m.text && streamingId !== m.id && (
+                      {m.role === 'assistant' && !m.failed && m.text && (
                         <div className="flex items-center gap-1">
                           <button onClick={() => copyText(m.text, m.id)}
                             className="p-1 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors" title="Copy response">
@@ -297,7 +292,7 @@ const AIChatbot: React.FC = () => {
               </div>
             ))
           )}
-          {isLoading && streamingId === null && (
+          {isLoading && (
             <div className="flex gap-3 mr-auto">
               <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-xl bg-white dark:bg-slate-800 text-[#00843D] border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0 shadow-sm">
                 <Bot size={18} />

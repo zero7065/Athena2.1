@@ -5,9 +5,9 @@
  * and displays headlines with links. Falls back to cached/offline data.
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { Rss, ExternalLink, RefreshCw, Calendar, Clock, Globe, Filter, BookOpen } from 'lucide-react';
-import { EDU_RSS_FEEDS, EduRssFeed } from '../lib/edu-seeds';
+import { useState, useEffect, useMemo } from 'react';
+import { Rss, ExternalLink, RefreshCw, Clock, Globe, Filter } from 'lucide-react';
+import { EDU_RSS_FEEDS } from '../lib/edu-seeds';
 import { cn } from '../lib/utils';
 import { loadData, saveData } from '../lib/storage';
 
@@ -22,7 +22,6 @@ interface RssItem {
 }
 
 const CACHE_KEY = 'rss';
-const CACHE_TTL = 30 * 60 * 1000; // 30 min
 
 export default function EduRSS() {
   const [feedId, setFeedId] = useState<string>(EDU_RSS_FEEDS[0].id);
@@ -31,7 +30,6 @@ export default function EduRSS() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastFetch, setLastFetch] = useState<number | null>(null);
-  const [customFeed, setCustomFeed] = useState('');
 
   const categories = useMemo(() => {
     return ['all', ...new Set(EDU_RSS_FEEDS.map(f => f.category))];
@@ -71,8 +69,8 @@ export default function EduRSS() {
       setLastFetch(Date.now());
     } catch (e: any) {
       // Fall back to cache if available
-      const cached = loadData(CACHE_KEY, null);
-      if (cached && cached.items) {
+      const cached = loadData(CACHE_KEY, { feedUrl: '', items: [], fetchedAt: 0 } as { feedUrl: string; items: RssItem[]; fetchedAt: number });
+      if (cached && cached.items && cached.items.length > 0) {
         setItems(cached.items);
         setError('Showing cached data (offline).');
       } else {

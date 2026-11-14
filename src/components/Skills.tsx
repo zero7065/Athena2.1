@@ -1,7 +1,6 @@
-import React, { useState, useMemo } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { BookOpen, Sparkles, TrendingUp, Target, Zap, Timer, Brain, GraduationCap, Code, Award, Mic, Palette, Globe } from 'lucide-react';
-import { getSkillProgress, saveSkillProgress, updateSkillXp, DEFAULT_SKILLS } from '../lib/storage';
+import { useState, useMemo } from 'react';
+import { BookOpen, Sparkles, TrendingUp, Zap, Timer, Brain, GraduationCap, Code, Award, Mic, Globe } from 'lucide-react';
+import { getSkillProgress, updateSkillXp, DEFAULT_SKILLS } from '../lib/storage';
 import { cn } from '../lib/utils';
 
 const CATEGORY_ICONS: Record<string, React.ElementType> = {
@@ -23,7 +22,6 @@ interface SkillsProps {}
 const SKILL_XP_GAIN = 15;
 
 const Skills: React.FC<SkillsProps> = () => {
-  const { user } = useAuth();
   const [skills, setSkills] = useState(getSkillProgress());
   const [expandedSkill, setExpandedSkill] = useState<string | null>(null);
 
@@ -136,7 +134,6 @@ const Skills: React.FC<SkillsProps> = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                   {catGroup.skills.map((skill) => {
                     const pct = skill.xp;
-                    const nextLevelXp = 100;
                     return (
                       <div key={skill.id} className="glass-card p-4 sm:p-5 rounded-[24px] relative overflow-hidden group">
                         <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />

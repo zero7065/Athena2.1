@@ -14,7 +14,7 @@ export const courseApi = {
 /* ===== Student enrollment API ===== */
 
 export const enrollmentApi = {
-  getForStudent: (email: string) => {
+  getForStudent: () => {
     const raw = localStorage.getItem('unipulse_enrollments');
     if (!raw) return [];
     return JSON.parse(raw) as StudentEnrollment[];
@@ -23,12 +23,12 @@ export const enrollmentApi = {
     try { localStorage.setItem('unipulse_enrollments', JSON.stringify(enrollments)); return true; } catch { return false; }
   },
   enroll: (courseId: string, email: string) => {
-    const all = enrollmentApi.getForStudent(email);
+    const all = enrollmentApi.getForStudent();
     if (all.some(e => e.courseId === courseId)) return false;
     return enrollmentApi.saveAll([...all, { courseId, studentEmail: email, enrolledAt: Date.now() }]);
   },
-  unenroll: (courseId: string, email: string) => {
-    const all = enrollmentApi.getForStudent(email).filter(e => e.courseId !== courseId);
+  unenroll: (courseId: string, _email: string) => {
+    const all = enrollmentApi.getForStudent().filter(e => e.courseId !== courseId);
     return enrollmentApi.saveAll(all);
   },
 };

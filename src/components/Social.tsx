@@ -15,10 +15,9 @@ const Social: React.FC = () => {
   const [chatFriend, setChatFriend] = useState<LocalFriend | null>(null);
   const [chatMessage, setChatMessage] = useState('');
   const [messages, setMessages] = useState<DirectMessage[]>([]);
-  const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
 
   const friends = appData.friends;
-  const allUsers = useMemo(() => loadData('users', []).filter((u: any) => u.email !== user?.email), [user?.email]);
+  const allUsers = useMemo(() => loadData<any[]>('users', []).filter((u: any) => u.email !== user?.email), [user?.email]);
 
   useEffect(() => {
     const counts: Record<string, number> = {};
@@ -30,16 +29,15 @@ const Social: React.FC = () => {
         }
       }
     });
-    setUnreadCounts(counts);
   }, [friends, allUsers, user?.email]);
 
   useEffect(() => {
     if (chatFriend) {
       const matchedUser = allUsers.find((u: any) => u.studentId === chatFriend.studentId);
       if (matchedUser) {
-        const conv = getConversation(user?.email || '', matchedUser.email);
+        const conv = getConversation(user?.email || '', (matchedUser as any).email);
         setMessages(conv);
-        markMessagesRead(user?.email || '', matchedUser.email);
+        markMessagesRead(user?.email || '', (matchedUser as any).email);
       }
     }
   }, [chatFriend, allUsers, user?.email]);
@@ -49,7 +47,7 @@ const Social: React.FC = () => {
       if (chatFriend) {
         const matchedUser = allUsers.find((u: any) => u.studentId === chatFriend.studentId);
         if (matchedUser) {
-          const conv = getConversation(user?.email || '', matchedUser.email);
+          const conv = getConversation(user?.email || '', (matchedUser as any).email);
           setMessages(conv);
         }
       }
@@ -71,9 +69,9 @@ const Social: React.FC = () => {
     }
     const newFriend: LocalFriend = {
       id: Date.now().toString(),
-      name: matchedUser.name,
-      studentId: matchedUser.studentId,
-      department: matchedUser.department || 'Unknown',
+      name: (matchedUser as any).name,
+      studentId: (matchedUser as any).studentId,
+      department: ((matchedUser as any).department || 'Unknown'),
       level: 1,
       online: true,
     };
@@ -110,7 +108,7 @@ const Social: React.FC = () => {
       from: user.name || '',
       fromEmail: user.email || '',
       to: chatFriend.name,
-      toEmail: matchedUser.email,
+      toEmail: (matchedUser as any).email,
       text: chatMessage.trim(),
       timestamp: Date.now(),
       read: false,
@@ -120,13 +118,7 @@ const Social: React.FC = () => {
     setChatMessage('');
   };
 
-  const findFriendEmail = (friend: LocalFriend): string | undefined => {
-    const matched = allUsers.find((u: any) => u.studentId === friend.studentId);
-    return matched?.email;
-  };
-
   if (chatFriend) {
-    const friendEmail = findFriendEmail(chatFriend);
     return (
       <div className="p-3 sm:p-5 md:p-8 space-y-4 h-full flex flex-col overflow-y-auto">
         <div className="flex items-center gap-3">

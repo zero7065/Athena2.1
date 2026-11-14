@@ -1,8 +1,7 @@
 import React, { useMemo } from 'react';
 import { Trophy, Star, Zap, Target, Flame, CheckCircle2, Lock, Award, GraduationCap, Gamepad2, Timer, Clock, Brain, Grid3X3, CheckSquare } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { calcLevel, xpForNextLevel, LocalAchievement } from '../lib/storage';
-import { cn } from '../lib/utils';
+import { calcLevel, xpForNextLevel } from '../lib/storage';
 
 const iconMap: Record<string, React.ElementType> = {
   CheckSquare, Target, Zap, Timer, Clock, Flame, Star, Trophy, Brain, Grid3X3, Award, GraduationCap, Gamepad2,

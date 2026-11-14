@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Calendar, CheckSquare, Zap, Users, TrendingUp, Flame, Star, School, MessageSquare, Sparkles, Brain, Trophy, BookOpen, Target, Clock, Quote, Activity } from 'lucide-react';
+import { CheckSquare, Zap, TrendingUp, Flame, Star, School, MessageSquare, Sparkles, Trophy, BookOpen, Target, Quote, Activity } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAuth } from '../context/AuthContext';
 import { useCurrentUser } from '../hooks/useCurrentUser';
@@ -42,7 +42,6 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
   const progressPct = Math.min(100, Math.round((progressInLevel / (xpNeeded || 1)) * 100));
 
   const completedTasks = useMemo(() => tasks.filter(t => t.status === 'done').length, [tasks]);
-  const pendingTasks = useMemo(() => tasks.filter(t => t.status !== 'done').length, [tasks]);
   const totalSessions = sessions.length;
   const unlockedAchievements = useMemo(() => achievements.filter(a => a.unlockedAt !== null).length, [achievements]);
 

@@ -64,7 +64,7 @@ const AppContent: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
-  const [showAuth, setShowAuth] = useState(false);
+  const [, setShowAuth] = useState(false);
   const [showLecturerAuth, setShowLecturerAuth] = useState(false);
   const [showHomepage, setShowHomepage] = useState(!user); // Show homepage when not logged in
   const [showFeedback, setShowFeedback] = useState(false);

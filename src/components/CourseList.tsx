@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { ThemeProvider } from '../context/ThemeContext';
-import { useCurrentUser } from '../hooks/useCurrentUser';
 import { Course } from '../types';
 import { getAllCourses, saveCourses, addCourse, deleteCourse } from '../lib/storage';
 
@@ -97,8 +96,7 @@ const DEFAULT_COURSES: Course[] = [
 ];
 
 export const CourseList: React.FC = () => {
-  const { user, logout } = useAuth();
-  const profile = useCurrentUser();
+  const { user } = useAuth();
 
   const [courses, setCourses] = useState<Course[]>(() => {
     try {
@@ -113,7 +111,6 @@ export const CourseList: React.FC = () => {
   });
 
   const [loading, setLoading] = useState(false);
-  const [addedCount, setAddedCount] = useState(0);
 
   const seedIfEmpty = () => {
     const existing = getAllCourses();
@@ -144,7 +141,6 @@ export const CourseList: React.FC = () => {
     };
     await addCourse(newCourse);
     setCourses((prev) => [...prev, newCourse]);
-    setAddedCount((c) => c + 1);
     setLoading(false);
   };
 
@@ -153,7 +149,6 @@ export const CourseList: React.FC = () => {
     setLoading(true);
     await deleteCourse(id);
     setCourses((prev) => prev.filter(c => c.id !== id));
-    setAddedCount((c) => Math.max(c - 1, 0));
     setLoading(false);
   };
 

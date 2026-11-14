@@ -8,14 +8,13 @@
  * - Admin → AdminPanel
  */
 
-import React from 'react';
 import Dashboard from './Dashboard';
 import LecturerPortal from './LecturerPortal';
 import AdminPanel from './AdminPanel';
 import { useAuth } from '../context/AuthContext';
 
 export default function DashboardRouter({ setActiveTab }: { setActiveTab: (tab: string) => void }) {
-  const { user, appData } = useAuth();
+  const { user } = useAuth();
 
   if (!user) return null;
 

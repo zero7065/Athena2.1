@@ -6,11 +6,11 @@
  * Features: university imagery, student interaction, events, dark/light toggle
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
-  ArrowRight, BookOpen, Clock, Users, BarChart3, Brain, GraduationCap,
+  BookOpen, Clock, Users, BarChart3, Brain, GraduationCap,
   Star, MapPin, Quote, Award, ChevronRight, Sun, Moon,
-  Calendar, ChevronLeft, Sparkles, Zap, Trophy, ExternalLink, ChevronLeftCircle, ChevronRightCircle,
+  Calendar, ChevronLeft, Sparkles, Zap, Trophy, ExternalLink,
   ShieldCheck
 } from 'lucide-react';
 
@@ -159,14 +159,14 @@ export default function Homepage({ onSignUp, onLecturer, theme = 'dark', onToggl
     autoPlayRef.current = setInterval(() => {
       setActiveTestimonial((prev) => (prev + 1) % testimonials.length);
     }, 5000);
-    return () => clearInterval(autoPlayRef.current);
+    return () => { if (autoPlayRef.current) clearInterval(autoPlayRef.current); };
   }, []);
 
   useEffect(() => {
     imageAutoRef.current = setInterval(() => {
       setActiveImage((prev) => (prev + 1) % carouselImages.length);
     }, 4000);
-    return () => clearInterval(imageAutoRef.current);
+    return () => { if (imageAutoRef.current) clearInterval(imageAutoRef.current); };
   }, []);
 
   const goToImage = (index: number) => {

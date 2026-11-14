@@ -1,13 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import {
-  ShieldCheck, Users, Clock, Trophy, Download, TrendingUp, BarChart3,
-  PieChart as PieChartIcon, Edit, Trash2, FileText, CheckCircle2,
-  AlertTriangle, Settings, LogOut, Activity, Mail, Globe, Lock
+  ShieldCheck, Users, Trophy, Download, TrendingUp, BarChart3,
+  PieChart as PieChartIcon, Trash2, FileText, CheckCircle2,
+  AlertTriangle, Activity, Mail, Lock
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { cn } from '../lib/utils';
-import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip, PieChart, Pie, Cell } from 'recharts';
-import { loadData, getAuditLog, verifyAuditLog, getFeedbackStats, getSupportSettings } from '../lib/storage';
+import { BarChart, Bar, ResponsiveContainer, XAxis, Tooltip, PieChart, Pie, Cell } from 'recharts';
+import { loadData, getAuditLog, verifyAuditLog, getFeedbackStats } from '../lib/storage';
 
 const AdminPanel: React.FC = () => {
   const { appData, managementRequests, approveManagementRequest, rejectManagementRequest, addManagementRequest } = useAuth();
@@ -92,7 +92,6 @@ const AdminPanel: React.FC = () => {
   const auditLog = useMemo(() => getAuditLog(), []);
   const auditVerification = useMemo(() => verifyAuditLog(), [auditLog]);
   const feedbackStats = useMemo(() => getFeedbackStats(), []);
-  const supportSettings = useMemo(() => getSupportSettings(), []);
 
   const tabs = [
     { id: 'overview' as const, label: 'Overview', icon: BarChart3, count: tasks.length },

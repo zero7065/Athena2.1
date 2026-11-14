@@ -9,7 +9,7 @@
  * - Google Sheets-ready export format
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import {
   BookOpen, Users, CheckCircle, Clock, Search, Download,
   GraduationCap, Trophy,
@@ -17,10 +17,10 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { cn } from '../lib/utils';
-import { loadData, getSubmissions, saveSubmission, getAssignments, saveAssignment, deleteAssignment, Submission, Assignment, getRooms, saveRoom, deleteRoom, generateRoomCode, StudyRoom } from '../lib/storage';
+import { loadData, getSubmissions, saveSubmission, getAssignments, saveAssignment, deleteAssignment, Assignment, getRooms, saveRoom, deleteRoom, generateRoomCode, StudyRoom } from '../lib/storage';
 
 const LecturerPortal: React.FC = () => {
-  const { user, appData, updateAppData, addUserXp } = useAuth();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'students' | 'submissions' | 'assignments' | 'export' | 'rooms'>('students');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'graded'>('all');
@@ -341,7 +341,7 @@ const LecturerPortal: React.FC = () => {
         <div className="glass-strong p-5 sm:p-6 rounded-[32px] space-y-4 border border-white/20 dark:border-white/5 bg-white/70 dark:bg-slate-800/60 backdrop-blur-sm shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h3 className="font-bold text-sm text-slate-800 dark:text-white">
-              {selectedStudent ? `Submissions by ${students.find((s: any) => s.studentId === selectedStudent)?.name || selectedStudent}` : 'All Submissions'}
+              {selectedStudent ? `Submissions by ${(students.find((s: any) => s.studentId === selectedStudent) as any)?.name || selectedStudent}` : 'All Submissions'}
             </h3>
             <div className="flex items-center gap-2">
               <select className="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold outline-none"

@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { LayoutDashboard, CheckSquare, Clock, Sparkles, Users, Trophy, Target, TrendingUp, Activity } from 'lucide-react';
+import { LayoutDashboard, CheckSquare, Clock, Sparkles, Users, Target, TrendingUp, Activity } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCurrentUser } from '../hooks/useCurrentUser';
 import { calcLevel, xpForNextLevel } from '../lib/storage';
@@ -23,9 +23,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ setActiveTab }) => 
   const tasks = appData.tasks;
   const sessions = appData.sessions;
 
-  const completedTasks = useMemo(() => tasks.filter(t => t.status === 'done').length, [tasks]);
   const pendingTasks = useMemo(() => tasks.filter(t => t.status !== 'done').length, [tasks]);
-  const avgFocus = sessions.length > 0 ? sessions.reduce((acc, s) => acc + s.duration, 0) / sessions.length : 0;
   const xp = profile?.xp ?? 0;
   const level = calcLevel(xp);
   const currentLevelXp = xpForNextLevel(level - 1);

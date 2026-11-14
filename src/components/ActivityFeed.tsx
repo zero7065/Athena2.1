@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, CheckSquare, Timer, Trophy, Gamepad2, Brain, BookOpen, Users, CheckCircle2, Sparkles, Star, MessageSquare, Award, Activity } from 'lucide-react';
+import { CheckSquare, Timer, Trophy, Gamepad2, Brain, BookOpen, Users, CheckCircle2, Sparkles, Star, MessageSquare, Award, Activity } from 'lucide-react';
 import { getActivities, ActivityEntry, logActivity } from '../lib/storage';
 import { useAuth } from '../context/AuthContext';
 import { cn } from '../lib/utils';

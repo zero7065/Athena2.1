@@ -4,15 +4,15 @@
  * Lets logged-in students discover other students who share location, interests,
  * or subjects. Uses registered users stored locally.
  */
-import React, { useState, useMemo } from 'react';
-import { MapPin, User } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { MapPin } from 'lucide-react';
 import { loadData } from '../lib/storage';
 
 interface FindFellowProps {
   activeTab?: 'find-fellow';
 }
 
-export default function FindFellowStudents({ activeTab }: FindFellowProps) {
+export default function FindFellowStudents({ }: FindFellowProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [showResults, setShowResults] = useState(false);
   const [results, setResults] = useState<any[]>([]);
@@ -26,7 +26,7 @@ export default function FindFellowStudents({ activeTab }: FindFellowProps) {
       setResults([]);
       return;
     }
-    const matched = allUsers.filter(u => {
+    const matched = (allUsers as any[]).filter((u: any) => {
       const haystack =
         `${u.name} ${u.email} ${u.studentId} ${u.department || ''} ${u.location?.city || ''} ${u.interests?.join(' ') || ''} ${u.subjects?.join(' ') || ''}`.toLowerCase();
       return haystack.includes(query);

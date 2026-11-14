@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { Bot, User, Sparkles, X, Send, Trash2, Copy, Loader2, ThumbsUp, ThumbsDown, Check } from 'lucide-react';
+import { Bot, User, Sparkles, X, Send, Trash2, Copy, ThumbsUp, ThumbsDown, Check } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAI } from '../context/AIContext';
 
@@ -118,7 +118,7 @@ const AIChatSidebar: React.FC = () => {
         )}
 
         {/* Messages list */}
-        {messages.map((m, i) => (
+        {messages.map((m) => (
           <div key={m.id} className={cn('flex gap-3 max-w-[90%]', m.role === 'user' ? 'ml-auto flex-row-reverse' : 'mr-auto')}>
             <div className={cn('w-7 h-7 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center shrink-0 shadow-sm',
               m.role === 'user' ? 'bg-[#00843D] text-white' : 'bg-white dark:bg-slate-800 text-[#00843D] border border-slate-200 dark:border-slate-700')}>
