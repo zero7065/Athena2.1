@@ -1,8 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor, getByText } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import TaskBoard from './TaskBoard';
 import { useAuth } from '../context/AuthContext';
-import { api } from '../lib/api';
 
 vi.mock('../context/AuthContext', () => ({
   useAuth: vi.fn(),
@@ -28,7 +27,7 @@ const mockUser = {
   streak: 0,
 };
 
-  const renderTaskBoard = (user = mockUser, tasks = []) => {
+const renderTaskBoard = (user = mockUser, tasks: Array<{ id: string; title: string; description: string; status: 'todo' | 'in-progress' | 'done'; priority: 'low' | 'medium' | 'high'; createdAt: number }> = []) => {
   const updateAppData = vi.fn((updater) => {
     const newData = updater({ ...userAppData, tasks: [...userAppData.tasks] });
     userAppData.tasks = newData.tasks;
@@ -86,7 +85,7 @@ describe('TaskBoard', () => {
   });
 
   it('should add a new task', async () => {
-    const { getByPlaceholderText, getByRole, getByText, findByRole } = renderTaskBoard(mockUser, []);
+    const { getByPlaceholderText, getByRole } = renderTaskBoard(mockUser, []);
     
     // Click "New Task" to open the form
     fireEvent.click(getByRole('button', { name: 'New Task' }));
@@ -104,7 +103,7 @@ describe('TaskBoard', () => {
   });
 
   it('should show validation error for empty title', async () => {
-    const { getByPlaceholderText, getByRole, updateAppData } = renderTaskBoard(mockUser, []);
+    const { getByRole, updateAppData } = renderTaskBoard(mockUser, []);
     
     fireEvent.click(getByRole('button', { name: 'New Task' }));
     fireEvent.click(getByRole('button', { name: 'Create Task' }));
