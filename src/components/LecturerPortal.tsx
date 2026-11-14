@@ -1,5 +1,5 @@
 /*
- * CampusIQ - Student Success Platform
+ * AcademiaIQ - Student Success Platform
  * Section: LECTURER PORTAL
  *
  * - Students list with progress tracking
@@ -288,7 +288,7 @@ const LecturerPortal: React.FC = () => {
 
       {/* === STUDENTS TAB === */}
       {activeTab === 'students' && (
-        <div className="glass p-5 sm:p-6 rounded-[32px]">
+        <div className="glass-strong p-5 sm:p-6 rounded-[32px] border border-white/20 dark:border-white/5 bg-white/70 dark:bg-slate-800/60 backdrop-blur-sm shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold text-sm text-slate-800 dark:text-white">All Students ({totalStudents})</h3>
             <div className="relative max-w-xs">
@@ -308,7 +308,7 @@ const LecturerPortal: React.FC = () => {
             <div className="overflow-x-auto -mx-5 sm:mx-0">
               <div className="min-w-[600px] px-5 sm:px-0 space-y-2">
                 {studentProgress.map((s, i) => (
-                  <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 hover:border-primary/30 transition-all">
+                  <div key={i} className="flex items-center justify-between p-3 rounded-xl border border-white/10 dark:border-white/5 bg-white/50 dark:bg-slate-800/40 backdrop-blur-sm hover:border-primary/30 transition-all">
                     <div className="flex items-center gap-3 min-w-0 flex-1">
                       <div className="w-10 h-10 rounded-xl bg-[#00843D]/10 flex items-center justify-center text-[#00843D] font-bold text-sm shrink-0">
                         {s.name[0] || '?'}
@@ -338,7 +338,7 @@ const LecturerPortal: React.FC = () => {
 
       {/* === SUBMISSIONS TAB === */}
       {activeTab === 'submissions' && (
-        <div className="glass p-5 sm:p-6 rounded-[32px] space-y-4">
+        <div className="glass-strong p-5 sm:p-6 rounded-[32px] space-y-4 border border-white/20 dark:border-white/5 bg-white/70 dark:bg-slate-800/60 backdrop-blur-sm shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h3 className="font-bold text-sm text-slate-800 dark:text-white">
               {selectedStudent ? `Submissions by ${students.find((s: any) => s.studentId === selectedStudent)?.name || selectedStudent}` : 'All Submissions'}
@@ -370,7 +370,7 @@ const LecturerPortal: React.FC = () => {
             <div className="overflow-x-auto -mx-5 sm:mx-0">
               <div className="min-w-[800px] px-5 sm:px-0 space-y-2">
                 {filteredSubmissions.map(sub => (
-                  <div key={sub.id} className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700">
+                  <div key={sub.id} className="p-4 rounded-xl border border-white/10 dark:border-white/5 bg-white/50 dark:bg-slate-800/40 backdrop-blur-sm">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 mb-1">
@@ -460,7 +460,7 @@ const LecturerPortal: React.FC = () => {
           ) : (
             <div className="space-y-3">
               {assignments.map(a => (
-                <div key={a.id} className="glass p-4 sm:p-5 rounded-[32px] flex items-start justify-between gap-3">
+                <div key={a.id} className="glass-strong p-4 sm:p-5 rounded-[32px] flex items-start justify-between gap-3 border border-white/20 dark:border-white/5 bg-white/70 dark:bg-slate-800/60 backdrop-blur-sm shadow-sm">
                   <div className="flex gap-3 min-w-0">
                     <div className="p-3 rounded-2xl bg-[#00843D]/10 text-[#00843D] shrink-0">
                       <FileText size={22} />
@@ -557,7 +557,7 @@ const LecturerPortal: React.FC = () => {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {myRooms.map(room => (
-                <div key={room.id} className="glass p-4 sm:p-5 rounded-[32px]">
+                <div key={room.id} className="glass-strong p-4 sm:p-5 rounded-[32px] border border-white/20 dark:border-white/5 bg-white/70 dark:bg-slate-800/60 backdrop-blur-sm shadow-sm">
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center gap-3">
                       <div className="p-2.5 rounded-2xl bg-primary/10 text-primary">
@@ -660,7 +660,7 @@ const LecturerPortal: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+            <div className="p-5 rounded-2xl border border-white/10 dark:border-white/5 bg-white/60 dark:bg-slate-800/40 backdrop-blur-sm shadow-sm">
               <FileText size={24} className="text-blue-500 mb-3" />
               <h4 className="font-bold text-sm text-slate-800 dark:text-white mb-1">Submissions Report</h4>
               <p className="text-xs text-slate-500 mb-3">Student ID, Name, Email, Department, Assignment, Status, Score, Feedback, Dates</p>
@@ -677,7 +677,7 @@ const LecturerPortal: React.FC = () => {
               </button>
             </div>
 
-            <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+            <div className="p-5 rounded-2xl border border-white/10 dark:border-white/5 bg-white/60 dark:bg-slate-800/40 backdrop-blur-sm shadow-sm">
               <Users size={24} className="text-emerald-500 mb-3" />
               <h4 className="font-bold text-sm text-slate-800 dark:text-white mb-1">Student Progress</h4>
               <p className="text-xs text-slate-500 mb-3">Student ID, Name, Email, Department, Total Submissions, Pending, Graded, Average Score</p>
@@ -691,7 +691,7 @@ const LecturerPortal: React.FC = () => {
             </div>
           </div>
 
-          <div className="p-4 rounded-2xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+          <div className="p-4 rounded-2xl border border-blue-200/50 dark:border-blue-800/50 bg-blue-50/40 dark:bg-blue-900/30 backdrop-blur-sm shadow-sm">
             <h5 className="text-xs font-bold text-blue-600 mb-1">Google Sheets Import</h5>
             <ol className="text-[10px] text-blue-500 space-y-1 list-decimal ml-4">
               <li>Download the CSV file above</li>

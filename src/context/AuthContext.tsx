@@ -1,5 +1,5 @@
 /*
- * CampusIQ - Student Success Platform
+ * AcademiaIQ - Student Success Platform
  * Section: AUTH - LOGIN & SIGNUP
  */
 

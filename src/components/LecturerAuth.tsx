@@ -130,7 +130,7 @@ const LecturerAuth: React.FC<LecturerAuthProps> = ({ onBack }) => {
               <BookOpen size={24} />
             </div>
             <div className="flex flex-col items-start">
-              <span className="text-xl font-black tracking-tighter text-slate-900 dark:text-white leading-none">CampusIQ</span>
+              <span className="text-xl font-black tracking-tighter text-slate-900 dark:text-white leading-none">AcademiaIQ</span>
               <span className="text-[8px] text-blue-600 font-bold uppercase tracking-[0.2em] leading-none mt-0.5">Lecturer Portal</span>
             </div>
           </div>

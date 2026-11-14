@@ -48,13 +48,13 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
 
   const widgets = [
     {
-      id: 'ai-assistant', title: 'CampusIQ AI', icon: Sparkles, color: 'text-primary',
+      id: 'ai-assistant', title: 'AcademiaIQ AI', icon: Sparkles, color: 'text-primary',
       content: (
         <div className="space-y-3">
           <p className="text-xs text-slate-500 font-medium">Your academic assistant is ready to help with your studies.</p>
           <button onClick={() => setActiveTab?.('ai')}
             className="w-full py-3 bg-primary text-white rounded-xl font-bold text-sm shadow-lg shadow-primary/20 hover:scale-105 transition-all flex items-center justify-center gap-2">
-            <MessageSquare size={16} /> Ask CampusIQ
+            <MessageSquare size={16} /> Ask AcademiaIQ
           </button>
         </div>
       )
@@ -168,7 +168,7 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
       )
     },
     {
-      id: 'CampusIQ-info', title: 'CampusIQ Bokkos', icon: School, color: 'text-accent',
+      id: 'AcademiaIQ-info', title: 'AcademiaIQ Bokkos', icon: School, color: 'text-accent',
       content: (
         <div className="space-y-3">
           <div className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-100 dark:border-blue-800">
@@ -231,7 +231,7 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveTab }) => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5">
         {widgets.map((w) => (
-          <div key={w.id} className="group glass-gradient p-4 sm:p-5 md:p-6 rounded-[24px] sm:rounded-[32px] flex flex-col gap-3 min-h-[180px] relative overflow-hidden hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-0.5 transition-all duration-500">
+          <div key={w.id} className="group glass-strong p-4 sm:p-5 md:p-6 rounded-[24px] sm:rounded-[32px] flex flex-col gap-3 min-h-[180px] relative overflow-hidden hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-0.5 transition-all duration-500 border border-white/20 dark:border-white/5 bg-white/70 dark:bg-slate-800/60 backdrop-blur-sm">
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-[#00843D]/5 to-transparent rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 sm:gap-3">

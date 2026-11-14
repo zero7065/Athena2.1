@@ -1,5 +1,5 @@
 /*
- * CampusIQ - Student Success Platform
+ * AcademiaIQ - Student Success Platform
  * Section: AI CHAT — Groq via Serverless Proxy
  *
  * - Calls /api/groq proxy (key is server-side, never exposed)
@@ -44,7 +44,7 @@ function formatTime(ts: string) {
 
 function exportChat(msgs: ChatMsg[]) {
   const lines = msgs.map(m =>
-    `[${formatTime(m.timestamp)}] ${m.role === 'user' ? 'You' : 'CampusIQ'}:\n${m.text}\n`
+    `[${formatTime(m.timestamp)}] ${m.role === 'user' ? 'You' : 'AcademiaIQ'}:\n${m.text}\n`
   );
   const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
   const url = URL.createObjectURL(blob);
@@ -72,7 +72,7 @@ const AIChatbot: React.FC = () => {
   // Welcome greeting when chat is fresh (no history yet)
   useEffect(() => {
       if (!messages.length && !isLoading) {
-        setMessages([{ id: Date.now().toString(), role: 'user', text: "Welcome to CampusIQ! I'm your AI tutor. Ask me about study plans, tasks, focus tips, or university info - I stay on academic topics and follow all my instructions.", timestamp: new Date().toISOString() }]);
+        setMessages([{ id: Date.now().toString(), role: 'user', text: "Welcome to AcademiaIQ! I'm your AI tutor. Ask me about study plans, tasks, focus tips, or university info - I stay on academic topics and follow all my instructions.", timestamp: new Date().toISOString() }]);
       }
   }, [messages, isLoading]);
 
@@ -128,7 +128,7 @@ const AIChatbot: React.FC = () => {
         body: JSON.stringify({
           model: 'llama-3.1-70b-versatile',
           messages: [
-            { role: 'system', content: 'You are CampusIQ, an academic assistant for the university. Answer questions helpfully, concisely, and stay on academic topics. Use the university context provided.' },
+            { role: 'system', content: 'You are AcademiaIQ, an academic assistant for the university. Answer questions helpfully, concisely, and stay on academic topics. Use the university context provided.' },
             ...chatHistory.slice(-20),
           ],
           max_tokens: 1024,
@@ -150,7 +150,7 @@ const AIChatbot: React.FC = () => {
       const responseText = data.choices?.[0]?.message?.content || 'No response from AI.';
       setMessages(prev => prev.map(m => m.id === aiId ? { ...m, text: responseText } : m));
     } catch (err: any) {
-      const fallback = "I'm CampusIQ AI — I couldn't reach the AI service right now, but I'm still here for you. Try again in a moment, or ask me about study plans, tasks, focus tips, or your courses. I stay on academic topics and follow all my instructions.";
+      const fallback = "I'm AcademiaIQ AI — I couldn't reach the AI service right now, but I'm still here for you. Try again in a moment, or ask me about study plans, tasks, focus tips, or your courses. I stay on academic topics and follow all my instructions.";
       setMessages(prev => prev.map(m => m.id === aiId ? {
         ...m,
         text: fallback,
@@ -196,7 +196,7 @@ const AIChatbot: React.FC = () => {
           </div>
           <div>
             <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-slate-800 dark:text-white tracking-tight">
-              CampusIQ
+              AcademiaIQ
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 font-medium">Your Academic AI Assistant</p>
           </div>
@@ -224,13 +224,13 @@ const AIChatbot: React.FC = () => {
               </div>
               <div className="max-w-xs">
                 <h3 className="text-lg font-bold text-slate-800 dark:text-white">How can I help you today?</h3>
-                <p className="text-xs sm:text-sm text-slate-500 mt-1">Ask about your courses, study tips, or CampusIQ life.</p>
+                <p className="text-xs sm:text-sm text-slate-500 mt-1">Ask about your courses, study tips, or AcademiaIQ life.</p>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full max-w-sm">
                 {[
                   'Explain Binary Search Trees',
                   'Study tips for CSC 301',
-                  'CampusIQ library hours',
+                  'AcademiaIQ library hours',
                   'How to improve focus?',
                 ].map(q => (
                   <button key={q} onClick={() => setInput(q)}
@@ -308,7 +308,7 @@ const AIChatbot: React.FC = () => {
                   <span className="w-2 h-2 bg-[#00843D] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
                   <span className="w-2 h-2 bg-[#00843D] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                 </span>
-                <span className="text-xs font-medium text-slate-500 ml-1">CampusIQ is thinking...</span>
+                <span className="text-xs font-medium text-slate-500 ml-1">AcademiaIQ is thinking...</span>
               </div>
             </div>
           )}
@@ -327,7 +327,7 @@ const AIChatbot: React.FC = () => {
             </button>
           </div>
           <p className="text-[10px] text-center text-slate-400 mt-2 font-medium leading-relaxed px-2">
-            CampusIQ is an AI tool &mdash; always verify important information with your lecturer.
+            AcademiaIQ is an AI tool &mdash; always verify important information with your lecturer.
           </p>
         </div>
       </div>

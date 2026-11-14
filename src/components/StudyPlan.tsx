@@ -29,7 +29,7 @@ const StudyPlan: React.FC = () => {
     const s = syllabi[0];
     setLoading(true);
     const prompt = [
-      'You are CampusIQ, the academic assistant for the university.',
+      'You are AcademiaIQ, the academic assistant for the university.',
       'Create a detailed, personalized study plan for the student based on the course syllabus.',
       `Course: ${s.course} - ${s.title}`,
       `Subject: ${s.subject}`,

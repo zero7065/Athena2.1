@@ -1,8 +1,8 @@
-export const UNIPULSE_BRANDING = {
-  platformName: 'CampusIQ',
-  shortName: 'CampusIQ',
+export const ACADEMIAIQ_BRANDING = {
+  platformName: 'AcademiaIQ',
+  shortName: 'AcademiaIQ',
   motto: 'Intelligence. Integrity. Innovation.',
-  emblemUrl: '/campusiq-logo.svg',
+  emblemUrl: '/academiaiq-logo.svg',
   established: 2025,
   colors: {
     primary: '#00843D',
@@ -11,8 +11,8 @@ export const UNIPULSE_BRANDING = {
     dark: '#0f172a',
   },
   contact: {
-    email: 'support@unipulse.io',
-    website: 'https://unipulse.io',
+    email: 'support@academiaiq.com',
+    website: 'https://academiaiq.com',
     address: 'Multi-Tenant Platform',
   },
   version: '3.0.0',

@@ -39,7 +39,7 @@ const Terminal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               <Shield size={32} className="text-amber-400" />
             </div>
             <h2 className="text-xl font-black text-amber-400">Admin Access Granted</h2>
-            <p className="text-xs text-slate-500 mt-1">Welcome to the CampusIQ management console.</p>
+            <p className="text-xs text-slate-500 mt-1">Welcome to the AcademiaIQ management console.</p>
           </div>
           <button onClick={handleClose} className="w-full py-3 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-xl transition-all min-h-[48px]">Enter Admin Panel</button>
         </div>
@@ -53,7 +53,7 @@ const Terminal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <TerminalIcon size={18} className="text-amber-400" />
-            <span className="text-sm font-bold text-amber-400">CampusIQ Admin Terminal</span>
+            <span className="text-sm font-bold text-amber-400">AcademiaIQ Admin Terminal</span>
           </div>
           <button onClick={handleClose} className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-slate-200 transition-colors">
             <X size={18} />

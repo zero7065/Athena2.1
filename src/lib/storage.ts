@@ -607,7 +607,7 @@ export function getSupportSettings(): SupportSettings {
     whatsappNumber: '+2348000000000',
     whatsappMessage: 'Hello%20UniPulse%20Support%2C%20I%20need%20help%20with...',
     email: 'support@unipulse.io',
-    phone: '+234-800-CampusIQ',
+    phone: '+234-800-AcademiaIQ',
     enabled: true,
   };
 }
@@ -682,8 +682,19 @@ export function seedActivityLog() {
 export function getContentResources(): ContentResource[] {
   try {
     const raw = localStorage.getItem(PREFIX + 'content_resources');
-    return raw ? JSON.parse(raw) : [];
-  } catch { return []; }
+    const existing = raw ? JSON.parse(raw) : [];
+    if (existing.length > 0) return existing;
+  } catch { /* fall through to seed defaults */ }
+  const seeded = [...DEFAULT_CONTENT_RESOURCES];
+  saveContentResourcesSilent(seeded);
+  return seeded;
+}
+
+function saveContentResourcesSilent(resources: ContentResource[]): ContentResource[] {
+  try {
+    localStorage.setItem(PREFIX + 'content_resources', JSON.stringify(resources));
+  } catch { /* noop */ }
+  return resources;
 }
 
 export function saveContentResource(resource: ContentResource): ContentResource[] {
@@ -707,8 +718,19 @@ export function deleteContentResource(id: string): ContentResource[] {
 export function getSyllabi(): Syllabus[] {
   try {
     const raw = localStorage.getItem(PREFIX + 'syllabi');
-    return raw ? JSON.parse(raw) : [];
-  } catch { return []; }
+    const existing = raw ? JSON.parse(raw) : [];
+    if (existing.length > 0) return existing;
+  } catch { /* fall through to seed defaults */ }
+  const seeded = [...DEFAULT_SYLLABI];
+  saveSyllabiSilent(seeded);
+  return seeded;
+}
+
+function saveSyllabiSilent(syllabi: Syllabus[]): Syllabus[] {
+  try {
+    localStorage.setItem(PREFIX + 'syllabi', JSON.stringify(syllabi));
+  } catch { /* noop */ }
+  return syllabi;
 }
 
 export function saveSyllabus(syllabus: Syllabus): Syllabus[] {
@@ -730,8 +752,19 @@ export function getAllCourses(): Course[] {
   try {
     const raw = localStorage.getItem(PREFIX + 'courses');
     if (!raw) return [];
-    return JSON.parse(raw) as Course[];
-  } catch { return []; }
+    const existing = JSON.parse(raw) as Course[];
+    if (existing.length > 0) return existing;
+  } catch { /* fall through to seed defaults */ }
+  const seeded = [...DEFAULT_COURSES];
+  saveCoursesSilent(seeded);
+  return seeded;
+}
+
+function saveCoursesSilent(courses: Course[]): Course[] {
+  try {
+    localStorage.setItem(PREFIX + 'courses', JSON.stringify(courses));
+  } catch { return courses; }
+  return courses;
 }
 
 export function saveCourses(courses: Course[]): Course[] {
@@ -787,3 +820,274 @@ export function unenrollStudent(courseId: string, studentEmail: string): boolean
   const all = getStudentEnrollments(studentEmail).filter(e => e.courseId !== courseId);
   return saveStudentEnrollments(all);
 }
+
+/* ========================================
+ * Skill Progress Tracking
+ * ======================================== */
+
+export interface SkillProgress {
+  id: string;
+  name: string;
+  category: string;
+  level: number; // 1-5
+  xp: number; // 0-100 per level
+  learnedAt?: number;
+  lastPracticed?: number;
+}
+
+const SKILLS_KEY = PREFIX + 'skills';
+
+export const DEFAULT_SKILLS: SkillProgress[] = [
+  { id: 'skill_js', name: 'JavaScript', category: 'Programming', level: 1, xp: 0 },
+  { id: 'skill_ts', name: 'TypeScript', category: 'Programming', level: 1, xp: 0 },
+  { id: 'skill_react', name: 'React', category: 'Programming', level: 1, xp: 0 },
+  { id: 'skill_css', name: 'CSS & Styling', category: 'Programming', level: 1, xp: 0 },
+  { id: 'skill_git', name: 'Git & Version Control', category: 'Tools', level: 1, xp: 0 },
+  { id: 'skill_calculus', name: 'Calculus', category: 'Mathematics', level: 1, xp: 0 },
+  { id: 'skill_algebra', name: 'Algebra', category: 'Mathematics', level: 1, xp: 0 },
+  { id: 'skill_mechanics', name: 'Classical Mechanics', category: 'Physics', level: 1, xp: 0 },
+  { id: 'skill_energy', name: 'Energy & Thermodynamics', category: 'Physics', level: 1, xp: 0 },
+  { id: 'skill_chemistry', name: 'Chemical Bonding', category: 'Chemistry', level: 1, xp: 0 },
+  { id: 'skill_genetics', name: 'Genetics', category: 'Biology', level: 1, xp: 0 },
+  { id: 'skill_ecology', name: 'Ecology', category: 'Biology', level: 1, xp: 0 },
+  { id: 'skill_writing', name: 'Academic Writing', category: 'Communication', level: 1, xp: 0 },
+  { id: 'skill_research', name: 'Research Methods', category: 'Communication', level: 1, xp: 0 },
+  { id: 'skill_citation', name: 'Citation Styles (APA/MLA)', category: 'Communication', level: 1, xp: 0 },
+];
+
+export function getSkillProgress(): SkillProgress[] {
+  try {
+    const raw = localStorage.getItem(SKILLS_KEY);
+    const existing = raw ? JSON.parse(raw) : [];
+    if (existing.length > 0) return existing;
+  } catch { /* fall through to seed defaults */ }
+  const seeded = [...DEFAULT_SKILLS];
+  try { localStorage.setItem(SKILLS_KEY, JSON.stringify(seeded)); } catch { /* noop */ }
+  return seeded;
+}
+
+export function saveSkillProgress(skills: SkillProgress[]): SkillProgress[] {
+  try {
+    localStorage.setItem(SKILLS_KEY, JSON.stringify(skills));
+  } catch { /* noop */ }
+  return skills;
+}
+
+export function updateSkillXp(skillId: string, xpGain: number): { skills: SkillProgress[]; leveledUp: boolean } {
+  const skills = getSkillProgress();
+  let leveledUp = false;
+  const updated = skills.map(s => {
+    if (s.id !== skillId) return s;
+    let newXp = s.xp + xpGain;
+    let newLevel = s.level;
+    while (newXp >= 100 && newLevel < 5) {
+      newXp -= 100;
+      newLevel += 1;
+      leveledUp = true;
+    }
+    return { ...s, level: newLevel, xp: newXp, lastPracticed: Date.now() };
+  });
+  saveSkillProgress(updated);
+  return { skills: updated, leveledUp };
+}
+
+/* ========================================
+ * DEFAULT SEED DATA (packed content)
+ * Populates ContentLibrary, Syllabi, and Courses
+ * on first load so the app is never empty.
+ * ======================================== */
+
+export const DEFAULT_CONTENT_RESOURCES: ContentResource[] = [
+  { id: 'res_cs_001', title: 'MDN Web Docs — HTML, CSS, JavaScript Reference', subject: 'Computer Science', type: 'link', url: 'https://developer.mozilla.org', description: 'Comprehensive web development documentation from Mozilla.', tags: ['html', 'css', 'javascript', 'web-dev'], createdBy: 'AcademiaIQ', createdByEmail: 'academia@unipulse.io', createdAt: Date.now() },
+  { id: 'res_cs_002', title: 'freeCodeCamp — Learn to Code', subject: 'Computer Science', type: 'link', url: 'https://www.freecodecamp.org', description: 'Free coding curriculum with interactive projects and certifications.', tags: ['javascript', 'python', 'web-dev', 'certification'], createdBy: 'AcademiaIQ', createdByEmail: 'academia@unipulse.io', createdAt: Date.now() },
+  { id: 'res_cs_003', title: 'React.dev — Official React Documentation', subject: 'Computer Science', type: 'link', url: 'https://react.dev', description: 'The official React documentation with tutorials and API reference.', tags: ['react', 'frontend', 'javascript'], createdBy: 'AcademiaIQ', createdByEmail: 'academia@unipulse.io', createdAt: Date.now() },
+  { id: 'res_cs_004', title: 'CS50 — Harvard Introduction to Computer Science', subject: 'Computer Science', type: 'link', url: 'https://pll.harvard.edu/course/cs50-introduction-computer-science', description: 'Harvard University’s introductory computer science course.', tags: ['cs', 'algorithms', 'harvard'], createdBy: 'AcademiaIQ', createdByEmail: 'academia@unipulse.io', createdAt: Date.now() },
+  { id: 'res_cs_005', title: 'W3Schools — Web Tutorials', subject: 'Computer Science', type: 'link', url: 'https://www.w3schools.com', description: 'Beginner-friendly tutorials for HTML, CSS, JavaScript, and more.', tags: ['html', 'css', 'javascript', 'tutorial'], createdBy: 'AcademiaIQ', createdByEmail: 'academia@unipulse.io', createdAt: Date.now() },
+  { id: 'res_math_001', title: 'Khan Academy — Mathematics', subject: 'Mathematics', type: 'link', url: 'https://www.khanacademy.org/math', description: 'Free math lessons from arithmetic to calculus and beyond.', tags: ['math', 'algebra', 'calculus', 'video'], createdBy: 'AcademiaIQ', createdByEmail: 'academia@unipulse.io', createdAt: Date.now() },
+  { id: 'res_math_002', title: '3Blue1Brown — Visual Mathematics', subject: 'Mathematics', type: 'video', url: 'https://www.youtube.com/c/3blue1brown', description: 'Animated visual explanations of mathematical concepts.', tags: ['calculus', 'linear-algebra', 'visual', 'youtube'], createdBy: 'AcademiaIQ', createdByEmail: 'academia@unipulse.io', createdAt: Date.now() },
+  { id: 'res_math_003', title: 'PatrickJMT — Just Math Tutorials', subject: 'Mathematics', type: 'video', url: 'https://patrickjmt.com', description: 'Clear, concise math tutorials for calculus, algebra, and statistics.', tags: ['calculus', 'algebra', 'statistics', 'tutorial'], createdBy: 'AcademiaIQ', createdByEmail: 'academia@unipulse.io', createdAt: Date.now() },
+  { id: 'res_phy_001', title: 'Khan Academy — Physics', subject: 'Physics', type: 'link', url: 'https://www.khanacademy.org/science/physics', description: 'Physics lessons covering motion, energy, waves, and more.', tags: ['physics', 'mechanics', 'video'], createdBy: 'AcademiaIQ', createdByEmail: 'academia@unipulse.io', createdAt: Date.now() },
+  { id: 'res_phy_002', title: 'The Physics Classroom', subject: 'Physics', type: 'link', url: 'https://www.physicsclassroom.com', description: 'Interactive physics tutorials and concept builders.', tags: ['physics', 'tutorial', 'interactive'], createdBy: 'AcademiaIQ', createdByEmail: 'academia@unipulse.io', createdAt: Date.now() },
+  { id: 'res_phy_003', title: 'HyperPhysics', subject: 'Physics', type: 'link', url: 'http://hyperphysics.phy-astr.gsu.edu', description: 'Concept maps and physics reference from Georgia State University.', tags: ['physics', 'reference', 'concept-map'], createdBy: 'AcademiaIQ', createdByEmail: 'academia@unipulse.io', createdAt: Date.now() },
+  { id: 'res_chm_001', title: 'Khan Academy — Chemistry', subject: 'Chemistry', type: 'link', url: 'https://www.khanacademy.org/science/chemistry', description: 'Chemistry lessons from atomic structure to organic chemistry.', tags: ['chemistry', 'organic', 'video'], createdBy: 'AcademiaIQ', createdByEmail: 'academia@unipulse.io', createdAt: Date.now() },
+  { id: 'res_chm_002', title: 'LibreTexts Chemistry', subject: 'Chemistry', type: 'link', url: 'https://chem.libretexts.org', description: 'Open-access chemistry textbooks and references.', tags: ['chemistry', 'textbook', 'reference'], createdBy: 'AcademiaIQ', createdByEmail: 'academia@unipulse.io', createdAt: Date.now() },
+  { id: 'res_bio_001', title: 'Khan Academy — Biology', subject: 'Biology', type: 'link', url: 'https://www.khanacademy.org/science/biology', description: 'Biology lessons from cells to ecosystems.', tags: ['biology', 'cells', 'ecology', 'video'], createdBy: 'AcademiaIQ', createdByEmail: 'academia@unipulse.io', createdAt: Date.now() },
+  { id: 'res_bio_002', title: 'Crash Course Biology', subject: 'Biology', type: 'video', url: 'https://www.youtube.com/c/crashcourse', description: 'Fast-paced, engaging biology video lessons.', tags: ['biology', 'video', 'youtube'], createdBy: 'AcademiaIQ', createdByEmail: 'academia@unipulse.io', createdAt: Date.now() },
+  { id: 'res_eng_001', title: 'Purdue OWL — Writing Lab', subject: 'English', type: 'link', url: 'https://owl.purdue.edu', description: 'Writing, citation, and grammar resources from Purdue University.', tags: ['writing', 'citation', 'grammar', 'reference'], createdBy: 'AcademiaIQ', createdByEmail: 'academia@unipulse.io', createdAt: Date.now() },
+  { id: 'res_eng_002', title: 'BBC Learning English', subject: 'English', type: 'link', url: 'https://www.bbc.co.uk/learningenglish', description: 'English lessons, vocabulary, and grammar for learners.', tags: ['english', 'vocabulary', 'grammar'], createdBy: 'AcademiaIQ', createdByEmail: 'academia@unipulse.io', createdAt: Date.now() },
+  { id: 'res_gen_001', title: 'MIT OpenCourseWare', subject: 'Computer Science', type: 'link', url: 'https://ocw.mit.edu', description: 'Free MIT course materials across computer science and engineering.', tags: ['mit', 'courseware', 'cs', 'engineering'], createdBy: 'AcademiaIQ', createdByEmail: 'academia@unipulse.io', createdAt: Date.now() },
+  { id: 'res_gen_002', title: 'Coursera — Online Courses', subject: 'Computer Science', type: 'link', url: 'https://www.coursera.org', description: 'Online courses from top universities and companies.', tags: ['coursera', 'online-learning', 'certification'], createdBy: 'AcademiaIQ', createdByEmail: 'academia@unipulse.io', createdAt: Date.now() },
+  { id: 'res_gen_003', title: 'edX — Free Online Courses', subject: 'Mathematics', type: 'link', url: 'https://www.edx.org', description: 'University-level courses from Harvard, MIT, and more.', tags: ['edx', 'university', 'free-courses'], createdBy: 'AcademiaIQ', createdByEmail: 'academia@unipulse.io', createdAt: Date.now() },
+  { id: 'res_gen_004', title: 'TED-Ed — Lessons Worth Sharing', subject: 'Biology', type: 'video', url: 'https://ed.ted.com', description: 'Animated educational lessons on diverse topics.', tags: ['ted-ed', 'animation', 'lessons'], createdBy: 'AcademiaIQ', createdByEmail: 'academia@unipulse.io', createdAt: Date.now() },
+];
+
+export const DEFAULT_SYLLABI: Syllabus[] = [
+  {
+    id: 'syll_cs101',
+    course: 'CS101',
+    title: 'Introduction to Programming',
+    subject: 'Computer Science',
+    instructor: 'Dr. Ada Lovelace',
+    instructorEmail: 'ada@unipulse.io',
+    objectives: [
+      'Understand fundamental programming concepts using JavaScript/TypeScript.',
+      'Build interactive web pages with HTML, CSS, and React.',
+      'Apply version control with Git and GitHub.',
+      'Debug and test code using modern tooling.',
+      'Develop problem-solving and algorithmic thinking skills.',
+    ],
+    modules: [
+      { id: 'mod_cs101_1', title: 'Module 1 — Programming Basics', topics: ['Variables', 'Data Types', 'Operators', 'Control Flow'], resources: ['res_cs_001', 'res_cs_005'] },
+      { id: 'mod_cs101_2', title: 'Module 2 — Functions & Scope', topics: ['Function Declarations', 'Arrow Functions', 'Closures', 'Scope'], resources: ['res_cs_001'] },
+      { id: 'mod_cs101_3', title: 'Module 3 — Data Structures', topics: ['Arrays', 'Objects', 'Maps', 'Sets'], resources: ['res_cs_002'] },
+      { id: 'mod_cs101_4', title: 'Module 4 — Introduction to React', topics: ['Components', 'Props', 'State', 'Event Handling'], resources: ['res_cs_003'] },
+      { id: 'mod_cs101_5', title: 'Module 5 — Git & Version Control', topics: ['Git Basics', 'GitHub', 'Branching', 'Pull Requests'], resources: ['res_cs_004'] },
+    ],
+    createdAt: Date.now(),
+  },
+  {
+    id: 'syll_math101',
+    course: 'MATH101',
+    title: 'Calculus I',
+    subject: 'Mathematics',
+    instructor: 'Prof. Isaac Newton',
+    instructorEmail: 'newton@unipulse.io',
+    objectives: [
+      'Compute limits and derivatives of functions.',
+      'Apply differentiation to optimization problems.',
+      'Understand definite and indefinite integrals.',
+      'Model real-world phenomena with calculus.',
+    ],
+    modules: [
+      { id: 'mod_math101_1', title: 'Module 1 — Limits & Continuity', topics: ['Limits', 'Continuity', 'Intermediate Value Theorem'], resources: ['res_math_001', 'res_math_002'] },
+      { id: 'mod_math101_2', title: 'Module 2 — Derivatives', topics: ['Power Rule', 'Product Rule', 'Chain Rule', 'Implicit Differentiation'], resources: ['res_math_003'] },
+      { id: 'mod_math101_3', title: 'Module 3 — Applications', topics: ['Related Rates', 'Optimization', 'Curve Sketching'], resources: ['res_math_001'] },
+    ],
+    createdAt: Date.now(),
+  },
+  {
+    id: 'syll_phy101',
+    course: 'PHY101',
+    title: 'General Physics I',
+    subject: 'Physics',
+    instructor: 'Dr. Marie Curie',
+    instructorEmail: 'curie@unipulse.io',
+    objectives: [
+      'Understand classical mechanics and motion.',
+      'Apply Newton’s laws to physical systems.',
+      'Compute work, energy, and power.',
+      'Study waves, sound, and thermodynamics.',
+    ],
+    modules: [
+      { id: 'mod_phy101_1', title: 'Module 1 — Kinematics', topics: ['Displacement', 'Velocity', 'Acceleration', 'Projectile Motion'], resources: ['res_phy_001', 'res_phy_002'] },
+      { id: 'mod_phy101_2', title: 'Module 2 — Dynamics', topics: ["Newton's Laws", 'Force', 'Friction', 'Circular Motion'], resources: ['res_phy_003'] },
+      { id: 'mod_phy101_3', title: 'Module 3 — Energy', topics: ['Work', 'Kinetic Energy', 'Potential Energy', 'Conservation'], resources: ['res_phy_001'] },
+    ],
+    createdAt: Date.now(),
+  },
+];
+
+export const DEFAULT_COURSES: Course[] = [
+  {
+    id: 'course_cs101',
+    code: 'CS101',
+    title: 'Introduction to Programming',
+    department: 'Computer Science',
+    credits: 3,
+    yearOfStudy: 1,
+    level: 1,
+    program: 'BSc Computer Science',
+    bio: 'Foundational programming course covering web development, algorithms, and software engineering principles.',
+    location: { campus: 'Main Campus', city: 'University City', country: 'Nigeria' },
+    interests: ['web development', 'software engineering', 'algorithms'],
+    subjects: ['Computer Science'],
+    skills: ['JavaScript', 'TypeScript', 'React', 'HTML', 'CSS', 'Git', 'Problem Solving'],
+    stats: { streak: 0, tasksCompleted: 0, studyHours: 0, gpa: undefined, achievements: 0 },
+    joinDate: Date.now(),
+  },
+  {
+    id: 'course_math101',
+    code: 'MATH101',
+    title: 'Calculus I',
+    department: 'Mathematics',
+    credits: 4,
+    yearOfStudy: 1,
+    level: 1,
+    program: 'BSc Mathematics',
+    bio: 'Introduction to differential and integral calculus with applications to science and engineering.',
+    location: { campus: 'Science Campus', city: 'University City', country: 'Nigeria' },
+    interests: ['calculus', 'mathematics', 'physics'],
+    subjects: ['Mathematics'],
+    skills: ['Limits', 'Derivatives', 'Integrals', 'Mathematical Modeling'],
+    stats: { streak: 0, tasksCompleted: 0, studyHours: 0, gpa: undefined, achievements: 0 },
+    joinDate: Date.now(),
+  },
+  {
+    id: 'course_phy101',
+    code: 'PHY101',
+    title: 'General Physics I',
+    department: 'Physics',
+    credits: 4,
+    yearOfStudy: 1,
+    level: 1,
+    program: 'BSc Physics',
+    bio: 'Classical mechanics covering motion, forces, energy, and waves.',
+    location: { campus: 'Science Campus', city: 'University City', country: 'Nigeria' },
+    interests: ['mechanics', 'physics', 'energy'],
+    subjects: ['Physics'],
+    skills: ['Kinematics', 'Dynamics', 'Energy Conservation', 'Waves'],
+    stats: { streak: 0, tasksCompleted: 0, studyHours: 0, gpa: undefined, achievements: 0 },
+    joinDate: Date.now(),
+  },
+  {
+    id: 'course_chm101',
+    code: 'CHM101',
+    title: 'General Chemistry I',
+    department: 'Chemistry',
+    credits: 3,
+    yearOfStudy: 1,
+    level: 1,
+    program: 'BSc Chemistry',
+    bio: 'Atomic structure, chemical bonding, stoichiometry, and introductory organic chemistry.',
+    location: { campus: 'Science Campus', city: 'University City', country: 'Nigeria' },
+    interests: ['chemistry', 'organic chemistry', 'laboratory'],
+    subjects: ['Chemistry'],
+    skills: ['Atomic Structure', 'Stoichiometry', 'Chemical Bonding', 'Lab Safety'],
+    stats: { streak: 0, tasksCompleted: 0, studyHours: 0, gpa: undefined, achievements: 0 },
+    joinDate: Date.now(),
+  },
+  {
+    id: 'course_bio101',
+    code: 'BIO101',
+    title: 'General Biology I',
+    department: 'Biology',
+    credits: 3,
+    yearOfStudy: 1,
+    level: 1,
+    program: 'BSc Biology',
+    bio: 'Cell biology, genetics, evolution, and ecology fundamentals.',
+    location: { campus: 'Science Campus', city: 'University City', country: 'Nigeria' },
+    interests: ['biology', 'genetics', 'ecology'],
+    subjects: ['Biology'],
+    skills: ['Cell Biology', 'Genetics', 'Ecology', 'Laboratory Techniques'],
+    stats: { streak: 0, tasksCompleted: 0, studyHours: 0, gpa: undefined, achievements: 0 },
+    joinDate: Date.now(),
+  },
+  {
+    id: 'course_eng101',
+    code: 'ENG101',
+    title: 'Academic Writing & Composition',
+    department: 'English',
+    credits: 3,
+    yearOfStudy: 1,
+    level: 1,
+    program: 'BSc English',
+    bio: 'Academic essay writing, research methods, and citation styles.',
+    location: { campus: 'Main Campus', city: 'University City', country: 'Nigeria' },
+    interests: ['writing', 'literature', 'research'],
+    subjects: ['English'],
+    skills: ['Essay Writing', 'APA Citation', 'Critical Analysis', 'Research'],
+    stats: { streak: 0, tasksCompleted: 0, studyHours: 0, gpa: undefined, achievements: 0 },
+    joinDate: Date.now(),
+  },
+];

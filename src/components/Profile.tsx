@@ -55,7 +55,7 @@ const Profile: React.FC = () => {
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-slate-800 dark:text-white tracking-tight">Profile Settings</h1>
-          <p className="text-xs sm:text-sm text-slate-500">Customize your CampusIQ experience.</p>
+          <p className="text-xs sm:text-sm text-slate-500">Customize your AcademiaIQ experience.</p>
         </div>
         <button onClick={() => isEditing ? handleSave() : setIsEditing(true)}
           className={cn("btn-primary flex items-center justify-center gap-2 shadow-xl w-full sm:w-auto text-sm min-h-[44px]", isEditing && "bg-emerald-600")}>
@@ -187,7 +187,7 @@ const Profile: React.FC = () => {
             <div className="w-4 h-4 rounded-md bg-gradient-to-br from-[#00843D] to-emerald-500 flex items-center justify-center text-white text-[6px] font-bold">J</div>
             <span className="text-[9px] font-bold tracking-wider text-slate-400 dark:text-slate-500">JADAI STUDIOS</span>
           </div>
-          <p className="text-[8px] text-slate-400 mt-1">CampusIQ for CampusIQ &bull; All rights reserved</p>
+          <p className="text-[8px] text-slate-400 mt-1">AcademiaIQ for AcademiaIQ &bull; All rights reserved</p>
         </div>
       </div>
     </div>

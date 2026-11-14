@@ -19,7 +19,8 @@ import {
   ArrowLeft,
   GraduationCap,
   MapPin,
-  Rss
+  Rss,
+  Target
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAuth } from '../context/AuthContext';
@@ -32,44 +33,64 @@ interface SidebarProps {
   setIsCollapsed: (collapsed: boolean) => void;
   isMobile?: boolean;
   onCloseMobile?: () => void;
-  onReturnHome?: () => void; // New prop for homepage
+  onReturnHome?: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ 
-  activeTab, 
-  setActiveTab, 
-  isCollapsed, 
-  setIsCollapsed, 
-  isMobile, 
+const menuGroups = [
+  {
+    title: 'Overview',
+    items: [
+      { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    ],
+  },
+  {
+    title: 'Academic',
+    items: [
+      { id: 'ai', label: 'AI Assistant', icon: Sparkles },
+      { id: 'tasks', label: 'Tasks', icon: CheckSquare },
+      { id: 'study', label: 'Study Tracker', icon: Timer },
+      { id: 'content', label: 'Content Library', icon: BookOpen },
+      { id: 'syllabus', label: 'Syllabus & Study Plan', icon: GraduationCap },
+      { id: 'rss', label: 'Education RSS', icon: Rss },
+      { id: 'courses', label: 'Courses', icon: BookOpen },
+      { id: 'studyplan', label: 'Study Plan', icon: Target },
+      { id: 'skills', label: 'Skills Mastery', icon: Sparkles },
+    ],
+  },
+  {
+    title: 'Community',
+    items: [
+      { id: 'social', label: 'Friends & Rooms', icon: Users },
+      { id: 'find-fellow', label: 'Find Fellow Students', icon: MapPin },
+      { id: 'students', label: 'Student Profiles', icon: Users2 },
+    ],
+  },
+  {
+    title: 'Progress & Fun',
+    items: [
+      { id: 'achievements', label: 'Achievements', icon: Trophy },
+      { id: 'games', label: 'Games', icon: Gamepad2 },
+    ],
+  },
+  {
+    title: 'Account',
+    items: [
+      { id: 'profile', label: 'Profile', icon: UserCircle },
+    ],
+  },
+];
+
+const Sidebar: React.FC<SidebarProps> = ({
+  activeTab,
+  setActiveTab,
+  isCollapsed,
+  setIsCollapsed,
+  isMobile,
   onCloseMobile,
-  onReturnHome 
+  onReturnHome
 }) => {
   const { user, logout, switchAccount, adminClickCount, setAdminClickCount, showTerminal, setShowTerminal } = useAuth();
   const { theme, toggleTheme } = useTheme();
-
-  const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'ai', label: 'AI Assistant', icon: Sparkles },
-    { id: 'tasks', label: 'Tasks', icon: CheckSquare },
-    { id: 'study', label: 'Study Tracker', icon: Timer },
-    { id: 'games', label: 'Games', icon: Gamepad2 },
-    { id: 'achievements', label: 'Achievements', icon: Trophy },
-    { id: 'social', label: 'Friends & Rooms', icon: Users },
-    { id: 'find-fellow', label: 'Find Fellow Students', icon: MapPin },
-    { id: 'rss', label: 'Education RSS', icon: Rss },
-    { id: 'students', label: 'Student Profiles', icon: Users2 },
-    { id: 'profile', label: 'Profile', icon: UserCircle },
-    { id: 'content', label: 'Content Library', icon: BookOpen },
-    { id: 'syllabus', label: 'Syllabus & Study Plan', icon: GraduationCap },
-  ];
-
-  // Role-based menu items
-  if (user?.role === 'lecturer') {
-    menuItems.splice(4, 0, { id: 'lecturer', label: 'Lecturer Portal', icon: BookOpen });
-  }
-  if (user?.role === 'admin') {
-    menuItems.push({ id: 'admin', label: 'Admin Panel', icon: ShieldCheck });
-  }
 
   const handleNav = (id: string) => {
     setActiveTab(id);
@@ -85,7 +106,6 @@ const Sidebar: React.FC<SidebarProps> = ({
     }
   }, [adminClickCount, setAdminClickCount, setShowTerminal]);
 
-  // Logout — AuthContext handles persistence and cleanup correctly
   const handleLogout = () => {
     logout();
     if (isMobile && onCloseMobile) onCloseMobile();
@@ -96,7 +116,6 @@ const Sidebar: React.FC<SidebarProps> = ({
     }
   };
 
-  // Return to homepage (logs out, returns to public landing)
   const handleReturnHome = () => {
     if (onReturnHome) {
       onReturnHome();
@@ -116,8 +135,8 @@ const Sidebar: React.FC<SidebarProps> = ({
             <Star size={20} />
           </div>
           <div className="flex flex-col">
-            <span className="text-base font-black tracking-tighter text-slate-800 dark:text-white leading-none">CampusIQ</span>
-            <span className="text-[8px] text-[#00843D] font-bold uppercase tracking-widest leading-none mt-0.5">CampusIQ Edition</span>
+            <span className="text-base font-black tracking-tighter text-slate-800 dark:text-white leading-none">AcademiaIQ</span>
+            <span className="text-[8px] text-[#00843D] font-bold uppercase tracking-widest leading-none mt-0.5">AcademiaIQ Edition</span>
           </div>
         </div>
 
@@ -130,17 +149,24 @@ const Sidebar: React.FC<SidebarProps> = ({
 
         {/* Main Navigation */}
         <nav className="space-y-1">
-          {menuItems.map((item) => (
-            <button key={item.id} onClick={() => handleNav(item.id)}
-              className={cn(
-                "w-full flex items-center gap-3 p-3 rounded-xl transition-all",
-                activeTab === item.id 
-                  ? "bg-[#00843D] text-white shadow-md" 
-                  : "hover:bg-[#00843D]/10 text-slate-600 dark:text-slate-300"
-              )}>
-              <item.icon size={20} className={activeTab === item.id ? "text-white" : "text-[#00843D]"} />
-              <span className="font-bold text-sm">{item.label}</span>
-            </button>
+          {menuGroups.map((group) => (
+            <div key={group.title} className="space-y-1">
+              <div className="px-2 pt-1 pb-0.5 text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                {group.title}
+              </div>
+              {group.items.map((item) => (
+                <button key={item.id} onClick={() => handleNav(item.id)}
+                  className={cn(
+                    "w-full flex items-center gap-3 p-3 rounded-xl transition-all",
+                    activeTab === item.id
+                      ? "bg-[#00843D] text-white shadow-md"
+                      : "hover:bg-[#00843D]/10 text-slate-600 dark:text-slate-300"
+                  )}>
+                  <item.icon size={20} className={activeTab === item.id ? "text-white" : "text-[#00843D]"} />
+                  <span className="font-bold text-sm">{item.label}</span>
+                </button>
+              ))}
+            </div>
           ))}
         </nav>
 
@@ -165,6 +191,35 @@ const Sidebar: React.FC<SidebarProps> = ({
   }
 
   // Desktop layout
+  const renderGroup = (group: typeof menuGroups[number], gi: number) => (
+    <div key={group.title} className="space-y-1">
+      <div className={cn(
+        "px-3 pb-2 text-[10px] font-bold uppercase tracking-widest",
+        isCollapsed ? "opacity-0" : "text-slate-400 dark:text-slate-500"
+      )}>
+        {isCollapsed ? '\u00A0' : group.title}
+      </div>
+      {group.items.map((item) => (
+        <button key={item.id} onClick={() => setActiveTab(item.id)}
+          className={cn(
+            "w-full flex items-center gap-3 p-2.5 rounded-xl transition-all duration-200 group relative min-h-[44px]",
+            activeTab === item.id
+              ? "bg-gradient-to-r from-[#00843D] to-emerald-600 text-white shadow-md shadow-[#00843D]/20"
+              : "hover:bg-[#00843D]/10 text-slate-600 dark:text-slate-300"
+          )}>
+          {activeTab === item.id && (
+            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-white rounded-full shadow-lg" />
+          )}
+          <item.icon size={20} className={cn(
+            activeTab === item.id ? "text-white" : "text-[#00843D] group-hover:scale-110 transition-transform duration-200",
+            isCollapsed && "mx-auto"
+          )} />
+          {!isCollapsed && <span className="font-bold text-sm">{item.label}</span>}
+        </button>
+      ))}
+    </div>
+  );
+
   return (
     <aside className={cn(
       "fixed left-0 top-0 h-screen bg-white dark:bg-slate-900 z-50 transition-all duration-300 flex flex-col shadow-2xl border-r border-slate-200 dark:border-slate-800",
@@ -178,14 +233,14 @@ const Sidebar: React.FC<SidebarProps> = ({
               <Star size={20} />
             </div>
             <div className="flex flex-col">
-              <span className="text-lg font-black tracking-tighter text-slate-800 dark:text-white leading-none">CampusIQ</span>
-              <span className="text-[7px] text-[#00843D] font-bold uppercase tracking-widest leading-none mt-0.5">CampusIQ Edition</span>
+              <span className="text-lg font-black tracking-tighter text-slate-800 dark:text-white leading-none">AcademiaIQ</span>
+              <span className="text-[7px] text-[#00843D] font-bold uppercase tracking-widest leading-none mt-0.5">AcademiaIQ Edition</span>
             </div>
           </div>
         )}
         <button onClick={() => setIsCollapsed(!isCollapsed)}
           className={cn("p-2 hover:bg-[#00843D]/10 rounded-xl transition-colors text-[#00843D]", isCollapsed && "mx-auto")}
-          title={isCollapsed ? "Expand Menu" : "Collapse Menu"} 
+          title={isCollapsed ? "Expand Menu" : "Collapse Menu"}
           aria-label={isCollapsed ? "Expand Menu" : "Collapse Menu"}>
           {isCollapsed ? (
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6"/></svg>
@@ -209,25 +264,8 @@ const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* Main Navigation */}
-      <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto">
-        {menuItems.map((item) => (
-          <button key={item.id} onClick={() => setActiveTab(item.id)}
-            className={cn(
-              "w-full flex items-center gap-3 p-2.5 rounded-xl transition-all duration-200 group relative min-h-[44px]",
-              activeTab === item.id 
-                ? "bg-gradient-to-r from-[#00843D] to-emerald-600 text-white shadow-md shadow-[#00843D]/20" 
-                : "hover:bg-[#00843D]/10 text-slate-600 dark:text-slate-300"
-            )}>
-            {activeTab === item.id && (
-              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-white rounded-full shadow-lg" />
-            )}
-            <item.icon size={20} className={cn(
-              activeTab === item.id ? "text-white" : "text-[#00843D] group-hover:scale-110 transition-transform duration-200", 
-              isCollapsed && "mx-auto"
-            )} />
-            {!isCollapsed && <span className="font-bold text-sm">{item.label}</span>}
-          </button>
-        ))}
+      <nav className="flex-1 px-3 space-y-4 overflow-y-auto pb-2">
+        {menuGroups.map((group, gi) => renderGroup(group, gi))}
       </nav>
 
       {/* User Profile & Actions */}
@@ -283,7 +321,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               <div className="w-5 h-5 rounded-md bg-gradient-to-br from-[#00843D] to-emerald-500 flex items-center justify-center text-white text-[8px] font-bold shadow-sm">J</div>
               <div className="flex flex-col">
                 <span onClick={handleJadaiClick} className="text-[8px] font-black tracking-tighter text-slate-500 dark:text-slate-400 leading-none cursor-pointer select-none">JADAI STUDIOS</span>
-                <span className="text-[6px] text-slate-400 dark:text-slate-500 leading-none mt-0.5">CampusIQ Edition</span>
+                <span className="text-[6px] text-slate-400 dark:text-slate-500 leading-none mt-0.5">AcademiaIQ Edition</span>
               </div>
             </div>
           </div>
@@ -294,35 +332,6 @@ const Sidebar: React.FC<SidebarProps> = ({
           </div>
         )}
       </div>
-
-      {/* Future Enhancement Hooks (Development Ready) */}
-      {/* 
-        FUTURE ENHANCEMENTS - Ready to integrate:
-        
-        1. Notifications Badge:
-           - Add <NotificationBadge count={unreadCount} /> above profile
-           
-        2. Online Status Indicator:
-           - Add green dot on profile avatar when online
-           
-        3. Quick Actions Menu:
-           - Add floating menu for common actions
-           
-        4. Sidebar Search:
-           - Add search input above navigation
-           
-        5. Favorites/Pinned Items:
-           - Allow users to pin frequently used tabs
-           
-        6. Custom Themes:
-           - Add more theme options beyond light/dark
-           
-        7. Sidebar Width Customization:
-           - Remember collapsed state in localStorage
-           
-        8. Keyboard Shortcuts Display:
-           - Show shortcut hints on hover
-      */}
     </aside>
   );
 };

@@ -1,12 +1,12 @@
 /*
- * CampusIQ — Education RSS Widget
+ * AcademiaIQ — Education RSS Widget
  *
  * Fetches curated education RSS feeds, parses them client-side,
  * and displays headlines with links. Falls back to cached/offline data.
  */
 
-import React, { useState, useEffect } from 'react';
-import { Rss, ExternalLink, RefreshCw, Calendar, Clock, Globe } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Rss, ExternalLink, RefreshCw, Calendar, Clock, Globe, Filter, BookOpen } from 'lucide-react';
 import { EDU_RSS_FEEDS, EduRssFeed } from '../lib/edu-seeds';
 import { cn } from '../lib/utils';
 import { loadData, saveData } from '../lib/storage';
@@ -14,6 +14,7 @@ import { loadData, saveData } from '../lib/storage';
 interface RssItem {
   id: string;
   feedTitle: string;
+  category: string;
   title: string;
   link: string;
   description: string;
@@ -25,11 +26,26 @@ const CACHE_TTL = 30 * 60 * 1000; // 30 min
 
 export default function EduRSS() {
   const [feedId, setFeedId] = useState<string>(EDU_RSS_FEEDS[0].id);
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [items, setItems] = useState<RssItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastFetch, setLastFetch] = useState<number | null>(null);
   const [customFeed, setCustomFeed] = useState('');
+
+  const categories = useMemo(() => {
+    return ['all', ...new Set(EDU_RSS_FEEDS.map(f => f.category))];
+  }, []);
+
+  const groupedFeeds = useMemo(() => {
+    return categoryFilter === 'all' ? EDU_RSS_FEEDS : EDU_RSS_FEEDS.filter(f => f.category === categoryFilter);
+  }, [categoryFilter]);
+
+  // Keep selected feed valid under current category filter
+  useEffect(() => {
+    const valid = groupedFeeds.some(f => f.id === feedId);
+    if (!valid && groupedFeeds.length > 0) setFeedId(groupedFeeds[0].id);
+  }, [categoryFilter, groupedFeeds]);
 
   const fetchFeed = async (url: string) => {
     setLoading(true);
@@ -44,6 +60,7 @@ export default function EduRSS() {
       const mapped: RssItem[] = (data.items || []).slice(0, 20).map((item: any) => ({
         id: item.guid || item.link,
         feedTitle: data.feed?.title || '',
+        category: data.feed?.category || 'Education',
         title: item.title || 'Untitled',
         link: item.link || '',
         description: stripHtml(item.description || item.content || ''),
@@ -102,20 +119,60 @@ export default function EduRSS() {
         </button>
       </header>
 
+      {/* Category filter */}
+      <div className="glass rounded-3xl p-3 sm:p-4">
+        <div className="flex items-center gap-2 mb-2">
+          <Filter size={12} className="text-slate-400" />
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Categories</span>
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          {categories.map(cat => (
+            <button
+              key={cat}
+              onClick={() => setCategoryFilter(cat)}
+              className={cn(
+                'px-3 py-1.5 rounded-full text-[11px] font-bold transition-all',
+                categoryFilter === cat
+                  ? 'bg-[#00843D] text-white shadow-md shadow-[#00843D]/20'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-[#00843D]/10 hover:text-[#00843D]'
+              )}
+            >
+              {cat === 'all' ? 'All' : cat}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Feed selector */}
       <div className="glass rounded-3xl p-3 sm:p-4">
-        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 block">Select Feed</label>
+        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 block">Select Feed ({groupedFeeds.length})</label>
         <select
           value={feedId}
           onChange={e => setFeedId(e.target.value)}
           className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary outline-none text-sm"
         >
-          {EDU_RSS_FEEDS.map(f => (
-            <option key={f.id} value={f.id}>{f.title} — {f.category}</option>
+          {['all', ...categories.slice(1)].map(cat => (
+            cat === 'all'
+              ? <optgroup key="all" label="All Feeds">
+                  {EDU_RSS_FEEDS.map(f => (
+                    <option key={f.id} value={f.id}>{f.title} — {f.category}</option>
+                  ))}
+                </optgroup>
+              : <optgroup key={cat} label={cat}>
+                  {EDU_RSS_FEEDS.filter(f => f.category === cat).map(f => (
+                    <option key={f.id} value={f.id}>{f.title}</option>
+                  ))}
+                </optgroup>
           ))}
         </select>
         {activeFeed && (
-          <p className="text-xs text-slate-400 mt-2">{activeFeed.description}</p>
+          <div className="mt-2 space-y-1">
+            <p className="text-xs text-slate-500 dark:text-slate-400">{activeFeed.description}</p>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-[9px] px-2 py-0.5 rounded-full bg-[#00843D]/10 text-[#00843D] font-bold uppercase tracking-wider">{activeFeed.category}</span>
+              <span className="text-[9px] text-slate-400 uppercase tracking-wider">{activeFeed.language}</span>
+            </div>
+          </div>
         )}
       </div>
 
@@ -147,7 +204,8 @@ export default function EduRSS() {
             >
               <div className="flex items-center gap-2 mb-1">
                 <Rss size={14} className="text-[#00843D]" />
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{item.feedTitle}</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{item.category}</span>
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{item.feedTitle}</span>
               </div>
               <h3 className="font-bold text-sm text-slate-800 dark:text-white group-hover:text-[#00843D] transition-colors line-clamp-3">
                 {item.title}

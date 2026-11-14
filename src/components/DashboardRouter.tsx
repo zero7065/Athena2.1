@@ -1,5 +1,5 @@
 /*
- * CampusIQ - Student Success Platform
+ * AcademiaIQ - Student Success Platform
  * Section: DASHBOARD ROUTER
  *
  * Routes users to the correct dashboard based on their role:

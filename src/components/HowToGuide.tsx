@@ -1,5 +1,5 @@
 /**
- * CampusIQ — How to Use Guide
+ * AcademiaIQ — How to Use Guide
  *
  * An in-app guide/tutorial that helps students and lecturers navigate
  * every feature. Can be opened from a help button or sidebar menu item.
@@ -193,7 +193,7 @@ export const HowToGuide: React.FC = () => {
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
           <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] flex flex-col overflow-hidden">
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700">
-              <h2 className="text-xl font-bold text-slate-800 dark:text-white">How to Use CampusIQ</h2>
+              <h2 className="text-xl font-bold text-slate-800 dark:text-white">How to Use AcademiaIQ</h2>
               <button
                 onClick={() => setOpen(false)}
                 className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded"

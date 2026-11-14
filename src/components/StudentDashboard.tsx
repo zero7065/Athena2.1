@@ -1,5 +1,5 @@
 /*
- * CampusIQ — Student Dashboard
+ * AcademiaIQ — Student Dashboard
  *
  * Personal academic overview: stats, quick actions, today's tasks,
  * recent study activity, and quick access to core tools.

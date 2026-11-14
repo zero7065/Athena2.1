@@ -1,5 +1,5 @@
 /*
- * CampusIQ - Student Success Platform
+ * AcademiaIQ - Student Success Platform
  * Section: GLOBAL UI - ErrorBoundary
  * - Wraps root in ErrorBoundary to prevent white-screen on any state
  * - Catches render errors and displays recovery UI

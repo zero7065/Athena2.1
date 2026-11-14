@@ -1,5 +1,5 @@
 /*
- * CampusIQ — Lecturer Dashboard
+ * AcademiaIQ — Lecturer Dashboard
  *
  * Teacher view: students overview, pending submissions to grade,
  * assignments management, study room creation, and course curriculum editing.

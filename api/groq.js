@@ -1,5 +1,5 @@
 /**
- * CampusIQ — Groq API Proxy
+ * AcademiaIQ — Groq API Proxy
  *
  * Security:
  * - GROQ_API_KEY is server-side only (never exposed to client)

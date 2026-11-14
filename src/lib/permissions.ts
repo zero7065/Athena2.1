@@ -1,5 +1,5 @@
 /*
- * CampusIQ — Permission System
+ * AcademiaIQ — Permission System
  *
  * Role-based access control (RBAC) with granular resource actions.
  * Levels: view, edit, create, delete, manage

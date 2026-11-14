@@ -45,7 +45,7 @@ const InstallPrompt: React.FC = () => {
           <Download size={20} />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-bold text-sm text-slate-800 dark:text-white">Install CampusIQ</p>
+          <p className="font-bold text-sm text-slate-800 dark:text-white">Install AcademiaIQ</p>
           <p className="text-[10px] text-slate-500 dark:text-slate-400">Add to your home screen for quick access &amp; offline use.</p>
         </div>
         <button onClick={install} className="btn-primary px-4 py-2 text-xs min-h-[44px] font-bold whitespace-nowrap">

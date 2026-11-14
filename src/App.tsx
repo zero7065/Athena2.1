@@ -23,6 +23,7 @@ import StudentProfiles from './components/StudentProfiles';
 import StudentDashboard from './components/StudentDashboard';
 import LecturerDashboard from './components/LecturerDashboard';
 import EduRSS from './components/EduRSS';
+import Skills from './components/Skills';
 import FindFellowStudents from './components/FindFellowStudents';
 import CourseList from './components/CourseList';
 import HowToGuide from './components/HowToGuide';
@@ -157,6 +158,7 @@ const AppContent: React.FC = () => {
       { id: 'content', icon: BookOpen, label: 'Content' },
       { id: 'syllabus', icon: GraduationCap, label: 'Syllabus' },
       { id: 'courses', icon: BookOpen, label: 'Courses' },
+      { id: 'skills', icon: Sparkles, label: 'Skills' },
     ];
     if (user?.role === 'lecturer') {
       tabs.splice(5, 0, { id: 'lecturer', icon: BookOpen, label: 'Lecturer' });
@@ -211,7 +213,7 @@ const AppContent: React.FC = () => {
         <div className="flex flex-col items-center gap-4">
           <div className="w-16 h-16 border-4 border-[#00843D] border-t-transparent rounded-full animate-spin" />
           <p className="text-[#00843D] font-bold animate-pulse uppercase tracking-widest text-xs">
-            Initializing CampusIQ...
+            Initializing AcademiaIQ...
           </p>
         </div>
       </div>
@@ -273,6 +275,8 @@ const AppContent: React.FC = () => {
         return <SyllabusManager />;
       case 'studyplan':
         return <StudyPlan />;
+      case 'skills':
+        return <Skills />;
       case 'courses':
         return <CourseList />;
       case 'lecturer':
@@ -301,7 +305,7 @@ const AppContent: React.FC = () => {
                 <div className="w-7 h-7 bg-[#00843D] rounded-lg flex items-center justify-center text-white">
                   <Sparkles size={16} />
                 </div>
-                <span className="font-bold text-sm">CampusIQ</span>
+                <span className="font-bold text-sm">AcademiaIQ</span>
                 <span onClick={handleJadaiClick} className="text-[7px] text-[#00843D] font-bold uppercase tracking-wider hidden xs:inline cursor-pointer select-none">by JADAI</span>
               </div>
               <div className="w-8 h-8 rounded-lg bg-[#00843D]/10 flex items-center justify-center text-[#00843D] font-bold text-xs">
