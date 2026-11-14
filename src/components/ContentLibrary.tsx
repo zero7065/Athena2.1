@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { BookOpen, Plus, Trash2, FileText, Link as LinkIcon, Video, Presentation } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { BookOpen, Plus, Trash2, FileText, Link as LinkIcon, Video, Presentation, Sparkles, Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { getContentResources, saveContentResource, deleteContentResource } from '../lib/storage';
 import type { ContentResource } from '../types';
 import { cn } from '../lib/utils';
+import { safeGroq } from '../lib/groq';
 
 const TYPE_ICONS: Record<string, React.ElementType> = {
   note: FileText, pdf: FileText, link: LinkIcon, video: Video, slides: Presentation,
@@ -22,6 +23,9 @@ const ContentLibrary: React.FC = () => {
   const [url, setUrl] = useState('');
   const [description, setDescription] = useState('');
   const [tags, setTags] = useState('');
+
+  const [aiRecommendations, setAiRecommendations] = useState<string[] | null>(null);
+  const [aiRecLoading, setAiRecLoading] = useState(false);
 
   useEffect(() => {
     setResources(getContentResources());
@@ -57,6 +61,40 @@ const ContentLibrary: React.FC = () => {
     setResources(deleteContentResource(id));
   };
 
+  const generateAiRecommendations = useCallback(async () => {
+    if (aiRecLoading) return;
+    setAiRecLoading(true);
+    try {
+      const subjects = [...new Set(resources.map(r => r.subject))].join(', ') || 'general';
+      const types = [...new Set(resources.map(r => r.type))].join(', ') || 'notes';
+      const result = await safeGroq(
+        'You are a learning resource curator. Suggest 3-5 high-quality, free online learning resources (websites, YouTube channels, open courses) for a student. Return ONLY a JSON array of strings with format: ["Resource Name - URL - Description", ...]. Keep descriptions under 10 words.',
+        `Student is studying: ${subjects}. Resource types they use: ${types}. Focus on free, accessible educational content.`,
+        'llama-3.1-8b-instant',
+        '["Khan Academy - khanacademy.org - Free courses on math, science, humanities", "MIT OpenCourseWare - ocw.mit.edu - Free MIT course materials", "Coursera - coursera.org - Free online courses from universities"]',
+      );
+      try {
+        const parsed = JSON.parse(result);
+        if (Array.isArray(parsed)) setAiRecommendations(parsed.slice(0, 5));
+        else setAiRecommendations([result]);
+      } catch {
+        setAiRecommendations([result]);
+      }
+    } catch {
+      setAiRecommendations([
+        'Khan Academy - khanacademy.org - Free courses on math, science, humanities',
+        'MIT OpenCourseWare - ocw.mit.edu - Free MIT course materials',
+        'Coursera - coursera.org - Free online courses from top universities',
+      ]);
+    } finally {
+      setAiRecLoading(false);
+    }
+  }, [resources]);
+
+  useEffect(() => {
+    generateAiRecommendations();
+  }, [generateAiRecommendations]);
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3">
@@ -66,6 +104,35 @@ const ContentLibrary: React.FC = () => {
             <Plus size={16} /> Add Resource
           </button>
         )}
+      </div>
+
+      {/* AI Recommendations */}
+      <div className="glass p-4 sm:p-6 rounded-[24px] border-l-4 border-purple-500">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white shrink-0">
+            <Sparkles size={16} className="text-white" />
+          </div>
+          <div>
+            <h3 className="font-bold text-sm sm:text-base text-slate-800 dark:text-white">AI-Recommended Resources</h3>
+            <p className="text-[10px] text-slate-400">Curated for your learning path</p>
+          </div>
+          {aiRecLoading && (
+            <div className="flex items-center gap-2 text-xs text-slate-400">
+              <Loader2 size={14} className="animate-spin" />
+              <span>Finding resources...</span>
+            </div>
+          )}
+        </div>
+        <div className="space-y-3">
+          {aiRecommendations?.map((rec, i) => (
+            <div key={i} className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700">
+              <p className="text-sm text-slate-700 dark:text-slate-300">{rec}</p>
+            </div>
+          ))}
+          {!aiRecommendations && !aiRecLoading && (
+            <p className="text-sm text-slate-500 text-center">Add some resources to get AI recommendations.</p>
+          )}
+        </div>
       </div>
 
       <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">

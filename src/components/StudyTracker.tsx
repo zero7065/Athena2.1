@@ -13,10 +13,11 @@
  */
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Play, Pause, RotateCcw, BookOpen, TrendingUp, History, Trophy } from 'lucide-react';
+import { Play, Pause, RotateCcw, BookOpen, TrendingUp, History, Trophy, Brain, Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { cn } from '../lib/utils';
 import { logActivity } from './ActivityFeed';
+import { safeGroq } from '../lib/groq';
 
 const WORK_TIME = 25 * 60;
 const SHORT_BREAK = 5 * 60;
@@ -37,6 +38,9 @@ const StudyTracker: React.FC = () => {
 
   const sessions = appData.sessions;
   const pomodoro = appData.pomodoro;
+
+  const [aiStudyTip, setAiStudyTip] = useState<string | null>(null);
+  const [aiTipLoading, setAiTipLoading] = useState(false);
 
   const sendNotification = useCallback((title: string, body: string) => {
     if ('Notification' in window && Notification.permission === 'granted') {
@@ -162,6 +166,33 @@ const StudyTracker: React.FC = () => {
     }
   }, [subject, pomodoro, updateAppData, addUserXp, switchMode]);
 
+  const generateStudyTip = useCallback(async () => {
+    if (aiTipLoading) return;
+    setAiTipLoading(true);
+    try {
+      const totalSessions = sessions.length;
+      const avgFocus = sessions.length > 0
+        ? Math.round(sessions.reduce((acc, s) => acc + (s.focusScore || 0), 0) / sessions.length)
+        : 0;
+      const subjects = [...new Set(sessions.map(s => s.subject))].join(', ') || 'general subjects';
+      const result = await safeGroq(
+        'You are a study coach. Give ONE practical, actionable study tip based on the user data. Keep it under 2 sentences. Be encouraging and specific.',
+        `User has completed ${totalSessions} study sessions. Average focus score: ${avgFocus}/10. Recent subjects: ${subjects}.`,
+        'llama-3.1-8b-instant',
+        'Try the Pomodoro technique: 25 minutes of focused work followed by a 5-minute break. This helps maintain concentration and prevent burnout.'
+      );
+      setAiStudyTip(result);
+    } catch {
+      setAiStudyTip('Take regular breaks - your brain needs time to process and retain information.');
+    } finally {
+      setAiTipLoading(false);
+    }
+  }, [sessions]);
+
+  useEffect(() => {
+    generateStudyTip();
+  }, [generateStudyTip]);
+
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
@@ -260,6 +291,28 @@ const StudyTracker: React.FC = () => {
               <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 text-center">
                 <p className="text-lg sm:text-xl font-bold text-orange-500">{pomodoro.sessionCount}/4</p>
                 <p className="text-[10px] text-slate-400 font-medium">Before Long Break</p>
+              </div>
+            </div>
+
+            {/* AI Study Tip */}
+            <div className="glass p-4 sm:p-6 rounded-3xl border-l-4 border-primary">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white shrink-0">
+                  <Brain size={16} className="text-white" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-sm sm:text-base text-slate-800 dark:text-white">AI Study Tip</h3>
+                  <p className="text-[10px] text-slate-400">Personalized for you</p>
+                </div>
+                {aiTipLoading && (
+                  <div className="flex items-center gap-2 text-xs text-slate-400">
+                    <Loader2 size={14} className="animate-spin" />
+                    <span>Generating...</span>
+                  </div>
+                )}
+              </div>
+              <div className="text-sm text-slate-700 dark:text-slate-300 italic leading-relaxed">
+                {aiStudyTip || 'Generating your personalized study tip...'}
               </div>
             </div>
           </div>

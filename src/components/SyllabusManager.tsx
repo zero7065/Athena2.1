@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, GraduationCap } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Plus, Trash2, GraduationCap, Sparkles } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { getSyllabi, saveSyllabus, deleteSyllabus } from '../lib/storage';
 import type { Syllabus } from '../types';
+import { safeGroq } from '../lib/groq';
 
 const Subjects = ['Mathematics', 'English', 'Physics', 'Chemistry', 'Biology', 'Computer Science'];
 
@@ -14,6 +15,10 @@ const SyllabusManager: React.FC = () => {
   const [subject, setSubject] = useState('Mathematics');
   const [objectives, setObjectives] = useState('');
   const [modules, setModules] = useState<Array<{ title: string; topics: string }>>([{ title: '', topics: '' }]);
+
+  const [aiGenerating, setAiGenerating] = useState(false);
+  const [aiObjectives, setAiObjectives] = useState('');
+  const [aiModules, setAiModules] = useState<Array<{ title: string; topics: string }>>([]);
 
   useEffect(() => {
     setSyllabi(getSyllabi());
@@ -42,6 +47,36 @@ const SyllabusManager: React.FC = () => {
   const handleDelete = (id: string) => {
     setSyllabi(deleteSyllabus(id));
   };
+
+  const generateAiSyllabus = useCallback(async () => {
+    if (!course.trim() || aiGenerating) return;
+    setAiGenerating(true);
+    try {
+      const result = await safeGroq(
+        'You are an expert curriculum designer. Create a detailed syllabus outline for a university course. Return ONLY a JSON object with "objectives" (array of 4-6 learning objectives) and "modules" (array of 4-6 modules, each with "title" and "topics" array of 3-5 topics).',
+        `Course: ${course}\nSubject: ${subject}\nCreate a comprehensive syllabus with learning objectives and module breakdown.`,
+        'llama-3.1-8b-instant',
+        '{"objectives": ["Understand fundamentals", "Apply concepts", "Analyze case studies", "Create projects"], "modules": [{"title": "Introduction", "topics": ["Overview", "History", "Key concepts"]}]}',
+      );
+      try {
+        const parsed = JSON.parse(result);
+        if (parsed.objectives && Array.isArray(parsed.objectives)) {
+          setObjectives(parsed.objectives.join('\n'));
+        }
+        if (parsed.modules && Array.isArray(parsed.modules)) {
+          setAiModules(parsed.modules.map((m: any) => ({ title: String(m.title || 'Module'), topics: Array.isArray(m.topics) ? m.topics.join('\n') : String(m.topics || '') })));
+        }
+      } catch {
+        setAiObjectives(prev => prev || 'Understand core concepts\nApply knowledge to real problems\nAnalyze and evaluate\nCreate and synthesize');
+        setAiModules([{ title: 'Introduction', topics: 'Overview\nKey concepts\nApplications' }]);
+      }
+    } catch {
+      setAiObjectives(prev => prev || 'Understand core concepts\nApply knowledge to real problems\nAnalyze and evaluate\nCreate and synthesize');
+      setAiModules([{ title: 'Introduction', topics: 'Overview\nKey concepts\nApplications' }]);
+    } finally {
+      setAiGenerating(false);
+    }
+  }, [course, subject, aiGenerating]);
 
   return (
     <div className="space-y-4">
@@ -102,7 +137,15 @@ const SyllabusManager: React.FC = () => {
         <form onSubmit={handleCreate} className="glass p-4 sm:p-5 rounded-2xl space-y-3 max-w-2xl">
           <h3 className="text-sm font-bold text-slate-800 dark:text-white">Create Course Syllabus</h3>
           <div className="grid grid-cols-2 gap-3">
-            <input type="text" placeholder="Course code / name" value={course} onChange={e => setCourse(e.target.value)} className="input-field" required />
+            <div className="flex flex-col gap-1">
+              <input type="text" placeholder="Course code / name" value={course} onChange={e => setCourse(e.target.value)} className="input-field" required />
+              {course.trim() && (
+                <button onClick={generateAiSyllabus} disabled={aiGenerating} className="px-2 py-1.5 text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-md hover:bg-purple-200 dark:hover:bg-purple-800/50 transition-colors min-h-[36px] flex items-center gap-1">
+                  <Sparkles size={14} className={aiGenerating ? 'animate-spin' : ''} />
+                  {aiGenerating ? 'Generating...' : 'AI Generate'}
+                </button>
+              )}
+            </div>
             <input type="text" placeholder="Course title" value={title} onChange={e => setTitle(e.target.value)} className="input-field" required />
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -111,7 +154,18 @@ const SyllabusManager: React.FC = () => {
             </select>
             <input type="text" placeholder="Instructor name" value={user?.name || ''} disabled className="input-field" />
           </div>
-          <textarea placeholder="Learning objectives (one per line)" value={objectives} onChange={e => setObjectives(e.target.value)} className="input-field min-h-[80px]" />
+          <div className="flex flex-col gap-1">
+            <textarea placeholder="Learning objectives (one per line)" value={objectives} onChange={e => setObjectives(e.target.value)} className="input-field min-h-[80px]" />
+            {objectives.trim() || aiObjectives ? (
+              <button onClick={() => {
+                if (aiObjectives && !objectives) setObjectives(aiObjectives);
+                if (aiModules.length > 0) setModules(aiModules);
+              }} className="px-2 py-1.5 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-md hover:bg-blue-200 dark:hover:bg-blue-800/50 transition-colors min-h-[36px] flex items-center gap-1">
+                <Sparkles size={14} />
+                Apply AI
+              </button>
+            ) : null}
+          </div>
           <div className="space-y-2">
             <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Modules</p>
             {modules.map((m, i) => (
