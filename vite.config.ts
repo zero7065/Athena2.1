@@ -19,21 +19,16 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: false,
     minify: 'esbuild',
-    chunkSizeWarningLimit: 600,
+    chunkSizeWarningLimit: 1200,
     rollupOptions: {
       output: {
+        // IMPORTANT: all node_modules must share ONE chunk.
+        // Splitting react/react-dom/lucide across separate chunks reorders
+        // React 19.2's CommonJS namespace init (qe = {} emitted after the
+        // factory call) which crashes the app on boot with
+        // "Cannot set properties of undefined (setting 'Activity')".
         manualChunks: (id) => {
-          if (id.includes('node_modules')) {
-            if (id.includes('lucide-react')) return 'vendor-icons';
-            if (id.includes('react') || id.includes('react-dom')) return 'vendor-react';
-            if (id.includes('recharts')) return 'vendor-charts';
-            if (id.includes('chess.js')) return 'vendor-chess';
-            if (id.includes('motion')) return 'vendor-motion';
-            if (id.includes('clsx') || id.includes('tailwind-merge')) return 'vendor-utils';
-            if (id.includes('react-markdown')) return 'vendor-markdown';
-            if (id.includes('framer-motion')) return 'vendor-animation';
-            return 'vendor';
-          }
+          if (id.includes('node_modules')) return 'vendor';
           if (id.includes('/components/Games')) return 'feature-games';
           if (id.includes('/components/CBTExam')) return 'feature-cbt';
           if (id.includes('/components/AdminPanel')) return 'feature-admin';
@@ -43,10 +38,11 @@ export default defineConfig({
           return null;
         },
         chunkFileNames: (chunkInfo) => {
-          if (chunkInfo.name.startsWith('vendor')) return 'assets/vendor-[name].[hash].js';
-          if (chunkInfo.name.startsWith('feature')) return 'assets/feature-[name].[hash].js';
+          if (chunkInfo.name === 'vendor') return 'assets/vendor-[hash].js';
+          if (chunkInfo.name.startsWith('feature')) return 'assets/feature-[name]-[hash].js';
           return 'assets/[name]-[hash].js';
         },
+        entryFileNames: 'assets/[name]-[hash].js',
       },
     },
   },

@@ -14,7 +14,8 @@
     "clean": "if (Test-Path dist) { Remove-Item -Recurse -Force dist }",
     "lint": "tsc --noEmit",
     "test": "vitest run",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "smoke": "node run-smoke.mjs ./dist"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
