@@ -21,6 +21,7 @@ export default defineConfig({
     chunkSizeWarningLimit: 600,
     rollupOptions: {
       output: {
+        // NO manual chunking - everything in one bundle to prevent lucide-react icon errors
         chunkFileNames: (chunkInfo) => {
           return 'assets/[name]-[hash].js';
         },
