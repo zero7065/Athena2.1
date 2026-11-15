@@ -22,18 +22,9 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: (id) => {
-          // Keep lucide-react and react in main bundle to prevent icon errors
-          if (id.includes('node_modules')) {
-            if (id.includes('lucide-react') || id.includes('react') || id.includes('react-dom')) return null;
-            if (id.includes('recharts')) return 'vendor-charts';
-            if (id.includes('chess.js')) return 'vendor-chess';
-            if (id.includes('motion')) return 'vendor-motion';
-            if (id.includes('clsx') || id.includes('tailwind-merge')) return 'vendor-utils';
-            if (id.includes('react-markdown')) return 'vendor-markdown';
-            if (id.includes('framer-motion')) return 'vendor-animation';
-            return 'vendor';
-          }
-          // Feature chunks for lazy-loaded pages only
+          // Keep ALL node_modules in main bundle to prevent cross-chunk icon errors
+          if (id.includes('node_modules')) return null;
+          // Only chunk feature components for lazy-loaded pages
           if (id.includes('/components/Games')) return 'feature-games';
           if (id.includes('/components/CBTExam')) return 'feature-cbt';
           if (id.includes('/components/AdminPanel')) return 'feature-admin';
