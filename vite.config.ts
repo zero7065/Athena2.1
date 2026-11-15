@@ -23,8 +23,9 @@ export default defineConfig({
       output: {
         manualChunks: (id) => {
           if (id.includes('node_modules')) {
+            // Keep lucide-react in main bundle to prevent icon import errors
+            if (id.includes('lucide-react')) return null;
             if (id.includes('react') || id.includes('react-dom')) return 'vendor-react';
-            if (id.includes('lucide-react')) return 'vendor-icons';
             if (id.includes('recharts')) return 'vendor-charts';
             if (id.includes('chess.js')) return 'vendor-chess';
             if (id.includes('motion')) return 'vendor-motion';
