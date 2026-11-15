@@ -2,6 +2,7 @@
  * AcademiaIQ - Production Service Worker
  * Caches app shell, static assets, and API responses for offline-first behavior.
  * Handles Render free tier cold starts gracefully.
+ * Skips non-http schemes (chrome-extension, etc.) to prevent cache errors.
  */
 
 const CACHE_NAME = 'academiaiq-v1';
@@ -20,9 +21,6 @@ const APP_SHELL = [
 
 // API patterns to cache (GET only, short TTL)
 const CACHEABLE_API_PREFIXES = ['/api/groq', '/api/rss'];
-
-// Max age for cached API responses (5 minutes)
-const API_CACHE_TTL = 5 * 60 * 1000;
 
 // Install: cache app shell
 self.addEventListener('install', (event) => {
@@ -49,9 +47,6 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return;
 
   // Skip non-http/https schemes (chrome-extension, chrome-devtools, etc.)
-  if (!url.protocol.startsWith('http')) return;
-
-  // Skip chrome-extension:// and other non-http schemes
   if (!url.protocol.startsWith('http:')) return;
 
   // Handle app shell HTML -> network first, fall back to cache
@@ -89,9 +84,6 @@ self.addEventListener('fetch', (event) => {
           const fetchPromise = fetch(request).then((response) => {
             if (response.ok) {
               const cloned = response.clone();
-              // Store with timestamp
-              const record = { body: cloned, ts: Date.now() };
-              // Cache the response directly
               cache.put(request, response.clone());
             }
             return response;

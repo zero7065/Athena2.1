@@ -37,6 +37,7 @@ import { useKeyboardShortcuts } from './lib/useKeyboard';
 import { useCurrentUser } from './hooks/useCurrentUser';
 import { useTheme } from './context/ThemeContext';
 import { LayoutDashboard, CheckSquare, Timer, Gamepad2, Trophy, Users, UserCircle, Sparkles, Menu, X, BookOpen, ShieldCheck, GraduationCap, Rss } from 'lucide-react';
+import ErrorBoundary from './components/ErrorBoundary';
 
 const Games = lazy(() => import('./components/Games'));
 const AdminPanel = lazy(() => import('./components/AdminPanel'));
@@ -297,8 +298,9 @@ const AppContent: React.FC = () => {
 
   // ============ LOGGED IN - SHOW MAIN APP ============
   return (
-    <>
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col md:flex-row transition-colors duration-500">
+    <ErrorBoundary>
+      <>
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col md:flex-row transition-colors duration-500">
         {isMobile ? (
           <>
             {/* MOBILE: Top Navigation */}
@@ -422,6 +424,7 @@ const AppContent: React.FC = () => {
 
       {/* AI Chat Sidebar */}
       <AIChatSidebar />
+      </ErrorBoundary>
     </>
   );
 };
