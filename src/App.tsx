@@ -424,8 +424,8 @@ const AppContent: React.FC = () => {
 
       {/* AI Chat Sidebar */}
       <AIChatSidebar />
-      </ErrorBoundary>
-    </>
+      </>
+    </ErrorBoundary>
   );
 };
 
