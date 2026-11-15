@@ -21,9 +21,10 @@ export default defineConfig({
     chunkSizeWarningLimit: 600,
     rollupOptions: {
       output: {
+        // Keep ALL node_modules in ONE shared vendor chunk so lucide-react
+        // icons share the same module instance across all components
         manualChunks: (id) => {
-          // Keep ALL node_modules in main bundle to prevent cross-chunk icon errors
-          if (id.includes('node_modules')) return null;
+          if (id.includes('node_modules')) return 'vendor-vendor';
           // Only chunk feature components for lazy-loaded pages
           if (id.includes('/components/Games')) return 'feature-games';
           if (id.includes('/components/CBTExam')) return 'feature-cbt';
