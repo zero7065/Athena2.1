@@ -2,18 +2,19 @@ import React, { useState, useMemo } from 'react';
 import {
   ShieldCheck, Users, Trophy, Download, TrendingUp, BarChart3,
   PieChart as PieChartIcon, Trash2, FileText, CheckCircle2,
-  AlertTriangle, Activity, Mail, Lock
+  AlertTriangle, Activity, Mail, Lock, Plug
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { cn } from '../lib/utils';
 import { BarChart, Bar, ResponsiveContainer, XAxis, Tooltip, PieChart, Pie, Cell } from 'recharts';
 import { loadData, getAuditLog, verifyAuditLog, getFeedbackStats } from '../lib/storage';
+import IntegrationsPanel from './IntegrationsPanel';
 
 const AdminPanel: React.FC = () => {
   const { appData, managementRequests, approveManagementRequest, rejectManagementRequest, addManagementRequest } = useAuth();
   const { user, tasks, sessions, friends, gameScores, achievements } = appData;
   const allUsers = useMemo(() => loadData('users', []), []);
-  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'reports' | 'management'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'reports' | 'management' | 'integrations'>('overview');
   const [dateRange, setDateRange] = useState({ from: '', to: '' });
   const [newMgmtEmail, setNewMgmtEmail] = useState('');
 
@@ -98,6 +99,7 @@ const AdminPanel: React.FC = () => {
     { id: 'users' as const, label: 'Users', icon: Users, count: totalRegisteredUsers },
     { id: 'reports' as const, label: 'Reports', icon: FileText, count: auditLog.length },
     { id: 'management' as const, label: 'Management', icon: ShieldCheck, count: managementRequests.length },
+    { id: 'integrations' as const, label: 'Integrations', icon: Plug },
   ];
 
   const handleDeleteUser = (email: string) => {
@@ -479,6 +481,7 @@ const AdminPanel: React.FC = () => {
       {activeTab === 'users' && usersContent}
       {activeTab === 'reports' && reportsContent}
       {activeTab === 'management' && managementContent}
+      {activeTab === 'integrations' && <IntegrationsPanel />}
     </div>
   );
 };
