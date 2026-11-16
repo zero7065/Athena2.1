@@ -16,6 +16,7 @@ const ContentLibrary: React.FC = () => {
   const { user } = useAuth();
   const [resources, setResources] = useState<ContentResource[]>([]);
   const [subject, setSubject] = useState('All');
+  const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [title, setTitle] = useState('');
   const [resSubject, setResSubject] = useState('Mathematics');
@@ -35,7 +36,17 @@ const ContentLibrary: React.FC = () => {
 
   const subjects = ['All', ...Array.from(new Set(resources.map(r => r.subject).filter(Boolean)))];
 
-  const filtered = subject === 'All' ? resources : resources.filter(r => r.subject === subject);
+  const filtered = resources.filter(r => {
+    if (subject !== 'All' && r.subject !== subject) return false;
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      r.title.toLowerCase().includes(q) ||
+      r.subject.toLowerCase().includes(q) ||
+      (r.description || '').toLowerCase().includes(q) ||
+      r.tags.some(t => t.toLowerCase().includes(q))
+    );
+  });
 
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,7 +107,7 @@ const ContentLibrary: React.FC = () => {
   }, [generateAiRecommendations]);
 
   return (
-    <div className="space-y-4">
+    <div className="p-3 sm:p-5 md:p-8 space-y-4 max-w-5xl mx-auto h-full overflow-y-auto">
       <div className="flex items-center justify-between gap-3">
         <h2 className="text-xl font-extrabold text-slate-800 dark:text-white tracking-tight">Content Library</h2>
         {isTeacher && (
@@ -135,14 +146,31 @@ const ContentLibrary: React.FC = () => {
         </div>
       </div>
 
+      <div className="flex flex-col sm:flex-row gap-2">
+        <input
+          type="text"
+          placeholder="Search resources by title, tag or subject…"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="input-field flex-1"
+        />
+        <div className="text-[11px] text-slate-500 dark:text-slate-400 font-bold self-center whitespace-nowrap">
+          {filtered.length} of {resources.length} resources
+        </div>
+      </div>
+
       <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-        {subjects.map(s => (
-          <button key={s} onClick={() => setSubject(s)}
-            className={cn("px-4 py-2 rounded-xl text-xs font-bold transition-all min-h-[44px] whitespace-nowrap",
-              subject === s ? 'bg-primary text-white shadow-md' : 'bg-white dark:bg-slate-800 text-slate-500 border border-slate-200 dark:border-slate-700')}>
-            {s}
-          </button>
-        ))}
+        {subjects.map(s => {
+          const count = s === 'All' ? resources.length : resources.filter(r => r.subject === s).length;
+          return (
+            <button key={s} onClick={() => setSubject(s)}
+              className={cn("px-4 py-2 rounded-xl text-xs font-bold transition-all min-h-[44px] whitespace-nowrap flex items-center gap-1.5",
+                subject === s ? 'bg-primary text-white shadow-md' : 'bg-white dark:bg-slate-800 text-slate-500 border border-slate-200 dark:border-slate-700')}>
+              {s}
+              <span className={cn("text-[10px] px-1.5 py-0.5 rounded-full", subject === s ? 'bg-white/20' : 'bg-slate-100 dark:bg-slate-700')}>{count}</span>
+            </button>
+          );
+        })}
       </div>
 
       {showForm && (

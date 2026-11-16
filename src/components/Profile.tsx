@@ -63,7 +63,7 @@ const Profile: React.FC = () => {
         </button>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+      <div className="p-3 sm:p-5 md:p-8 grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 h-full overflow-y-auto">
         <div className="space-y-4 sm:space-y-6">
           <div className="glass p-5 sm:p-6 md:p-8 rounded-[32px] sm:rounded-[40px] flex flex-col items-center text-center gap-4 sm:gap-5 relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-20 bg-gradient-to-br from-primary/10 to-secondary/10" />

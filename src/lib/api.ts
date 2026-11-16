@@ -27,14 +27,25 @@ interface LocalUser {
   studentId: string;
   department: string;
   role: 'student' | 'lecturer' | 'admin' | 'management';
+  level?: number;
+  interests?: string[];
+  subjects?: string[];
+  location?: { campus: string; city: string; country: string };
 }
 
 const USERS_KEY = 'unipulse_users';
 
 const DEMO_USERS: LocalUser[] = [
-  { name: 'Student Demo', email: 'student@unipulse.io', password: 'student123', studentId: 'STU001', department: 'Computer Science', role: 'student' },
+  { name: 'Student Demo', email: 'student@unipulse.io', password: 'student123', studentId: 'STU001', department: 'Computer Science', role: 'student', level: 3, interests: ['AI', 'Web Development', 'Hackathons'], subjects: ['CS101', 'CS202', 'MATH201'], location: { campus: 'Main Campus', city: 'Bokkos', country: 'Nigeria' } },
   { name: 'Lecturer Demo', email: 'lecturer@unipulse.io', password: 'lecturer123', studentId: 'LEC001', department: 'Computer Science', role: 'lecturer' },
   { name: 'Admin Demo', email: 'admin@unipulse.io', password: 'admin123', studentId: 'ADM001', department: 'Administration', role: 'admin' },
+  // Demo classmates so Social / Find Fellow Students / Student Profiles are populated
+  { name: 'Amina Bello', email: 'amina.bello@unipulse.io', password: 'student123', studentId: 'STU101', department: 'Computer Science', role: 'student', level: 4, interests: ['Python', 'Machine Learning', 'Data Science', 'Open Source'], subjects: ['CS101', 'CS202', 'CS305', 'MATH201'], location: { campus: 'Main Campus', city: 'Bokkos', country: 'Nigeria' } },
+  { name: 'David Adewale', email: 'david.adewale@unipulse.io', password: 'student123', studentId: 'STU102', department: 'Mathematics', role: 'student', level: 2, interests: ['Calculus', 'Statistics', 'Puzzles'], subjects: ['MATH101', 'MATH201', 'PHY101'], location: { campus: 'Science Campus', city: 'Bokkos', country: 'Nigeria' } },
+  { name: 'Grace Okonkwo', email: 'grace.okonkwo@unipulse.io', password: 'student123', studentId: 'STU103', department: 'Biology', role: 'student', level: 4, interests: ['Genetics', 'Ecology', 'Medical Research'], subjects: ['BIO101', 'BIO202', 'CHM101'], location: { campus: 'Medical Campus', city: 'Bokkos', country: 'Nigeria' } },
+  { name: 'Samuel Obi', email: 'samuel.obi@unipulse.io', password: 'student123', studentId: 'STU104', department: 'Physics', role: 'student', level: 3, interests: ['Quantum Mechanics', 'Programming', 'Research'], subjects: ['PHY101', 'PHY202', 'MATH301'], location: { campus: 'Science Campus', city: 'Bokkos', country: 'Nigeria' } },
+  { name: 'Fatima Aliyu', email: 'fatima.aliyu@unipulse.io', password: 'student123', studentId: 'STU105', department: 'English', role: 'student', level: 1, interests: ['Literature', 'Poetry', 'Writing'], subjects: ['ENG101', 'LIT202'], location: { campus: 'Arts Campus', city: 'Bokkos', country: 'Nigeria' } },
+  { name: 'Chukwuma Okoro', email: 'chukwuma.okoro@unipulse.io', password: 'student123', studentId: 'STU106', department: 'Chemistry', role: 'student', level: 3, interests: ['Organic Chemistry', 'Lab Work', 'Research'], subjects: ['CHM101', 'CHM202', 'BIO101'], location: { campus: 'Science Campus', city: 'Bokkos', country: 'Nigeria' } },
 ];
 
 function readUsers(): LocalUser[] {

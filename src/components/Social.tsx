@@ -64,21 +64,39 @@ const Social: React.FC = () => {
     }
     const matchedUser = allUsers.find((u: any) => u.studentId?.toLowerCase() === studentId.toLowerCase());
     if (!matchedUser) {
-      setAddError('No user found with that Student ID. They must register first.');
+      setAddError('No user found with that Student ID. Try the list below.');
+      return;
+    }
+    addFriendFromUser(matchedUser);
+  };
+
+  const addFriendFromUser = (matchedUser: any) => {
+    if (!matchedUser) return;
+    if (friends.some(f => f.studentId === matchedUser.studentId || f.name === matchedUser.name)) {
+      setAddError('Already in your friends list');
       return;
     }
     const newFriend: LocalFriend = {
       id: Date.now().toString(),
-      name: (matchedUser as any).name,
-      studentId: (matchedUser as any).studentId,
-      department: ((matchedUser as any).department || 'Unknown'),
-      level: 1,
+      name: matchedUser.name,
+      studentId: matchedUser.studentId,
+      department: matchedUser.department || 'Unknown',
+      level: matchedUser.level || 1,
       online: true,
     };
     updateAppData(prev => ({ ...prev, friends: [...prev.friends, newFriend] }));
     setSearchQuery('');
     setAddError('');
   };
+
+  const availableUsers = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    return allUsers
+      .filter((u: any) => u.role === 'student' || u.role === 'lecturer')
+      .filter((u: any) => !friends.some(f => f.studentId === u.studentId || f.name === u.name))
+      .filter((u: any) => !q || (u.name || '').toLowerCase().includes(q) || (u.studentId || '').toLowerCase().includes(q) || (u.department || '').toLowerCase().includes(q))
+      .slice(0, 12);
+  }, [allUsers, friends, searchQuery]);
 
   const handleRemoveFriend = (id: string) => {
     updateAppData(prev => ({ ...prev, friends: prev.friends.filter(f => f.id !== id) }));
@@ -201,6 +219,34 @@ const Social: React.FC = () => {
             </button>
           </div>
           {addError && <p className="text-xs text-red-500 font-bold">{addError}</p>}
+
+          <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+            <p className="text-[10px] font-bold text-slate-400 uppercase mb-2">Suggested classmates ({availableUsers.length})</p>
+            {availableUsers.length === 0 ? (
+              <p className="text-xs text-slate-400 italic">No more classmates to add. You're connected with everyone!</p>
+            ) : (
+              <div className="space-y-2">
+                {availableUsers.map((u: any) => (
+                  <div key={u.email} className="flex items-center justify-between gap-3 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center text-xs font-bold shrink-0">
+                        {(u.name || '?')[0]}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-slate-800 dark:text-white truncate">{u.name}</p>
+                        <p className="text-[10px] text-slate-400 truncate">{u.studentId || '—'} · {u.department || 'N/A'} · {u.role}</p>
+                      </div>
+                    </div>
+                    <button onClick={() => addFriendFromUser(u)}
+                      className="shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary/10 text-primary text-[11px] font-bold hover:bg-primary hover:text-white transition-all min-h-[36px]">
+                      <UserPlus size={13} /> Add
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
           <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
             <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Your Student ID</p>
             <div className="flex items-center gap-2">

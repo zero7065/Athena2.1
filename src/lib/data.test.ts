@@ -1,0 +1,42 @@
+import { describe, it, expect, beforeEach } from 'vitest';
+import { getContentResources, getSyllabi, getAllCourses, loadData } from './storage';
+import { api } from './api';
+
+/**
+ * Verifies the app ships with real, packed content out of the box
+ * (not empty states) for Content Library, Syllabi, Courses and the
+ * classmate directory used by Social / Find Fellow Students.
+ */
+describe('Seeded content integrity', () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  it('ships with at least 15 content resources', () => {
+    const resources = getContentResources();
+    expect(resources.length).toBeGreaterThanOrEqual(15);
+    expect(resources.every(r => r.title && r.subject && r.type)).toBe(true);
+  });
+
+  it('ships with 3 syllabus templates that have modules', () => {
+    const syllabi = getSyllabi();
+    expect(syllabi.length).toBeGreaterThanOrEqual(3);
+    expect(syllabi.every(s => s.modules.length > 0 && s.objectives.length > 0)).toBe(true);
+  });
+
+  it('ships with at least 6 courses that have skills', () => {
+    const courses = getAllCourses();
+    expect(courses.length).toBeGreaterThanOrEqual(6);
+    expect(courses.every(c => c.skills.length > 0)).toBe(true);
+  });
+
+  it('seeds a classmate directory after first login', async () => {
+    await api.authLogin({ email: 'student@unipulse.io', password: 'student123' });
+    const users = loadData<any[]>('users', []);
+    expect(users.length).toBeGreaterThanOrEqual(8);
+    const students = users.filter(u => u.role === 'student');
+    expect(students.length).toBeGreaterThanOrEqual(6);
+    // Students have the fields the Social / Find Fellow pages rely on
+    expect(students.every(s => s.name && s.email && s.studentId)).toBe(true);
+  });
+});

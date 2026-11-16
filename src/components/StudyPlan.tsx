@@ -43,7 +43,7 @@ const StudyPlan: React.FC = () => {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="p-3 sm:p-5 md:p-8 space-y-4 max-w-5xl mx-auto h-full overflow-y-auto">
       <div className="flex items-center justify-between gap-3">
         <h2 className="text-xl font-extrabold text-slate-800 dark:text-white tracking-tight">AI Study Plan</h2>
         <button onClick={generate} className="btn-primary px-4 py-2 text-sm min-h-[44px] flex items-center gap-2">

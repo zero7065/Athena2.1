@@ -751,9 +751,10 @@ export function deleteSyllabus(id: string): Syllabus[] {
 export function getAllCourses(): Course[] {
   try {
     const raw = localStorage.getItem(PREFIX + 'courses');
-    if (!raw) return [];
-    const existing = JSON.parse(raw) as Course[];
-    if (existing.length > 0) return existing;
+    if (raw) {
+      const existing = JSON.parse(raw) as Course[];
+      if (Array.isArray(existing) && existing.length > 0) return existing;
+    }
   } catch { /* fall through to seed defaults */ }
   const seeded = [...DEFAULT_COURSES];
   saveCoursesSilent(seeded);

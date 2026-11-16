@@ -19,6 +19,7 @@ const SyllabusManager: React.FC = () => {
   const [aiGenerating, setAiGenerating] = useState(false);
   const [aiObjectives, setAiObjectives] = useState('');
   const [aiModules, setAiModules] = useState<Array<{ title: string; topics: string }>>([]);
+  const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
     setSyllabi(getSyllabi());
@@ -42,6 +43,8 @@ const SyllabusManager: React.FC = () => {
     };
     setSyllabi(saveSyllabus(syllabus));
     setCourse(''); setTitle(''); setObjectives(''); setModules([{ title: '', topics: '' }]);
+    setAiModules([]); setAiObjectives('');
+    setShowForm(false);
   };
 
   const handleDelete = (id: string) => {
@@ -79,21 +82,30 @@ const SyllabusManager: React.FC = () => {
   }, [course, subject, aiGenerating]);
 
   return (
-    <div className="space-y-4">
+    <div className="p-3 sm:p-5 md:p-8 space-y-4 max-w-5xl mx-auto h-full overflow-y-auto">
       <div className="flex items-center justify-between gap-3">
         <h2 className="text-xl font-extrabold text-slate-800 dark:text-white tracking-tight">Course Syllabi</h2>
         {isTeacher && (
-          <button onClick={() => setModules([{ title: '', topics: '' }])} className="btn-primary px-4 py-2 text-sm min-h-[44px] flex items-center gap-2">
-            <Plus size={16} /> New Syllabus
+          <button onClick={() => setShowForm(v => !v)} className="btn-primary px-4 py-2 text-sm min-h-[44px] flex items-center gap-2">
+            <Plus size={16} className={showForm ? 'rotate-45 transition-transform' : 'transition-transform'} /> {showForm ? 'Close' : 'New Syllabus'}
           </button>
         )}
       </div>
+
+      {!isTeacher && (
+        <div className="glass rounded-2xl px-4 py-3 text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2">
+          <GraduationCap size={16} className="text-primary shrink-0" />
+          Browse your course syllabi below. Lecturers can add or update syllabi.
+        </div>
+      )}
 
       {syllabi.length === 0 ? (
         <div className="glass p-6 text-center">
           <GraduationCap size={28} className="mx-auto text-slate-300 mb-2" />
           <p className="text-sm text-slate-500 font-medium">No syllabi yet</p>
-          {isTeacher && <p className="text-xs text-slate-400 mt-1">Create a syllabus to structure the course.</p>}
+          {isTeacher
+            ? <p className="text-xs text-slate-400 mt-1">Click “New Syllabus” to structure a course.</p>
+            : <p className="text-xs text-slate-400 mt-1">Your lecturer will publish syllabi here.</p>}
         </div>
       ) : (
         <div className="space-y-2">
@@ -133,7 +145,7 @@ const SyllabusManager: React.FC = () => {
         </div>
       )}
 
-      {isTeacher && (
+      {isTeacher && showForm && (
         <form onSubmit={handleCreate} className="glass p-4 sm:p-5 rounded-2xl space-y-3 max-w-2xl">
           <h3 className="text-sm font-bold text-slate-800 dark:text-white">Create Course Syllabus</h3>
           <div className="grid grid-cols-2 gap-3">
