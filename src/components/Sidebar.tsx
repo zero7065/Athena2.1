@@ -1,29 +1,17 @@
 import React, { useCallback } from 'react';
 import {
-  LayoutDashboard,
-  CheckSquare,
-  Timer,
-  Gamepad2,
-  Trophy,
-  Users,
-  Users2,
-  UserCircle,
   Star,
   LogOut,
-  BookOpen,
   Sun,
   Moon,
-  Sparkles,
   Home,
-  ArrowLeft,
-  GraduationCap,
-  MapPin,
-  Rss,
-  Target
+  ArrowLeft
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { navGroupsForRole } from '../lib/routes';
+import type { UserRole } from '../types';
 
 interface SidebarProps {
   activeTab: string;
@@ -35,49 +23,6 @@ interface SidebarProps {
   onReturnHome?: () => void;
 }
 
-const menuGroups = [
-  {
-    title: 'Overview',
-    items: [
-      { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    ],
-  },
-  {
-    title: 'Academic',
-    items: [
-      { id: 'ai', label: 'AI Assistant', icon: Sparkles },
-      { id: 'tasks', label: 'Tasks', icon: CheckSquare },
-      { id: 'study', label: 'Study Tracker', icon: Timer },
-      { id: 'content', label: 'Content Library', icon: BookOpen },
-      { id: 'syllabus', label: 'Syllabus & Study Plan', icon: GraduationCap },
-      { id: 'rss', label: 'Education RSS', icon: Rss },
-      { id: 'courses', label: 'Courses', icon: BookOpen },
-      { id: 'studyplan', label: 'Study Plan', icon: Target },
-      { id: 'skills', label: 'Skills Mastery', icon: Sparkles },
-    ],
-  },
-  {
-    title: 'Community',
-    items: [
-      { id: 'social', label: 'Friends & Rooms', icon: Users },
-      { id: 'find-fellow', label: 'Find Fellow Students', icon: MapPin },
-      { id: 'students', label: 'Student Profiles', icon: Users2 },
-    ],
-  },
-  {
-    title: 'Progress & Fun',
-    items: [
-      { id: 'achievements', label: 'Achievements', icon: Trophy },
-      { id: 'games', label: 'Games', icon: Gamepad2 },
-    ],
-  },
-  {
-    title: 'Account',
-    items: [
-      { id: 'profile', label: 'Profile', icon: UserCircle },
-    ],
-  },
-];
 
 const Sidebar: React.FC<SidebarProps> = ({
   activeTab,
@@ -90,6 +35,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const { user, logout, switchAccount, adminClickCount, setAdminClickCount, setShowTerminal } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const menuGroups = navGroupsForRole(user?.role as UserRole | undefined);
 
   const handleNav = (id: string) => {
     setActiveTab(id);

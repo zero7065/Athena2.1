@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo, Suspense, lazy } from 'react';
+import React, { useState, useEffect, useCallback, Suspense, lazy } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { AIProvider } from './context/AIContext';
@@ -32,11 +32,13 @@ import Confetti from './components/Confetti';
 import InstallPrompt from './components/InstallPrompt';
 import AIFloatingButton from './components/AIFloatingButton';
 import AIChatSidebar from './components/AIChatSidebar';
+import TopNavbar from './components/TopNavbar';
+import { tabToPath, tabFromHash, MOBILE_PRIMARY, findNavItem } from './lib/routes';
 import { cn } from './lib/utils';
 import { useKeyboardShortcuts } from './lib/useKeyboard';
 import { useCurrentUser } from './hooks/useCurrentUser';
 import { useTheme } from './context/ThemeContext';
-import { LayoutDashboard, CheckSquare, Timer, Gamepad2, Trophy, Users, UserCircle, Sparkles, Menu, X, BookOpen, ShieldCheck, GraduationCap, Rss } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import ErrorBoundary from './components/ErrorBoundary';
 
 const Games = lazy(() => import('./components/Games'));
@@ -49,12 +51,14 @@ const CBTExam = lazy(() => import('./components/CBTExam'));
  * Handles routing, authentication, and layout
  */
 const AppContent: React.FC = () => {
-  const { user, isLoading, logout, showAchievement, setShowAchievement, knownAccounts, adminClickCount, setAdminClickCount, showTerminal, setShowTerminal } = useAuth();
+  const { user, isLoading, logout, showAchievement, setShowAchievement, knownAccounts, setAdminClickCount, showTerminal, setShowTerminal } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const profile = useCurrentUser();
 
   // ============ STATE ============
   const [activeTab, setActiveTab] = useState(() => {
+    const fromHash = tabFromHash(window.location.hash);
+    if (fromHash) return fromHash;
     if (user) return localStorage.getItem('unipulse_active_tab') || 'dashboard';
     return 'dashboard';
   });
@@ -87,13 +91,44 @@ const AppContent: React.FC = () => {
   }, []);
 
   /**
-   * Handle tab navigation
+   * Handle tab navigation (also updates the URL hash route)
    */
   const handleTabChange = useCallback((tab: string) => {
     setActiveTab(tab);
     setMobileMenuOpen(false);
     setIsCollapsed(true);
+    if (typeof window !== 'undefined' && window.location.hash !== tabToPath(tab)) {
+      try {
+        window.history.pushState(null, '', tabToPath(tab));
+      } catch {
+        window.location.hash = tabToPath(tab);
+      }
+    }
   }, []);
+
+  /**
+   * Sync route hash <-> active tab (deep links, back/forward)
+   */
+  useEffect(() => {
+    const syncFromHash = () => {
+      const fromHash = tabFromHash(window.location.hash);
+      if (fromHash) setActiveTab(fromHash);
+    };
+    if (user) {
+      const fromHash = tabFromHash(window.location.hash);
+      if (fromHash) setActiveTab(fromHash);
+      else {
+        try { window.history.replaceState(null, '', tabToPath(activeTab)); } catch { /* ignore */ }
+      }
+    }
+    window.addEventListener('hashchange', syncFromHash);
+    window.addEventListener('popstate', syncFromHash);
+    return () => {
+      window.removeEventListener('hashchange', syncFromHash);
+      window.removeEventListener('popstate', syncFromHash);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   /**
    * Handle returning to homepage (from Sidebar)
@@ -135,45 +170,7 @@ const AppContent: React.FC = () => {
     setShowHomepage(true);
   }, []);
 
-  const handleJadaiClick = useCallback(() => {
-    const next = adminClickCount + 1;
-    setAdminClickCount(next);
-    if (next >= 5) {
-      setShowTerminal(true);
-      setAdminClickCount(0);
-    }
-  }, [adminClickCount, setAdminClickCount, setShowTerminal]);
-
   useKeyboardShortcuts(handleTabChange);
-
-  /**
-   * Mobile bottom navigation tabs
-   * Dynamically includes role-based tabs
-   */
-  const mobileTabs = useMemo(() => {
-    const tabs: Array<{ id: string; icon: typeof LayoutDashboard; label: string }> = [
-      { id: 'dashboard', icon: LayoutDashboard, label: 'Home' },
-      { id: 'ai', icon: Sparkles, label: 'AI' },
-      { id: 'tasks', icon: CheckSquare, label: 'Tasks' },
-      { id: 'study', icon: Timer, label: 'Focus' },
-      { id: 'games', icon: Gamepad2, label: 'Games' },
-      { id: 'social', icon: Users, label: 'Social' },
-      { id: 'rss', icon: Rss, label: 'RSS' },
-      { id: 'achievements', icon: Trophy, label: 'Awards' },
-      { id: 'profile', icon: UserCircle, label: 'Profile' },
-      { id: 'content', icon: BookOpen, label: 'Content' },
-      { id: 'syllabus', icon: GraduationCap, label: 'Syllabus' },
-      { id: 'courses', icon: BookOpen, label: 'Courses' },
-      { id: 'skills', icon: Sparkles, label: 'Skills' },
-    ];
-    if (user?.role === 'lecturer') {
-      tabs.splice(5, 0, { id: 'lecturer', icon: BookOpen, label: 'Lecturer' });
-    }
-    if (user?.role === 'admin') {
-      tabs.push({ id: 'admin', icon: ShieldCheck, label: 'Admin' });
-    }
-    return tabs;
-  }, [user?.role]);
 
   /**
    * Apply user theme preferences
@@ -303,35 +300,24 @@ const AppContent: React.FC = () => {
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col md:flex-row transition-colors duration-500">
         {isMobile ? (
           <>
-            {/* MOBILE: Top Navigation */}
-            <nav className="fixed top-0 left-0 right-0 z-50 glass px-3 py-2 flex items-center justify-between border-b border-slate-200 dark:border-slate-800">
-              <button 
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)} 
-                className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center">
-                {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
-              </button>
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 bg-[#00843D] rounded-lg flex items-center justify-center text-white">
-                  <Sparkles size={16} />
-                </div>
-                <span className="font-bold text-sm">AcademiaIQ</span>
-                <span onClick={handleJadaiClick} className="text-[7px] text-[#00843D] font-bold uppercase tracking-wider hidden xs:inline cursor-pointer select-none">by JADAI</span>
-              </div>
-              <div className="w-8 h-8 rounded-lg bg-[#00843D]/10 flex items-center justify-center text-[#00843D] font-bold text-xs">
-                {user.name?.[0] || 'S'}
-              </div>
-            </nav>
+            {/* MOBILE: Top Navigation (categorized menu via drawer) */}
+            <TopNavbar
+              isMobile
+              activeTab={activeTab}
+              onNavigate={handleTabChange}
+              onOpenMenu={() => setMobileMenuOpen(true)}
+            />
 
-            {/* MOBILE: Sidebar Menu (Overlay) */}
+            {/* MOBILE: Categorized Menu (Overlay drawer) */}
             {mobileMenuOpen && (
-              <div className="fixed inset-0 top-[52px] z-40 bg-white/95 dark:bg-slate-950/95 backdrop-blur-md">
-                <div className="p-4 space-y-1 overflow-y-auto max-h-[calc(100vh-52px)]">
-                  <Sidebar 
-                    activeTab={activeTab} 
-                    setActiveTab={handleTabChange} 
-                    isCollapsed={false} 
-                    setIsCollapsed={() => {}} 
-                    isMobile={true} 
+              <div className="fixed inset-0 top-14 z-40 bg-white/95 dark:bg-slate-950/95 backdrop-blur-md">
+                <div className="p-4 overflow-y-auto max-h-[calc(100vh-56px)]">
+                  <Sidebar
+                    activeTab={activeTab}
+                    setActiveTab={handleTabChange}
+                    isCollapsed={false}
+                    setIsCollapsed={() => {}}
+                    isMobile={true}
                     onCloseMobile={() => setMobileMenuOpen(false)}
                     onReturnHome={handleReturnHome}
                   />
@@ -340,52 +326,67 @@ const AppContent: React.FC = () => {
             )}
 
             {/* MOBILE: Main Content */}
-            <main className="flex-1 pt-[52px] pb-[68px] overflow-y-auto min-h-screen">
+            <main className="flex-1 pt-14 pb-[68px] overflow-y-auto min-h-screen">
               <div className="max-w-7xl mx-auto">
                 {renderContent()}
               </div>
             </main>
 
-            {/* MOBILE: Bottom Navigation */}
+            {/* MOBILE: Bottom Navigation (primary routes + More) */}
             <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 safe-area-bottom">
-              <div className="flex overflow-x-auto no-scrollbar">
-                {mobileTabs.map(tab => (
-                  <button 
-                    key={tab.id} 
-                    onClick={() => handleTabChange(tab.id)}
-                    className={`flex flex-col items-center justify-center flex-1 min-w-0 py-1.5 px-1 transition-colors relative min-h-[44px] ${
-                      activeTab === tab.id ? 'text-[#00843D]' : 'text-slate-400'
-                    }`}>
-                    <tab.icon size={18} className={activeTab === tab.id ? 'text-[#00843D]' : ''} />
-                    <span className={`text-[10px] mt-0.5 font-semibold ${
-                      activeTab === tab.id ? 'text-[#00843D]' : 'text-slate-400'
-                    }`}>
-                      {tab.label}
-                    </span>
-                    {activeTab === tab.id && <div className="absolute top-0 left-1/4 right-1/4 h-0.5 bg-[#00843D] rounded-b-full" />}
-                  </button>
-                ))}
+              <div className="flex">
+                {MOBILE_PRIMARY.map(id => {
+                  const item = findNavItem(id);
+                  if (!item) return null;
+                  const Icon = item.icon;
+                  const active = activeTab === id;
+                  return (
+                    <button
+                      key={id}
+                      onClick={() => handleTabChange(id)}
+                      aria-label={item.label}
+                      className={`flex flex-col items-center justify-center flex-1 min-w-0 py-1.5 px-1 transition-colors relative min-h-[56px] ${
+                        active ? 'text-[#00843D]' : 'text-slate-400'
+                      }`}
+                    >
+                      <Icon size={20} />
+                      <span className="text-[10px] mt-0.5 font-semibold">{item.label.split(' ')[0]}</span>
+                      {active && <div className="absolute top-0 left-1/4 right-1/4 h-0.5 bg-[#00843D] rounded-b-full" />}
+                    </button>
+                  );
+                })}
+                <button
+                  onClick={() => setMobileMenuOpen(true)}
+                  aria-label="More"
+                  className="flex flex-col items-center justify-center flex-1 min-w-0 py-1.5 px-1 transition-colors relative min-h-[56px] text-slate-400"
+                >
+                  <Menu size={20} />
+                  <span className="text-[10px] mt-0.5 font-semibold">More</span>
+                </button>
               </div>
             </nav>
           </>
         ) : (
           <>
-            {/* DESKTOP: Sidebar */}
-            <Sidebar 
-              activeTab={activeTab} 
-              setActiveTab={handleTabChange} 
-              isCollapsed={isCollapsed} 
-              setIsCollapsed={setIsCollapsed} 
+            {/* DESKTOP: Categorized Sidebar (deep navigation) */}
+            <Sidebar
+              activeTab={activeTab}
+              setActiveTab={handleTabChange}
+              isCollapsed={isCollapsed}
+              setIsCollapsed={setIsCollapsed}
               isMobile={false}
               onReturnHome={handleReturnHome}
             />
 
-            {/* DESKTOP: Main Content */}
-            <main className={cn("flex-1 transition-all duration-300 min-h-screen overflow-y-auto", isCollapsed ? "ml-20" : "ml-64")}>
-              <div className="max-w-7xl mx-auto">
-                {renderContent()}
-              </div>
-            </main>
+            {/* DESKTOP: Column = top navbar + content */}
+            <div className={cn('flex-1 flex flex-col min-h-screen transition-all duration-300', isCollapsed ? 'ml-20' : 'ml-64')}>
+              <TopNavbar activeTab={activeTab} onNavigate={handleTabChange} />
+              <main className="flex-1 overflow-y-auto">
+                <div className="max-w-7xl mx-auto">
+                  {renderContent()}
+                </div>
+              </main>
+            </div>
           </>
         )}
       </div>
