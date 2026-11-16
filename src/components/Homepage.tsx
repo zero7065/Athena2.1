@@ -13,6 +13,13 @@ import {
   Calendar, ChevronLeft, Sparkles, Zap, Trophy, ExternalLink,
   ShieldCheck
 } from 'lucide-react';
+import { EDU_RSS_FEEDS } from '../lib/edu-seeds';
+import {
+  DEFAULT_CONTENT_RESOURCES,
+  DEFAULT_SYLLABI,
+  DEFAULT_COURSES,
+  DEFAULT_SKILLS,
+} from '../lib/storage';
 
 const carouselImages = [
   { src: 'https://images.unsplash.com/photo-1523050854058-8df90110c7f1?w=800&h=600&fit=crop', caption: 'AcademiaIQ Campus — Main Gate' },
@@ -683,6 +690,62 @@ export default function Homepage({ onSignUp, onLecturer, theme = 'dark', onToggl
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ===== WHAT'S INSIDE (live counts) ===== */}
+      <section className={`relative z-10 py-16 sm:py-20 ${isLight ? 'bg-emerald-50/50' : 'bg-slate-900/30'}`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10">
+            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-3 ${
+              isLight ? 'bg-emerald-100 text-emerald-700' : 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/30'
+            }`}>
+              <Sparkles size={14} /> What's inside — live in the app
+            </div>
+            <h2 className={`text-2xl sm:text-3xl lg:text-4xl font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>
+              Real content, not mock screens
+            </h2>
+            <p className={`text-sm sm:text-base mt-2 max-w-2xl mx-auto ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
+              These are the actual materials shipping in the platform right now.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+            {[
+              { value: `${EDU_RSS_FEEDS.length}`, label: 'Curated RSS sources', color: 'text-orange-500' },
+              { value: `${DEFAULT_CONTENT_RESOURCES.length}`, label: 'Learning resources', color: 'text-emerald-500' },
+              { value: `${DEFAULT_COURSES.length}`, label: 'Courses', color: 'text-blue-500' },
+              { value: `${DEFAULT_SYLLABI.length}`, label: 'Syllabi & modules', color: 'text-indigo-500' },
+              { value: `${DEFAULT_SKILLS.length}`, label: 'Trackable skills', color: 'text-purple-500' },
+              { value: '18', label: 'Achievements', color: 'text-amber-500' },
+            ].map((s, i) => (
+              <div key={i} className={`text-center p-4 rounded-2xl ${isLight ? 'bg-white border border-emerald-100' : 'bg-slate-900/50 border border-slate-800'}`}>
+                <p className={`text-2xl sm:text-3xl font-black ${s.color}`}>{s.value}</p>
+                <p className={`text-[10px] sm:text-xs font-bold mt-1 ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>{s.label}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-4">
+            {[
+              { icon: Brain, title: 'Live AI tutor', desc: 'Groq-powered explanations, study plans and syllabus generation.' },
+              { icon: Clock, title: 'Focus timer + logging', desc: 'Pomodoro sessions with focus scores and streak tracking.' },
+              { icon: Trophy, title: 'Games & CBT exams', desc: 'Chess, Sudoku, Memory, AI Art Guesser, JAMB-style exams.' },
+              { icon: Users, title: 'Social & study rooms', desc: 'Add classmates, message friends, join study rooms.' },
+            ].map((f, i) => (
+              <div key={i} className={`flex items-start gap-3 p-4 rounded-2xl ${isLight ? 'bg-white border border-emerald-100' : 'bg-slate-900/50 border border-slate-800'}`}>
+                <div className="p-2 rounded-xl bg-primary/10 text-primary shrink-0"><f.icon size={18} /></div>
+                <div>
+                  <p className={`text-xs sm:text-sm font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>{f.title}</p>
+                  <p className={`text-[10px] sm:text-xs mt-0.5 ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>{f.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <p className={`text-[11px] text-center mt-6 ${isLight ? 'text-slate-400' : 'text-slate-500'}`}>
+            Offline-first: your data is stored on your device. Connect a school system in Admin → Integrations to sync real records.
+          </p>
         </div>
       </section>
 
