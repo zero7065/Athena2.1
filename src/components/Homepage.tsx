@@ -378,7 +378,7 @@ export default function Homepage({ onSignUp, onLecturer, theme = 'dark', onToggl
               <div className={`relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl ${
                 isLight ? 'bg-emerald-50 border border-emerald-200' : 'bg-slate-900/50 border border-slate-700'
               }`}>
-                <div className="aspect-[4/3] relative overflow-hidden">
+                <div className="aspect-[4/3] relative overflow-hidden bg-gradient-to-br from-emerald-600 via-emerald-700 to-slate-900">
                   {carouselImages.map((img, i) => (
                     <img key={i}
                       src={img.src}
@@ -386,7 +386,10 @@ export default function Homepage({ onSignUp, onLecturer, theme = 'dark', onToggl
                       className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
                         i === activeImage ? 'opacity-80' : 'opacity-0'
                       }`}
-                      loading="lazy"
+                      loading={i === 0 ? 'eager' : 'lazy'}
+                      // eslint-disable-next-line react/no-unknown-property
+                      fetchPriority={i === 0 ? 'high' : 'low'}
+                      onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
                     />
                   ))}
                   <div className={`absolute inset-0 bg-gradient-to-tr ${
@@ -478,8 +481,13 @@ export default function Homepage({ onSignUp, onLecturer, theme = 'dark', onToggl
       </section>
 
       {/* ===== STATS SECTION ===== */}
-      <section ref={students.ref} className={`relative z-10 py-16 sm:py-20 ${isLight ? 'bg-emerald-50/50' : 'bg-slate-900/30'}`} style={{ backgroundImage: `url(https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1600&h=900&fit=crop)`, backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.12 }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section ref={students.ref} className={`relative z-10 py-16 sm:py-20 overflow-hidden ${isLight ? 'bg-emerald-50/50' : 'bg-slate-900/30'}`}>
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1600&h=900&fit=crop)`, opacity: 0.12 }}
+        />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8">
             {[
               { icon: Users, value: `${students.count.toLocaleString()}+`, label: 'AcademiaIQ Students', color: 'text-emerald-500' },
@@ -581,6 +589,103 @@ export default function Homepage({ onSignUp, onLecturer, theme = 'dark', onToggl
         </div>
       </section>
 
+      {/* ===== HOW IT WORKS ===== */}
+      <section className={`relative z-10 py-16 sm:py-24 ${isLight ? 'bg-white' : 'bg-slate-950'}`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12 sm:mb-16">
+            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-4 ${
+              isLight ? 'bg-emerald-100 text-emerald-700' : 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/30'
+            }`}>
+              <Sparkles size={14} /> How It Works
+            </div>
+            <h2 className={`text-3xl sm:text-4xl lg:text-5xl font-black ${isLight ? 'text-slate-900' : 'text-white'}`}>
+              From sign-up to <span className={isLight ? 'text-emerald-600' : 'text-emerald-400'}>success</span> in four steps
+            </h2>
+            <p className={`text-base sm:text-lg mt-3 max-w-2xl mx-auto ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
+              A guided path that turns scattered study habits into measurable academic progress.
+            </p>
+          </div>
+
+          <div className="grid gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-4">
+            {[
+              {
+                step: '01',
+                title: 'Create your account',
+                desc: 'Sign up as a student or lecturer, or jump straight in with a one-tap demo account.',
+                accent: 'from-emerald-500 to-teal-500',
+                art: (
+                  <svg viewBox="0 0 160 120" className="w-full h-28" role="img" aria-label="Account creation illustration">
+                    <rect x="18" y="22" width="124" height="80" rx="12" fill="currentColor" opacity="0.08" />
+                    <circle cx="56" cy="52" r="14" fill="currentColor" opacity="0.35" />
+                    <rect x="80" y="40" width="44" height="7" rx="3.5" fill="currentColor" opacity="0.35" />
+                    <rect x="80" y="54" width="34" height="6" rx="3" fill="currentColor" opacity="0.2" />
+                    <rect x="34" y="76" width="92" height="12" rx="6" fill="currentColor" opacity="0.22" />
+                    <circle cx="122" cy="82" r="9" fill="currentColor" opacity="0.5" />
+                  </svg>
+                ),
+              },
+              {
+                step: '02',
+                title: 'Plan with AI',
+                desc: 'Your AI tutor builds a study plan from your syllabus, deadlines, and skill gaps.',
+                accent: 'from-violet-500 to-fuchsia-500',
+                art: (
+                  <svg viewBox="0 0 160 120" className="w-full h-28" role="img" aria-label="AI planning illustration">
+                    <circle cx="80" cy="60" r="26" fill="currentColor" opacity="0.14" />
+                    <circle cx="80" cy="60" r="13" fill="currentColor" opacity="0.4" />
+                    <g stroke="currentColor" strokeWidth="3" opacity="0.4" strokeLinecap="round">
+                      <path d="M80 20v12M80 88v12M40 60h12M108 60h12M52 32l9 9M99 79l9 9M108 32l-9 9M61 79l-9 9" />
+                    </g>
+                    <circle cx="80" cy="60" r="4" fill="currentColor" opacity="0.8" />
+                  </svg>
+                ),
+              },
+              {
+                step: '03',
+                title: 'Focus & track',
+                desc: 'Use the Pomodoro timer, log sessions, and watch your focus score and XP climb.',
+                accent: 'from-sky-500 to-blue-600',
+                art: (
+                  <svg viewBox="0 0 160 120" className="w-full h-28" role="img" aria-label="Focus tracking illustration">
+                    <rect x="26" y="30" width="24" height="60" rx="6" fill="currentColor" opacity="0.22" />
+                    <rect x="58" y="48" width="24" height="42" rx="6" fill="currentColor" opacity="0.32" />
+                    <rect x="90" y="38" width="24" height="52" rx="6" fill="currentColor" opacity="0.42" />
+                    <rect x="122" y="24" width="24" height="66" rx="6" fill="currentColor" opacity="0.55" />
+                    <path d="M38 26l38 14 32-20 30 8" stroke="currentColor" strokeWidth="3" fill="none" opacity="0.6" strokeLinecap="round" />
+                  </svg>
+                ),
+              },
+              {
+                step: '04',
+                title: 'Level up',
+                desc: 'Earn achievements, climb leaderboards, and master skills across every subject.',
+                accent: 'from-amber-500 to-orange-500',
+                art: (
+                  <svg viewBox="0 0 160 120" className="w-full h-28" role="img" aria-label="Achievement illustration">
+                    <path d="M56 24h48v20a24 24 0 0 1-48 0V24z" fill="currentColor" opacity="0.35" />
+                    <path d="M56 30H42a14 14 0 0 0 14 16M104 30h14a14 14 0 0 1-14 16" stroke="currentColor" strokeWidth="3" fill="none" opacity="0.4" />
+                    <rect x="72" y="66" width="16" height="16" fill="currentColor" opacity="0.3" />
+                    <rect x="58" y="82" width="44" height="10" rx="5" fill="currentColor" opacity="0.45" />
+                    <path d="M80 32l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z" fill="currentColor" opacity="0.75" />
+                  </svg>
+                ),
+              },
+            ].map((item) => (
+              <div key={item.step} className={`group relative rounded-3xl p-6 border transition-all hover:-translate-y-1 ${
+                isLight ? 'bg-emerald-50/60 border-emerald-100 hover:shadow-xl hover:shadow-emerald-500/10' : 'bg-slate-900/50 border-slate-800 hover:shadow-xl hover:shadow-emerald-500/5'
+              }`}>
+                <div className={`absolute -top-3 left-6 px-3 py-1 rounded-full text-[10px] font-black tracking-widest text-white bg-gradient-to-r ${item.accent} shadow-lg`}>
+                  STEP {item.step}
+                </div>
+                <div className={`mt-4 ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`}>{item.art}</div>
+                <h3 className={`mt-4 text-lg font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>{item.title}</h3>
+                <p className={`mt-2 text-sm leading-relaxed ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ===== UNIVERSITY INFO + EVENTS ===== */}
       <section className={`relative z-10 py-16 sm:py-24 ${isLight ? 'bg-emerald-50/50' : 'bg-slate-900/30'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -588,7 +693,12 @@ export default function Homepage({ onSignUp, onLecturer, theme = 'dark', onToggl
             {/* University info */}
             <div className={`lg:col-span-2 rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10 relative overflow-hidden ${
               isLight ? 'bg-white border border-emerald-100' : 'bg-slate-900/50 border border-slate-800'
-            }`} style={{ backgroundImage: `url(https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1600&h=900&fit=crop)`, backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.12 }}>
+            }`}>
+              <div
+                aria-hidden="true"
+                className="absolute inset-0 bg-cover bg-center"
+                style={{ backgroundImage: `url(https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1600&h=900&fit=crop)`, opacity: 0.06 }}
+              />
               <div className={`absolute top-0 right-0 p-6 sm:p-8 opacity-5`}>
                 <GraduationCap size={120} className={isLight ? 'text-emerald-600' : 'text-emerald-400'} />
               </div>
@@ -670,7 +780,12 @@ export default function Homepage({ onSignUp, onLecturer, theme = 'dark', onToggl
           </h2>
 
           <div className="relative">
-            <div className={`rounded-2xl sm:rounded-3xl p-6 sm:p-10 md:p-12 ${isLight ? 'bg-emerald-50 border border-emerald-100' : 'bg-slate-900/50 border border-slate-800'}`} style={{ backgroundImage: `url(${testimonials[activeTestimonial].bg})`, backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.12 }}>
+            <div className={`relative overflow-hidden rounded-2xl sm:rounded-3xl p-6 sm:p-10 md:p-12 ${isLight ? 'bg-emerald-50 border border-emerald-100' : 'bg-slate-900/50 border border-slate-800'}`}>
+              <div
+                aria-hidden="true"
+                className="absolute inset-0 bg-cover bg-center"
+                style={{ backgroundImage: `url(${testimonials[activeTestimonial].bg})`, opacity: 0.06 }}
+              />
               <div className="flex items-center justify-center gap-1 mb-6">
                 {[...Array(5)].map((_, i) => (
                   <Star key={i} size={18} className="text-amber-400 fill-amber-400" />
@@ -731,8 +846,13 @@ export default function Homepage({ onSignUp, onLecturer, theme = 'dark', onToggl
       </section>
 
       {/* ===== CTA FOOTER ===== */}
-      <footer className={`relative z-10 ${isLight ? 'bg-emerald-900 text-white' : 'bg-slate-950 border-t border-slate-800'}`} style={{ backgroundImage: `url(https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=1600&h=900&fit=crop)`, backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.15 }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <footer className={`relative z-10 overflow-hidden ${isLight ? 'bg-emerald-900 text-white' : 'bg-slate-950 border-t border-slate-800'}`}>
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=1600&h=900&fit=crop)`, opacity: 0.1 }}
+        />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Main CTA */}
           <div className={`py-16 sm:py-20 text-center border-b ${isLight ? 'border-emerald-800' : 'border-slate-800'}`}>
             <div className="max-w-2xl mx-auto space-y-6">

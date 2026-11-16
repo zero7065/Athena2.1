@@ -123,6 +123,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = useCallback((userData: AuthUser, authToken: string) => {
     localStorage.setItem(AUTH_KEY, JSON.stringify({ token: authToken, user: userData }));
+    try { localStorage.setItem('token', authToken); } catch { /* ignore */ }
     setUser(userData);
     setToken(authToken);
     const data = loadAppDataLocally(userData);
@@ -150,6 +151,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem(dataKey, JSON.stringify(appData));
     }
     localStorage.removeItem(AUTH_KEY);
+    localStorage.removeItem('token');
     setUser(null);
     setToken(null);
     setAppDataState(getDefaultAppData());
@@ -161,6 +163,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem(dataKey, JSON.stringify(appData));
     }
     localStorage.removeItem(AUTH_KEY);
+    localStorage.removeItem('token');
     setUser(null);
     setToken(null);
     setAppDataState(getDefaultAppData());

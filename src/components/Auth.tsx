@@ -53,8 +53,13 @@ const Auth: React.FC<AuthProps> = ({ mode, setMode, onClose, knownAccounts }) =>
         return '';
       case 'password':
         if (!value) return 'Password is required';
-        const pwdValidation = validatePassword(value);
-        return pwdValidation.valid ? '' : pwdValidation.errors[0];
+        // Strength rules only apply when creating an account.
+        // On login we must accept existing/demo passwords as-is.
+        if (mode === 'register') {
+          const pwdValidation = validatePassword(value);
+          return pwdValidation.valid ? '' : pwdValidation.errors[0];
+        }
+        return '';
       case 'confirmPassword': return value === formData.password ? '' : 'Passwords do not match';
       default: return '';
     }
