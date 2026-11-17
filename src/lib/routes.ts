@@ -52,6 +52,7 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     title: 'Community',
     items: [
+      { id: 'feed', label: 'Campus Feed', icon: Rss, hint: 'Share, like, comment' },
       { id: 'social', label: 'Friends & Rooms', icon: Users, hint: 'Messages & study rooms' },
       { id: 'find-fellow', label: 'Find Students', icon: MapPin, hint: 'Discover classmates' },
       { id: 'students', label: 'Student Profiles', icon: Users2, hint: 'Browse profiles' },

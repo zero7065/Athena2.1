@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { useEffect, useState } from 'react';
 import { AuthProvider, useAuth } from '../context/AuthContext';
 import { api } from '../lib/api';
@@ -8,6 +8,7 @@ import SyllabusManager from './SyllabusManager';
 import Social from './Social';
 import FindFellowStudents from './FindFellowStudents';
 import EduRSS from './EduRSS';
+import CampusFeed from './CampusFeed';
 
 /**
  * Renders a real page inside AuthProvider after performing a real
@@ -67,6 +68,18 @@ describe('Pages render real content (not empty states)', () => {
     await waitFor(() => expect(screen.getByText(/classmates? found/i)).toBeInTheDocument());
     const names = await screen.findAllByText(/Amina Bello|David Adewale|Grace Okonkwo/i);
     expect(names.length).toBeGreaterThan(0);
+  });
+
+  it('Campus Feed renders posts and allows posting', async () => {
+    renderPage(<CampusFeed />);
+    expect(await screen.findByText(/Campus Feed/i)).toBeInTheDocument();
+    // Seeded classmate content is visible
+    expect(await screen.findByText(/Amina Bello/i)).toBeInTheDocument();
+
+    const box = screen.getByPlaceholderText(/What's on your mind/i);
+    fireEvent.change(box, { target: { value: 'My first campus post' } });
+    fireEvent.click(screen.getByRole('button', { name: /^Post$/i }));
+    expect(await screen.findByText('My first campus post')).toBeInTheDocument();
   });
 
   it('Education RSS always shows articles (curated fallback when offline)', async () => {

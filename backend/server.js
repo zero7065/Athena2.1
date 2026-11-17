@@ -19,21 +19,39 @@ import skillRoutes from './src/routes/skills.js';
 import submissionRoutes from './src/routes/submissions.js';
 import courseRoutes from './src/routes/courses.js';
 import rssRoutes from './src/routes/rss.js';
+import { ensureSchema } from './src/utils/schema.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Middleware
+// CORS_ORIGIN accepts a comma-separated list, e.g.
+//   http://localhost:5173,https://yourapp.vercel.app
+const rawOrigins = (process.env.CORS_ORIGIN || '*').trim();
+const allowedOrigins = rawOrigins === '*'
+  ? '*'
+  : rawOrigins.split(',').map(o => o.trim()).filter(Boolean);
+
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || '*',
+  origin: allowedOrigins,
   credentials: true,
 }));
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Health check
+// Health check (also used as a Render keep-alive ping)
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', service: 'academiaiq-backend', timestamp: new Date().toISOString() });
+  res.json({
+    status: 'ok',
+    service: 'academiaiq-backend',
+    database: process.env.DATABASE_TYPE === 'postgres' ? 'postgres' : 'sqlite',
+    uptime: Math.round(process.uptime()),
+    timestamp: new Date().toISOString(),
+  });
+});
+
+app.get('/', (req, res) => {
+  res.json({ name: 'AcademiaIQ API', docs: '/api/health', routes: ['/api/auth', '/api/tasks', '/api/skills', '/api/submissions', '/api/courses', '/api/rss'] });
 });
 
 // API Routes
@@ -54,6 +72,14 @@ app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: 'Internal server error' });
 });
+
+// Ensure database schema exists on every boot (idempotent).
+// Render free tier has an ephemeral disk, so this runs each start.
+try {
+  ensureSchema();
+} catch (err) {
+  console.error('Schema initialization failed:', err.message);
+}
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 AcademiaIQ Backend running on http://0.0.0.0:${PORT}`);

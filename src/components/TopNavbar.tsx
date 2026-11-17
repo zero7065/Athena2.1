@@ -1,12 +1,13 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ChevronDown, Sparkles, Moon, Sun, LogOut, UserCircle, Menu,
-  Home, LayoutGrid,
+  Home, LayoutGrid, Bell, CheckCheck,
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { navGroupsForRole, findNavItem, findGroupOf, type NavGroup } from '../lib/routes';
+import { getNotifications, unreadNotificationCount, markNotificationsRead } from '../lib/social';
 import type { UserRole } from '../types';
 
 interface TopNavbarProps {
@@ -21,8 +22,19 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ activeTab, onNavigate, onOpenMenu
   const { theme, toggleTheme } = useTheme();
   const [openGroup, setOpenGroup] = useState<string | null>(null);
   const [userMenu, setUserMenu] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifTick, setNotifTick] = useState(0);
   const navRef = useRef<HTMLElement>(null);
   const userRef = useRef<HTMLDivElement>(null);
+  const notifRef = useRef<HTMLDivElement>(null);
+
+  const notifications = useMemo(() => getNotifications(user?.email), [user?.email, notifTick]);
+  const unread = useMemo(() => unreadNotificationCount(user?.email), [user?.email, notifTick]);
+
+  useEffect(() => {
+    const t = setInterval(() => setNotifTick(v => v + 1), 5000);
+    return () => clearInterval(t);
+  }, []);
 
   const groups: NavGroup[] = useMemo(
     () => navGroupsForRole(user?.role as UserRole | undefined),
@@ -37,9 +49,10 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ activeTab, onNavigate, onOpenMenu
     const onDown = (e: MouseEvent) => {
       if (navRef.current && !navRef.current.contains(e.target as Node)) setOpenGroup(null);
       if (userRef.current && !userRef.current.contains(e.target as Node)) setUserMenu(false);
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) setNotifOpen(false);
     };
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') { setOpenGroup(null); setUserMenu(false); }
+      if (e.key === 'Escape') { setOpenGroup(null); setUserMenu(false); setNotifOpen(false); }
     };
     document.addEventListener('mousedown', onDown);
     document.addEventListener('keydown', onKey);
@@ -83,6 +96,19 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ activeTab, onNavigate, onOpenMenu
             className="p-2 rounded-xl bg-[#00843D]/10 text-[#00843D] min-w-[44px] min-h-[44px] flex items-center justify-center"
           >
             <Sparkles size={20} />
+          </button>
+
+          <button
+            onClick={() => go('feed')}
+            aria-label={`Notifications${unread ? ` (${unread} unread)` : ''}`}
+            className="relative p-2 rounded-xl text-slate-500 min-w-[44px] min-h-[44px] flex items-center justify-center"
+          >
+            <Bell size={20} />
+            {unread > 0 && (
+              <span className="absolute top-1 right-1 min-w-[14px] h-3.5 px-0.5 rounded-full bg-rose-500 text-white text-[8px] font-bold flex items-center justify-center">
+                {unread > 9 ? '9+' : unread}
+              </span>
+            )}
           </button>
 
           <button
@@ -196,6 +222,54 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ activeTab, onNavigate, onOpenMenu
 
         {/* Right utilities */}
         <div className="ml-auto flex items-center gap-2">
+          <div className="relative" ref={notifRef}>
+            <button
+              onClick={() => setNotifOpen(v => !v)}
+              aria-label={`Notifications${unread ? ` (${unread} unread)` : ''}`}
+              aria-expanded={notifOpen}
+              className="relative p-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all min-h-[40px] min-w-[40px] flex items-center justify-center"
+            >
+              <Bell size={18} />
+              {unread > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center">
+                  {unread > 9 ? '9+' : unread}
+                </span>
+              )}
+            </button>
+
+            {notifOpen && (
+              <div className="absolute right-0 top-full mt-1.5 w-80 max-w-[calc(100vw-2rem)] p-1.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-2xl animate-slide-down z-50">
+                <div className="flex items-center justify-between px-2.5 py-2 border-b border-slate-100 dark:border-slate-800 mb-1">
+                  <p className="text-xs font-bold text-slate-800 dark:text-white">Notifications</p>
+                  {unread > 0 && (
+                    <button
+                      onClick={() => { markNotificationsRead(user?.email || ''); setNotifTick(v => v + 1); }}
+                      className="flex items-center gap-1 text-[10px] font-bold text-primary hover:underline"
+                    >
+                      <CheckCheck size={12} /> Mark all read
+                    </button>
+                  )}
+                </div>
+                <div className="max-h-72 overflow-y-auto">
+                  {notifications.length === 0 ? (
+                    <p className="px-3 py-6 text-center text-[11px] text-slate-400">You're all caught up.</p>
+                  ) : (
+                    notifications.slice(0, 20).map(n => (
+                      <div key={n.id} className={cn('px-2.5 py-2 rounded-xl mb-0.5', n.read ? '' : 'bg-primary/5')}>
+                        <p className="text-[11px] text-slate-700 dark:text-slate-200">
+                          <span className="font-bold">{n.fromName}</span> {n.text}
+                        </p>
+                        <p className="text-[9px] text-slate-400 mt-0.5">
+                          {n.kind} · {new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
           <button
             onClick={toggleTheme}
             aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
