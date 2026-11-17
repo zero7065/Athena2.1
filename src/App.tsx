@@ -6,24 +6,10 @@ import Auth from './components/Auth';
 import LecturerAuth from './components/LecturerAuth';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
-import TaskBoard from './components/TaskBoard';
-import StudyTracker from './components/StudyTracker';
-import Achievements from './components/Achievements';
-import Social from './components/Social';
-import Profile from './components/Profile';
-import AIChatbot from './components/AIChatbot';
 import Homepage from './components/Homepage';
 import SecretAdmin from './components/SecretAdmin';
-import ContentLibrary from './components/ContentLibrary';
-import SyllabusManager from './components/SyllabusManager';
-import StudyPlan from './components/StudyPlan';
-import StudentProfiles from './components/StudentProfiles';
 import StudentDashboard from './components/StudentDashboard';
 import LecturerDashboard from './components/LecturerDashboard';
-import EduRSS from './components/EduRSS';
-import Skills from './components/Skills';
-import FindFellowStudents from './components/FindFellowStudents';
-import CourseList from './components/CourseList';
 import HowToGuide from './components/HowToGuide';
 import Terminal from './components/Terminal';
 import FloatingSupport from './components/FloatingSupport';
@@ -41,10 +27,37 @@ import { useTheme } from './context/ThemeContext';
 import { Menu } from 'lucide-react';
 import ErrorBoundary from './components/ErrorBoundary';
 
+// Code-split route-level screens so each ships as its own chunk and is only
+// fetched when the user navigates to it. The app shell (sidebar, navbar,
+// dashboards, homepage) stays in the initial bundle for a fast first paint.
+const TaskBoard = lazy(() => import('./components/TaskBoard'));
+const StudyTracker = lazy(() => import('./components/StudyTracker'));
+const Achievements = lazy(() => import('./components/Achievements'));
+const Social = lazy(() => import('./components/Social'));
+const CampusFeed = lazy(() => import('./components/CampusFeed'));
+const Profile = lazy(() => import('./components/Profile'));
+const AIChatbot = lazy(() => import('./components/AIChatbot'));
+const ContentLibrary = lazy(() => import('./components/ContentLibrary'));
+const SyllabusManager = lazy(() => import('./components/SyllabusManager'));
+const StudyPlan = lazy(() => import('./components/StudyPlan'));
+const StudentProfiles = lazy(() => import('./components/StudentProfiles'));
+const EduRSS = lazy(() => import('./components/EduRSS'));
+const Skills = lazy(() => import('./components/Skills'));
+const FindFellowStudents = lazy(() => import('./components/FindFellowStudents'));
+const CourseList = lazy(() => import('./components/CourseList'));
 const Games = lazy(() => import('./components/Games'));
 const AdminPanel = lazy(() => import('./components/AdminPanel'));
 const LecturerPortal = lazy(() => import('./components/LecturerPortal'));
 const CBTExam = lazy(() => import('./components/CBTExam'));
+
+/**
+ * Lightweight fallback shown while a lazily-loaded route chunk is fetched.
+ */
+const RouteFallback: React.FC = () => (
+  <div className="flex items-center justify-center min-h-[50vh]">
+    <div className="w-8 h-8 border-2 border-[#00843D] border-t-transparent rounded-full animate-spin" />
+  </div>
+);
 
 /**
  * Main App Content Component
@@ -264,6 +277,8 @@ const AppContent: React.FC = () => {
         return <Suspense fallback={<div className="flex items-center justify-center min-h-[400px] text-slate-500">Loading exam…</div>}><CBTExam /></Suspense>;
       case 'achievements':
         return <Achievements />;
+      case 'feed':
+        return <CampusFeed />;
       case 'social':
         return <Social />;
       case 'find-fellow':
@@ -382,9 +397,11 @@ const AppContent: React.FC = () => {
             <div className={cn('flex-1 flex flex-col min-h-screen transition-all duration-300', isCollapsed ? 'ml-20' : 'ml-64')}>
               <TopNavbar activeTab={activeTab} onNavigate={handleTabChange} />
               <main className="flex-1 overflow-y-auto">
-                <div className="max-w-7xl mx-auto">
-                  {renderContent()}
-                </div>
+                <Suspense fallback={<RouteFallback />}>
+                  <div className="max-w-7xl mx-auto">
+                    {renderContent()}
+                  </div>
+                </Suspense>
               </main>
             </div>
           </>
